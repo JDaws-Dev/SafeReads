@@ -10,6 +10,27 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 7 — SafeReads-5g4: Build Google Books API action and Open Library fallback
+
+- Created `convex/books.ts` — full book search + caching module
+  - `search` — public action: queries Google Books API, enriches with Open Library, upserts to DB
+    - Accepts `query` string and optional `maxResults` (default 10)
+    - Parses Google Books volumeInfo → normalized ParsedBook shape matching schema
+    - If description or categories missing, falls back to Open Library (ISBN lookup → title+author search → work details)
+    - Upserts each result into `books` table via internal mutation
+    - Returns array of books with Convex `_id` for immediate frontend use
+  - `upsert` — internal mutation: deduplicates by `googleBooksId` index, patches existing or inserts new
+  - `getById` — public query for single book fetch
+- Open Library fallback strategy: ISBN → search → work details (3-tier)
+  - Handles OL's polymorphic `description` field (string | {type, value})
+  - Caps subjects at 5 to avoid noise
+  - Wrapped in try/catch — OL is best-effort, won't fail the search
+- Google Books API key is optional (works without key at lower rate limits)
+- Added `GOOGLE_BOOKS_API_KEY` to `.env.local.example`
+- Cover URLs upgraded to HTTPS
+- Build + lint pass clean
+- Files: `convex/books.ts` (new), `.env.local.example` (modified)
+
 ### Iteration 6 — SafeReads-pqw: Build profile hash and AI verdict engine
 
 - Created `convex/lib/profileHash.ts` — `computeProfileHash()` utility
@@ -40,20 +61,6 @@ This file maintains context between autonomous iterations.
 - Created `convex/_generated/` stubs (server.js/d.ts, dataModel.d.ts, api.js/d.ts)
 - Created `src/components/Navbar.tsx`, dashboard layout + page
 - Build + lint pass clean
-
-### Iteration 4 — SafeReads-yau: Root layout with ClerkProvider + ConvexProviderWithClerk
-
-- Created `src/components/ConvexClientProvider.tsx` — "use client" component wrapping ConvexProviderWithClerk
-  - Instantiates ConvexReactClient with NEXT_PUBLIC_CONVEX_URL
-  - Passes `useAuth` from @clerk/nextjs for token flow
-- Updated `src/app/layout.tsx` — wrapped with `<ClerkProvider dynamic>` → `<ConvexClientProvider>`
-  - `dynamic` prop avoids build-time prerendering errors when CLERK keys not set
-  - Provider order: ClerkProvider (server) > ConvexClientProvider (client) > children
-- Created `src/proxy.ts` — Next.js 16 uses proxy.ts (not middleware.ts, deprecated)
-  - Uses clerkMiddleware + createRouteMatcher to protect /dashboard(.*)
-  - Standard matcher config excludes static assets and _next internals
-- Build + lint pass clean
-- Files: `src/components/ConvexClientProvider.tsx` (new), `src/app/layout.tsx` (modified), `src/proxy.ts` (new)
 
 ---
 
@@ -89,6 +96,9 @@ Patterns, gotchas, and decisions that affect future work:
 - Analyses keyed by (bookId, profileHash) so profile changes auto-invalidate
 - `convex/_generated/` stubs exist for builds without deployment — re-export generics from convex/server. Real codegen overwrites these when `npx convex dev` runs.
 - `convex/_generated/api.d.ts` must use `AnyApi` (not `ApiFromModules<typeof modules>`) in stubs — importing module types that themselves import from `api` creates circular type inference errors. Real codegen handles this differently.
+- Google Books API works without API key (lower rate limits). Key is optional env var.
+- Open Library fallback: ISBN lookup → title+author search → work details. Description field is polymorphic (string | {type, value}). Best-effort only — wrapped in try/catch.
+- Book upsert deduplicates by `googleBooksId` index — patches existing records to enrich data over time.
 
 ### Testing
 
@@ -97,6 +107,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 4 — SafeReads-yau: Root layout with ClerkProvider + ConvexProviderWithClerk
+
+- Created `src/components/ConvexClientProvider.tsx` — "use client" component wrapping ConvexProviderWithClerk
+- Updated `src/app/layout.tsx` — wrapped with `<ClerkProvider dynamic>` → `<ConvexClientProvider>`
+- Created `src/proxy.ts` — Next.js 16 uses proxy.ts (not middleware.ts, deprecated)
+- Build + lint pass clean
 
 ### Iteration 3 — SafeReads-zr4: Configure Tailwind with bookish theme
 
