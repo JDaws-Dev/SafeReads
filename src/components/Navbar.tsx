@@ -21,7 +21,7 @@ export function Navbar() {
               href="/dashboard"
               className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
             >
-              Dashboard
+              Search
             </Link>
             <Link
               href="/dashboard/profiles"

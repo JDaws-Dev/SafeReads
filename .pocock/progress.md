@@ -10,6 +10,26 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 10 — SafeReads-4fd: Build SearchBar, BookCard, and search page
+
+- Created `src/components/SearchBar.tsx` — search input with submit button
+  - Controlled text input with search icon and loading spinner
+  - Calls `onSearch(query)` callback on form submit
+  - Disabled state while loading
+- Created `src/components/BookCard.tsx` — book result card component
+  - Shows cover (Next.js Image with fallback BookOpen icon), title, authors, year, page count
+  - Description clamped to 2 lines, categories as pills (max 3)
+  - Links to `/dashboard/book/{_id}` for future book detail page
+  - Exports `BookCardBook` type for consumers
+- Updated `src/app/dashboard/page.tsx` — wired search into dashboard
+  - Uses `useAction(api.books.search)` for Convex action calls
+  - States: loading, searched (empty results), error, results list
+  - BookCard list layout (vertical stack, not grid — better for book metadata)
+- Updated `next.config.ts` — added `images.remotePatterns` for books.google.com and covers.openlibrary.org
+- Renamed Navbar "Dashboard" link to "Search" for clarity
+- Build + lint pass clean
+- Files: `src/components/SearchBar.tsx` (new), `src/components/BookCard.tsx` (new), `src/app/dashboard/page.tsx` (modified), `next.config.ts` (modified), `src/components/Navbar.tsx` (modified)
+
 ### Iteration 9 — SafeReads-tpl.1: Configure Convex auth.config.ts for Clerk integration
 
 - Created `convex/auth.config.ts` — Convex auth config for Clerk JWT verification
@@ -45,27 +65,6 @@ This file maintains context between autonomous iterations.
 - With AnyApi stubs, `useQuery` returns `any` — need explicit type annotations on `.map()` callbacks
 - Build + lint pass clean
 - Files: `convex/profiles.ts` (new), `src/components/ValuesProfileForm.tsx` (new), `src/app/dashboard/profiles/page.tsx` (new), `src/components/Navbar.tsx` (modified)
-
-### Iteration 7 — SafeReads-5g4: Build Google Books API action and Open Library fallback
-
-- Created `convex/books.ts` — full book search + caching module
-  - `search` — public action: queries Google Books API, enriches with Open Library, upserts to DB
-    - Accepts `query` string and optional `maxResults` (default 10)
-    - Parses Google Books volumeInfo → normalized ParsedBook shape matching schema
-    - If description or categories missing, falls back to Open Library (ISBN lookup → title+author search → work details)
-    - Upserts each result into `books` table via internal mutation
-    - Returns array of books with Convex `_id` for immediate frontend use
-  - `upsert` — internal mutation: deduplicates by `googleBooksId` index, patches existing or inserts new
-  - `getById` — public query for single book fetch
-- Open Library fallback strategy: ISBN → search → work details (3-tier)
-  - Handles OL's polymorphic `description` field (string | {type, value})
-  - Caps subjects at 5 to avoid noise
-  - Wrapped in try/catch — OL is best-effort, won't fail the search
-- Google Books API key is optional (works without key at lower rate limits)
-- Added `GOOGLE_BOOKS_API_KEY` to `.env.local.example`
-- Cover URLs upgraded to HTTPS
-- Build + lint pass clean
-- Files: `convex/books.ts` (new), `.env.local.example` (modified)
 
 ---
 
@@ -106,6 +105,9 @@ Patterns, gotchas, and decisions that affect future work:
 - Book upsert deduplicates by `googleBooksId` index — patches existing records to enrich data over time.
 - With `AnyApi` stubs, `useQuery` returns `any` — always add explicit type annotations on `.map()` callbacks and similar to satisfy `noImplicitAny`.
 - Convex auth config: `convex/auth.config.ts` exports `{ providers: [{ domain, applicationID }] }`. Domain comes from `CLERK_JWT_ISSUER_DOMAIN` env var. No JWT template needed with newer Clerk/Convex integration.
+- Convex actions use `useAction` (not `useQuery`/`useMutation`). Actions require manual loading/error state — they don't auto-subscribe like queries.
+- Next.js Image component requires `images.remotePatterns` in `next.config.ts` for external image hosts (books.google.com, covers.openlibrary.org).
+- BookCard links to `/dashboard/book/{_id}` — book detail page is the next task (SafeReads-t99).
 
 ### Testing
 
@@ -114,6 +116,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 7 — SafeReads-5g4: Build Google Books API action and Open Library fallback
+
+- Created `convex/books.ts` — full book search + caching module
+- Open Library fallback strategy: ISBN → search → work details (3-tier)
+- Google Books API key is optional
+- Build + lint pass clean
 
 ### Iteration 6 — SafeReads-pqw: Build profile hash and AI verdict engine
 
