@@ -10,6 +10,28 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 19 — SafeReads-tpl.3: Landing page for unauthenticated visitors
+
+- Built full marketing landing page at `/` (root route)
+  - Hero section with value proposition, sign-in CTA, and "see how it works" anchor link
+  - "How It Works" section: 3-step grid (barcode scan, cover photo, title search)
+  - Features section: 4-card grid (AI analysis, instant lookup, families, your values)
+  - Trust section: neutral messaging about objective content info
+  - Final CTA section with sign-in button
+  - Footer with copyright
+- Signed-in redirect: `useAuth()` + `useEffect` → `router.replace("/dashboard")` when authenticated
+  - Returns `null` while auth loading or signed in (no flash of marketing content)
+- Mobile-first responsive design following existing patterns
+  - `text-3xl` → `sm:text-5xl` for hero, `text-2xl` → `sm:text-3xl` for section headings
+  - CTA buttons stack vertically on mobile, row on desktop
+  - Feature cards single column → `sm:grid-cols-2`
+- Uses existing design tokens: parchment, ink, verdict colors, serif headings
+- Uses Clerk `SignInButton mode="modal"` for CTAs (consistent with Navbar)
+- `Step` and `Feature` helper components colocated in page file (not extracted — single use)
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/page.tsx` (rewritten)
+
 ### Iteration 18 — SafeReads-xza: Mobile-first scan UX
 
 - Redesigned dashboard search controls for mobile-first layout
@@ -51,22 +73,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies — uses existing `openai` package and native browser APIs (`getUserMedia`, `canvas`)
 - Build + lint pass clean
 - Files: `src/components/CoverScanner.tsx` (new), `convex/books.ts` (modified), `src/app/dashboard/page.tsx` (modified)
-
-### Iteration 16 — SafeReads-tpl.7: Research: Replace sensitivity sliders with objective content review
-
-- **Recommendation: Switch to objective content review** (no more sensitivity profiles/sliders)
-- Key findings:
-  - Current system: 10^6 possible profile combos per book = massive cache fragmentation, high API cost
-  - Proposed: ONE analysis per book — dramatically better caching, lower API spend
-  - Sliders are confusing UX — "Violence: 7" has no clear meaning to users
-  - Profile setup is friction barrier before first value (7 steps → 4 steps)
-  - Objective content descriptions are more trustworthy and shareable
-- Replace verdict (safe/caution/warning) with age recommendation + severity matrix per category
-- Keep contentFlags (category/severity/details) as the core output
-- Migration plan: 5 phases — schema, backend, AI prompt, frontend, cleanup
-- **No code changes** — this was a research/decision issue
-- Files touched: none (research only, findings in issue notes)
-- **Next steps**: Implement the migration plan in follow-up issues
 
 ---
 
@@ -134,6 +140,12 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 16 — SafeReads-tpl.7: Research: Replace sensitivity sliders with objective content review
+
+- Recommendation: switch to objective content review (one analysis per book)
+- No code changes — research only
+- Next steps: implement migration plan in follow-up issues
 
 ### Iteration 15 — SafeReads-ba5: Barcode scanner for ISBN lookup
 
