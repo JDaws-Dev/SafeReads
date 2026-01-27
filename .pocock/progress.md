@@ -10,6 +10,18 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 2 — SafeReads-1tc: .env.local template and Convex schema
+
+- Created `.env.local.example` with CONVEX_DEPLOYMENT, NEXT_PUBLIC_CONVEX_URL, Clerk keys, OPENAI_API_KEY
+- Created `convex/schema.ts` with 4 tables: users, profiles, books, analyses
+- Schema design decisions:
+  - users: indexed by clerkId for Clerk webhook sync
+  - profiles: 6 numeric sensitivity sliders (violence, language, sexualContent, substanceUse, darkThemes, religiousSensitivity) + isDefault flag
+  - books: supports both googleBooksId and openLibraryKey, indexed by googleBooksId and isbn13
+  - analyses: verdict enum (safe/caution/warning/no_verdict), contentFlags array with category+severity+details, indexed by (bookId, profileHash)
+- Build + lint pass clean
+- Files: `.env.local.example` (new), `convex/schema.ts` (new)
+
 ### Iteration 1 — SafeReads-5i8: Scaffold Next.js project
 
 - Scaffolded via `create-next-app@latest` (Next.js 16.x / React 19.x — latest stable)
