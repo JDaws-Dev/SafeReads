@@ -52,19 +52,19 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl font-bold text-ink-900">
+      <h1 className="font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
         Welcome{user?.firstName ? `, ${user.firstName}` : ""}
       </h1>
-      <p className="mt-2 text-ink-500">
+      <p className="mt-2 text-sm text-ink-500 sm:text-base">
         Search for a book to get started with your content analysis.
       </p>
 
-      <div className="mt-6 flex gap-2">
-        <div className="flex-1">
-          <SearchBar onSearch={handleSearch} loading={loading} />
+      <div className="mt-6 space-y-3">
+        <SearchBar onSearch={handleSearch} loading={loading} />
+        <div className="flex gap-2">
+          <BarcodeScanner onScan={handleSearch} disabled={loading} />
+          <CoverScanner onCapture={handleCoverCapture} disabled={loading} />
         </div>
-        <BarcodeScanner onScan={handleSearch} disabled={loading} />
-        <CoverScanner onCapture={handleCoverCapture} disabled={loading} />
       </div>
 
       {error && (

@@ -96,23 +96,24 @@ export function CoverScanner({ onCapture, disabled }: CoverScannerProps) {
         type="button"
         onClick={handleOpen}
         disabled={disabled}
-        className="rounded-lg border border-parchment-200 bg-white p-3 text-ink-500 transition-colors hover:border-parchment-400 hover:text-ink-700 disabled:opacity-50"
+        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-parchment-200 bg-white px-4 py-3 text-sm font-medium text-ink-600 transition-colors hover:border-parchment-400 hover:text-ink-800 disabled:opacity-50"
         title="Identify book from cover photo"
         aria-label="Identify book from cover photo"
       >
         <Camera className="h-5 w-5" />
+        <span>Photo Cover</span>
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="relative mx-4 w-full max-w-md rounded-xl bg-white p-4">
+        <div className="fixed inset-0 z-50 flex items-end bg-black/60 sm:items-center sm:justify-center">
+          <div className="relative w-full rounded-t-2xl bg-white p-4 sm:mx-4 sm:max-w-md sm:rounded-xl sm:rounded-t-xl">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-serif text-lg font-semibold text-ink-900">
                 Photo Book Cover
               </h2>
               <button
                 onClick={handleClose}
-                className="rounded-md p-1 text-ink-400 transition-colors hover:bg-parchment-100 hover:text-ink-600"
+                className="rounded-md p-2 text-ink-400 transition-colors hover:bg-parchment-100 hover:text-ink-600"
                 aria-label="Close camera"
               >
                 <X className="h-5 w-5" />
@@ -157,6 +158,15 @@ export function CoverScanner({ onCapture, disabled }: CoverScannerProps) {
               <div className="mt-3 rounded-lg border border-verdict-warning/30 bg-red-50 p-3 text-sm text-verdict-warning">
                 {error}
               </div>
+            )}
+
+            {!starting && !error && (
+              <button
+                onClick={handleClose}
+                className="mt-2 w-full rounded-lg border border-parchment-200 py-3 text-sm font-medium text-ink-600 transition-colors hover:bg-parchment-50 sm:hidden"
+              >
+                Cancel
+              </button>
             )}
           </div>
         </div>

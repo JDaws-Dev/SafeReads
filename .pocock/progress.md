@@ -10,6 +10,25 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 18 — SafeReads-xza: Mobile-first scan UX
+
+- Redesigned dashboard search controls for mobile-first layout
+  - Scanner buttons moved below search bar (stacked layout) instead of cramped side-by-side
+  - Both scanner buttons now full-width with text labels ("Scan Barcode", "Photo Cover") for discoverability
+  - Buttons use `flex-1` within a `flex gap-2` row so they split space equally
+- Scanner modals now use bottom-sheet pattern on mobile
+  - `items-end` + `rounded-t-2xl` on mobile → slides up from bottom (natural mobile gesture)
+  - `sm:items-center sm:justify-center sm:rounded-xl` → centered dialog on desktop
+  - Added explicit "Cancel" button on mobile (sm:hidden) for easy dismissal
+  - Close button padded to `p-2` for better touch target
+- SearchBar placeholder shortened for mobile ("Title, author, or ISBN…")
+  - `text-sm` on mobile, `sm:text-base` on desktop
+  - Right padding `pr-20` on mobile, `sm:pr-24` on desktop to fit search button
+- Heading scales: `text-2xl` → `sm:text-3xl`, subheading `text-sm` → `sm:text-base`
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/dashboard/page.tsx`, `src/components/BarcodeScanner.tsx`, `src/components/CoverScanner.tsx`, `src/components/SearchBar.tsx` (all modified)
+
 ### Iteration 17 — SafeReads-w1e: Book cover photo identification via vision AI
 
 - Created `convex/books.ts:identifyCover` action — OpenAI GPT-4o vision for book identification
@@ -48,29 +67,6 @@ This file maintains context between autonomous iterations.
 - **No code changes** — this was a research/decision issue
 - Files touched: none (research only, findings in issue notes)
 - **Next steps**: Implement the migration plan in follow-up issues
-
-### Iteration 15 — SafeReads-ba5: Barcode scanner for ISBN lookup
-
-- Installed `html5-qrcode` — browser-based barcode scanning library
-  - Supports EAN-13 (ISBN-13) and EAN-10 (ISBN-10) formats
-  - Uses native `BarcodeDetector` API when available (Chromium), falls back to JS decoder
-  - Dynamic import to avoid SSR issues
-- Created `src/components/BarcodeScanner.tsx` — barcode scanner component
-  - Button with `ScanBarcode` icon opens full-screen camera modal
-  - Uses rear camera (`facingMode: "environment"`) for book scanning
-  - Scans at 10fps with focused scan region (280x150px)
-  - Validates scanned text is 10 or 13 digits (ISBN format)
-  - Calls `onScan` callback with cleaned ISBN, closes modal automatically
-  - Loading state while camera starts, error state for camera permission denial
-  - Cleanup: stops camera stream on close or unmount
-- Updated `src/app/dashboard/page.tsx` — added BarcodeScanner next to SearchBar
-  - Scanner triggers `handleSearch` with scanned ISBN (same flow as manual search)
-  - Disabled while search is loading
-- Chose `html5-qrcode` over native `BarcodeDetector` API (Chromium-only, unreliable across devices)
-- Chose `html5-qrcode` over `zxing-js` (simpler API, handles camera lifecycle)
-- Note: `convex/_generated/api.d.ts` must be reverted to `AnyApi` stub after any `npx convex dev` run
-- Build + lint pass clean
-- Files: `src/components/BarcodeScanner.tsx` (new), `src/app/dashboard/page.tsx` (modified), `package.json` (modified)
 
 ---
 
@@ -129,6 +125,7 @@ Patterns, gotchas, and decisions that affect future work:
 - **DECISION (iteration 16)**: Switching from sensitivity sliders to objective content review. One analysis per book (not per book+profile). Removes profiles dependency from analysis flow. See SafeReads-tpl.7 issue notes for full rationale and migration plan.
 - CoverScanner uses native `getUserMedia` + `<canvas>` for photo capture — no library needed. Converts video frame to base64 JPEG via `canvas.toDataURL("image/jpeg", 0.8)`. Strip `data:image/jpeg;base64,` prefix before sending to API.
 - GPT-4o vision with `detail: "low"` is sufficient for book cover text extraction and keeps token cost minimal.
+- Mobile modals use bottom-sheet pattern: `items-end` + `rounded-t-2xl` on mobile, `sm:items-center sm:rounded-xl` on desktop. Always add explicit "Cancel" button on mobile (`sm:hidden`).
 
 ### Testing
 
@@ -137,6 +134,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 15 — SafeReads-ba5: Barcode scanner for ISBN lookup
+
+- Installed `html5-qrcode` for browser-based barcode scanning
+- Created `src/components/BarcodeScanner.tsx` — camera modal with ISBN validation
+- Updated dashboard page with scanner button
+- Build + lint pass clean
 
 ### Iteration 14 — SafeReads-tpl.5: Simplify to single profile per user
 

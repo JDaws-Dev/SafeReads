@@ -30,8 +30,8 @@ export function SearchBar({ onSearch, loading }: SearchBarProps) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search for a book by title, author, or ISBN…"
-          className="w-full rounded-lg border border-parchment-200 bg-white py-3 pl-10 pr-24 text-ink-900 placeholder:text-ink-400 focus:border-parchment-400 focus:outline-none focus:ring-2 focus:ring-parchment-300"
+          placeholder="Title, author, or ISBN…"
+          className="w-full rounded-lg border border-parchment-200 bg-white py-3 pl-10 pr-20 text-sm text-ink-900 placeholder:text-ink-400 focus:border-parchment-400 focus:outline-none focus:ring-2 focus:ring-parchment-300 sm:pr-24 sm:text-base"
           disabled={loading}
         />
         <button

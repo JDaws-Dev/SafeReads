@@ -119,23 +119,24 @@ export function BarcodeScanner({ onScan, disabled }: BarcodeScannerProps) {
         type="button"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        className="rounded-lg border border-parchment-200 bg-white p-3 text-ink-500 transition-colors hover:border-parchment-400 hover:text-ink-700 disabled:opacity-50"
+        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-parchment-200 bg-white px-4 py-3 text-sm font-medium text-ink-600 transition-colors hover:border-parchment-400 hover:text-ink-800 disabled:opacity-50"
         title="Scan ISBN barcode"
         aria-label="Scan ISBN barcode"
       >
         <ScanBarcode className="h-5 w-5" />
+        <span>Scan Barcode</span>
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="relative mx-4 w-full max-w-md rounded-xl bg-white p-4">
+        <div className="fixed inset-0 z-50 flex items-end bg-black/60 sm:items-center sm:justify-center">
+          <div className="relative w-full rounded-t-2xl bg-white p-4 sm:mx-4 sm:max-w-md sm:rounded-xl sm:rounded-t-xl">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-serif text-lg font-semibold text-ink-900">
                 Scan ISBN Barcode
               </h2>
               <button
                 onClick={handleClose}
-                className="rounded-md p-1 text-ink-400 transition-colors hover:bg-parchment-100 hover:text-ink-600"
+                className="rounded-md p-2 text-ink-400 transition-colors hover:bg-parchment-100 hover:text-ink-600"
                 aria-label="Close scanner"
               >
                 <X className="h-5 w-5" />
@@ -164,6 +165,13 @@ export function BarcodeScanner({ onScan, disabled }: BarcodeScannerProps) {
                 {error}
               </div>
             )}
+
+            <button
+              onClick={handleClose}
+              className="mt-3 w-full rounded-lg border border-parchment-200 py-3 text-sm font-medium text-ink-600 transition-colors hover:bg-parchment-50 sm:hidden"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}
