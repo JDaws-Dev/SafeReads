@@ -10,6 +10,22 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 16 — SafeReads-tpl.7: Research: Replace sensitivity sliders with objective content review
+
+- **Recommendation: Switch to objective content review** (no more sensitivity profiles/sliders)
+- Key findings:
+  - Current system: 10^6 possible profile combos per book = massive cache fragmentation, high API cost
+  - Proposed: ONE analysis per book — dramatically better caching, lower API spend
+  - Sliders are confusing UX — "Violence: 7" has no clear meaning to users
+  - Profile setup is friction barrier before first value (7 steps → 4 steps)
+  - Objective content descriptions are more trustworthy and shareable
+- Replace verdict (safe/caution/warning) with age recommendation + severity matrix per category
+- Keep contentFlags (category/severity/details) as the core output
+- Migration plan: 5 phases — schema, backend, AI prompt, frontend, cleanup
+- **No code changes** — this was a research/decision issue
+- Files touched: none (research only, findings in issue notes)
+- **Next steps**: Implement the migration plan in follow-up issues
+
 ### Iteration 15 — SafeReads-ba5: Barcode scanner for ISBN lookup
 
 - Installed `html5-qrcode` — browser-based barcode scanning library
@@ -53,39 +69,6 @@ This file maintains context between autonomous iterations.
 - Schema unchanged (`isDefault` field kept for backward compat with existing data)
 - Build + lint pass clean
 - Files: `convex/profiles.ts` (rewritten), `src/app/dashboard/profiles/page.tsx` (rewritten), `src/components/VerdictSection.tsx` (modified), `src/components/KidForm.tsx` (simplified), `src/app/dashboard/kids/page.tsx` (simplified), `src/components/Navbar.tsx` (modified)
-
-### Iteration 13 — SafeReads-bmt: Build kids management and wishlists
-
-- Added `kids` and `wishlists` tables to `convex/schema.ts`
-  - kids: userId, name, optional age, optional profileId (links to sensitivity profile)
-  - wishlists: kidId, bookId, optional note. Indexed by kid and by (kid, book) for dedup
-- Created `convex/kids.ts` — full CRUD module
-  - listByUser, getById, create, update, remove
-  - remove cascades: deletes all wishlist entries for the kid
-- Created `convex/wishlists.ts` — full CRUD module
-  - listByKid (joins book data), isOnWishlist, add (dedup), updateNote, remove, removeByKidAndBook
-  - add prevents duplicate entries via index lookup
-- Created `src/components/KidForm.tsx` — reusable form for kid create/edit
-  - Name input (required), age input (optional, 0-18), profile select dropdown (optional)
-  - Receives profiles list for the select options
-- Created `src/app/dashboard/kids/page.tsx` — kids management page
-  - Lists kids with avatar, name, age, linked profile name
-  - Each kid has Wishlist link, Edit button, Delete button
-  - Dialog-based create/edit using Radix Dialog + KidForm
-  - Empty state with "Add Your First Child" CTA
-- Created `src/app/dashboard/kids/[kidId]/wishlist/page.tsx` — per-kid wishlist page
-  - Lists wishlist books with cover thumbnail, title, authors, year
-  - Each item links to book detail page, has remove button
-  - Empty state with "Search Books" CTA
-- Created `src/components/WishlistButton.tsx` — add-to-wishlist button for book detail page
-  - Opens dialog listing user's kids with toggle per kid
-  - Each row shows checkmark if book already on that kid's wishlist
-  - Click toggles add/remove. Hidden when user has no kids
-- Updated `src/app/dashboard/book/[id]/page.tsx` — added WishlistButton alongside AmazonButton
-- Updated `src/components/Navbar.tsx` — added "Kids" nav link between Search and Profiles
-- Reverted `convex/_generated/api.d.ts` to `AnyApi` stub (was overwritten by `npx convex dev`)
-- Build + lint pass clean
-- Files: `convex/schema.ts` (modified), `convex/kids.ts` (new), `convex/wishlists.ts` (new), `src/components/KidForm.tsx` (new), `src/components/WishlistButton.tsx` (new), `src/app/dashboard/kids/page.tsx` (new), `src/app/dashboard/kids/[kidId]/wishlist/page.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (modified), `src/components/Navbar.tsx` (modified), `convex/_generated/api.d.ts` (reverted)
 
 ---
 
@@ -141,6 +124,7 @@ Patterns, gotchas, and decisions that affect future work:
 - `computeProfileHash` from `convex/lib/profileHash` can be imported client-side (pure function, no server deps).
 - `html5-qrcode` for barcode scanning: dynamic import (`import("html5-qrcode")`) to avoid SSR. Uses `Html5Qrcode` class — create instance, call `.start()` with camera config, `.stop()` on cleanup. Scanned ISBN barcodes are EAN-13 (13 digits) or ISBN-10 (10 digits).
 - BarcodeScanner creates its own container div imperatively (html5-qrcode manages its own DOM). Use a ref to a wrapper div, create child div with unique ID.
+- **DECISION (iteration 16)**: Switching from sensitivity sliders to objective content review. One analysis per book (not per book+profile). Removes profiles dependency from analysis flow. See SafeReads-tpl.7 issue notes for full rationale and migration plan.
 
 ### Testing
 
@@ -149,6 +133,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 13 — SafeReads-bmt: Build kids management and wishlists
+
+- Added `kids` and `wishlists` tables to `convex/schema.ts`
+- Created `convex/kids.ts` and `convex/wishlists.ts` — full CRUD modules
+- Created kids management page, per-kid wishlist page, WishlistButton component
+- Build + lint pass clean
 
 ### Iteration 12 — SafeReads-1sw: Build verdict UI components and wire into book detail page
 
