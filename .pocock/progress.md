@@ -10,6 +10,18 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 3 — SafeReads-zr4: Configure Tailwind with bookish theme
+
+- Tailwind v4 CSS-first config (no tailwind.config.ts — theme lives in globals.css `@theme inline`)
+- Added Libre Baskerville font (400, 700 weights) via next/font/google as `--font-serif`
+- Parchment palette: 10 shades from cream (#fdf8f0) to deep brown (#6c4025)
+- Ink palette: 10 shades for text from light (#f6f5f4) to near-black (#2a2622)
+- Verdict semantic colors: safe (green), caution (amber), warning (red), none (gray)
+- Base body styles: parchment-50 bg, ink-900 text
+- Usage: `text-parchment-500`, `bg-ink-900`, `text-verdict-safe`, `font-serif` for headings
+- Build + lint pass clean
+- Files: `src/app/globals.css` (modified), `src/app/layout.tsx` (modified)
+
 ### Iteration 2 — SafeReads-1tc: .env.local template and Convex schema
 
 - Created `.env.local.example` with CONVEX_DEPLOYMENT, NEXT_PUBLIC_CONVEX_URL, Clerk keys, OPENAI_API_KEY
