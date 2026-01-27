@@ -23,6 +23,32 @@ const severityValues = v.union(
 );
 
 /**
+ * List recent analyses with their associated book data.
+ * Returns the most recent analyses (newest first), limited by `count`.
+ */
+export const listRecent = query({
+  args: {
+    count: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.count ?? 10;
+    const analyses = await ctx.db
+      .query("analyses")
+      .order("desc")
+      .take(limit);
+
+    const results = await Promise.all(
+      analyses.map(async (analysis) => {
+        const book = await ctx.db.get(analysis.bookId);
+        return { ...analysis, book };
+      })
+    );
+
+    return results.filter((r) => r.book !== null);
+  },
+});
+
+/**
  * Get a cached analysis for a book.
  * One analysis per book (objective, profile-independent).
  */

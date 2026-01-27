@@ -10,6 +10,20 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 22 — SafeReads-0xq: Build dashboard home and polish UI
+
+- Split dashboard into two routes: `/dashboard` (home) and `/dashboard/search` (search)
+- Dashboard home shows: welcome greeting, 3 quick action cards, recent analyses list, kids overview
+- Added `listRecent` query to `convex/analyses.ts` — fetches recent analyses with book data (newest first, configurable count)
+- Recent analyses show book cover thumbnail, title, author, verdict badge (color-coded), and link to book detail
+- Kids overview shows avatar initial, name, age, links to wishlist — empty state prompts adding kids
+- Quick action cards link to search page (Search, Scan Barcode, Snap Cover)
+- Loading skeleton for analyses, empty states for both sections
+- Updated Navbar: added "Home" link to `/dashboard`, "Search" now points to `/dashboard/search`
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/analyses.ts` (modified), `src/app/dashboard/page.tsx` (rewritten), `src/app/dashboard/search/page.tsx` (new), `src/components/Navbar.tsx` (modified)
+
 ### Iteration 21 — SafeReads-tpl.4: Build onboarding flow for new users
 
 - Added `onboardingComplete: v.optional(v.boolean())` to users schema
@@ -55,28 +69,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `convex/schema.ts` (modified), `convex/analyses.ts` (rewritten), `src/components/VerdictSection.tsx` (rewritten), `convex/lib/profileHash.ts` (deleted)
-
-### Iteration 19 — SafeReads-tpl.3: Landing page for unauthenticated visitors
-
-- Built full marketing landing page at `/` (root route)
-  - Hero section with value proposition, sign-in CTA, and "see how it works" anchor link
-  - "How It Works" section: 3-step grid (barcode scan, cover photo, title search)
-  - Features section: 4-card grid (AI analysis, instant lookup, families, your values)
-  - Trust section: neutral messaging about objective content info
-  - Final CTA section with sign-in button
-  - Footer with copyright
-- Signed-in redirect: `useAuth()` + `useEffect` → `router.replace("/dashboard")` when authenticated
-  - Returns `null` while auth loading or signed in (no flash of marketing content)
-- Mobile-first responsive design following existing patterns
-  - `text-3xl` → `sm:text-5xl` for hero, `text-2xl` → `sm:text-3xl` for section headings
-  - CTA buttons stack vertically on mobile, row on desktop
-  - Feature cards single column → `sm:grid-cols-2`
-- Uses existing design tokens: parchment, ink, verdict colors, serif headings
-- Uses Clerk `SignInButton mode="modal"` for CTAs (consistent with Navbar)
-- `Step` and `Feature` helper components colocated in page file (not extracted — single use)
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/app/page.tsx` (rewritten)
 
 ---
 
@@ -144,6 +136,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 19 — SafeReads-tpl.3: Landing page for unauthenticated visitors
+
+- Built full marketing landing page at `/` (root route)
+- Signed-in redirect to `/dashboard`
+- Mobile-first responsive design with bookish theme
+- Build + lint pass clean
 
 ### Iteration 18 — SafeReads-xza: Mobile-first scan UX
 

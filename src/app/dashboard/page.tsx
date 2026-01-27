@@ -1,54 +1,42 @@
 "use client";
 
-import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useAction } from "convex/react";
+import { useQuery } from "convex/react";
+import Link from "next/link";
+import Image from "next/image";
 import { api } from "../../../convex/_generated/api";
-import { SearchBar } from "@/components/SearchBar";
-import { BarcodeScanner } from "@/components/BarcodeScanner";
-import { CoverScanner } from "@/components/CoverScanner";
-import { BookCard, BookCardBook } from "@/components/BookCard";
-import { BookOpen } from "lucide-react";
+import {
+  Search,
+  ScanBarcode,
+  Camera,
+  BookOpen,
+  Users,
+  Shield,
+  ChevronRight,
+} from "lucide-react";
+
+const VERDICT_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  safe: { bg: "bg-verdict-safe/10", text: "text-verdict-safe", label: "Safe" },
+  caution: { bg: "bg-verdict-caution/10", text: "text-verdict-caution", label: "Caution" },
+  warning: { bg: "bg-verdict-warning/10", text: "text-verdict-warning", label: "Warning" },
+  no_verdict: { bg: "bg-parchment-100", text: "text-ink-400", label: "No Verdict" },
+};
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const searchBooks = useAction(api.books.search);
-  const identifyCover = useAction(api.books.identifyCover);
+  const clerkId = user?.id;
 
-  const [results, setResults] = useState<BookCardBook[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const convexUser = useQuery(
+    api.users.getByClerkId,
+    clerkId ? { clerkId } : "skip"
+  );
 
-  async function handleSearch(query: string) {
-    setLoading(true);
-    setError(null);
-    try {
-      const books = await searchBooks({ query });
-      setResults(books as BookCardBook[]);
-      setSearched(true);
-    } catch {
-      setError("Something went wrong while searching. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const kids = useQuery(
+    api.kids.listByUser,
+    convexUser?._id ? { userId: convexUser._id } : "skip"
+  );
 
-  async function handleCoverCapture(imageBase64: string) {
-    setLoading(true);
-    setError(null);
-    try {
-      const books = await identifyCover({ imageBase64 });
-      setResults(books as BookCardBook[]);
-      setSearched(true);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Could not identify the book.";
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const recentAnalyses = useQuery(api.analyses.listRecent, { count: 5 });
 
   return (
     <div>
@@ -56,39 +44,221 @@ export default function DashboardPage() {
         Welcome{user?.firstName ? `, ${user.firstName}` : ""}
       </h1>
       <p className="mt-2 text-sm text-ink-500 sm:text-base">
-        Search for a book to get started with your content analysis.
+        What would you like to do today?
       </p>
 
-      <div className="mt-6 space-y-3">
-        <SearchBar onSearch={handleSearch} loading={loading} />
-        <div className="flex gap-2">
-          <BarcodeScanner onScan={handleSearch} disabled={loading} />
-          <CoverScanner onCapture={handleCoverCapture} disabled={loading} />
-        </div>
+      {/* Quick Actions */}
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <QuickAction
+          href="/dashboard/search"
+          icon={<Search className="h-5 w-5" />}
+          title="Search Books"
+          description="Search by title, author, or ISBN"
+        />
+        <QuickAction
+          href="/dashboard/search"
+          icon={<ScanBarcode className="h-5 w-5" />}
+          title="Scan Barcode"
+          description="Use your camera to scan an ISBN"
+        />
+        <QuickAction
+          href="/dashboard/search"
+          icon={<Camera className="h-5 w-5" />}
+          title="Snap Cover"
+          description="Photograph a book cover to identify it"
+        />
       </div>
 
-      {error && (
-        <div className="mt-6 rounded-lg border border-verdict-warning/30 bg-red-50 p-4 text-sm text-verdict-warning">
-          {error}
+      {/* Recent Analyses */}
+      <section className="mt-10">
+        <div className="flex items-center justify-between">
+          <h2 className="font-serif text-lg font-bold text-ink-900">
+            Recent Analyses
+          </h2>
+          {recentAnalyses && recentAnalyses.length > 0 && (
+            <Link
+              href="/dashboard/search"
+              className="text-sm font-medium text-parchment-700 hover:text-parchment-800"
+            >
+              Search more
+            </Link>
+          )}
         </div>
-      )}
 
-      {searched && !loading && results.length === 0 && !error && (
-        <div className="mt-12 text-center">
-          <BookOpen className="mx-auto h-12 w-12 text-parchment-300" />
-          <p className="mt-3 text-ink-500">
-            No books found. Try a different search term.
-          </p>
-        </div>
-      )}
+        {recentAnalyses === undefined ? (
+          <div className="mt-4 space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-20 animate-pulse rounded-lg bg-parchment-100"
+              />
+            ))}
+          </div>
+        ) : recentAnalyses.length === 0 ? (
+          <div className="mt-4 rounded-lg border border-parchment-200 bg-white p-8 text-center">
+            <Shield className="mx-auto h-10 w-10 text-parchment-300" />
+            <p className="mt-3 text-sm text-ink-500">
+              No analyses yet. Search for a book to get your first content
+              review.
+            </p>
+            <Link
+              href="/dashboard/search"
+              className="mt-4 inline-block rounded-lg bg-parchment-700 px-4 py-2 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800"
+            >
+              Search Books
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-4 space-y-2">
+            {recentAnalyses.map((analysis: AnalysisWithBook) => {
+              const style = VERDICT_STYLES[analysis.verdict] ?? VERDICT_STYLES.no_verdict;
+              return (
+                <Link
+                  key={analysis._id}
+                  href={`/dashboard/book/${analysis.bookId}`}
+                  className="group flex items-center gap-3 rounded-lg border border-parchment-200 bg-white p-3 transition-colors hover:border-parchment-300 hover:shadow-sm"
+                >
+                  <div className="relative h-14 w-10 flex-shrink-0 overflow-hidden rounded bg-parchment-100">
+                    {analysis.book?.coverUrl ? (
+                      <Image
+                        src={analysis.book.coverUrl}
+                        alt={analysis.book.title}
+                        fill
+                        sizes="40px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <BookOpen className="h-4 w-4 text-parchment-300" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink-900 group-hover:text-parchment-700">
+                      {analysis.book?.title ?? "Unknown Book"}
+                    </p>
+                    <p className="truncate text-xs text-ink-400">
+                      {analysis.book?.authors?.join(", ") ?? ""}
+                    </p>
+                  </div>
+                  <span
+                    className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}
+                  >
+                    {style.label}
+                  </span>
+                  <ChevronRight className="h-4 w-4 flex-shrink-0 text-ink-300" />
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
-      {results.length > 0 && (
-        <div className="mt-6 space-y-3">
-          {results.map((book: BookCardBook) => (
-            <BookCard key={book._id} book={book} />
-          ))}
-        </div>
+      {/* Kids Overview */}
+      {kids !== undefined && (
+        <section className="mt-10">
+          <div className="flex items-center justify-between">
+            <h2 className="font-serif text-lg font-bold text-ink-900">
+              Your Kids
+            </h2>
+            <Link
+              href="/dashboard/kids"
+              className="text-sm font-medium text-parchment-700 hover:text-parchment-800"
+            >
+              Manage
+            </Link>
+          </div>
+
+          {kids.length === 0 ? (
+            <div className="mt-4 rounded-lg border border-parchment-200 bg-white p-6 text-center">
+              <Users className="mx-auto h-10 w-10 text-parchment-300" />
+              <p className="mt-3 text-sm text-ink-500">
+                Add your kids to build wishlists and track reviews for each
+                child.
+              </p>
+              <Link
+                href="/dashboard/kids"
+                className="mt-4 inline-block rounded-lg border border-parchment-300 px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-parchment-50"
+              >
+                Add Kids
+              </Link>
+            </div>
+          ) : (
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {kids.map((kid: Kid) => (
+                <Link
+                  key={kid._id}
+                  href={`/dashboard/kids/${kid._id}/wishlist`}
+                  className="group flex items-center gap-3 rounded-lg border border-parchment-200 bg-white p-4 transition-colors hover:border-parchment-300 hover:shadow-sm"
+                >
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-parchment-100 text-sm font-bold text-parchment-700">
+                    {kid.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-ink-900 group-hover:text-parchment-700">
+                      {kid.name}
+                    </p>
+                    {kid.age !== undefined && (
+                      <p className="text-xs text-ink-400">
+                        Age {kid.age}
+                      </p>
+                    )}
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-ink-300" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
       )}
     </div>
   );
+}
+
+function QuickAction({
+  href,
+  icon,
+  title,
+  description,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-start gap-3 rounded-lg border border-parchment-200 bg-white p-4 transition-colors hover:border-parchment-300 hover:shadow-sm"
+    >
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-parchment-100 text-parchment-700 transition-colors group-hover:bg-parchment-200">
+        {icon}
+      </div>
+      <div>
+        <p className="text-sm font-medium text-ink-900 group-hover:text-parchment-700">
+          {title}
+        </p>
+        <p className="mt-0.5 text-xs text-ink-400">{description}</p>
+      </div>
+    </Link>
+  );
+}
+
+// Types for Convex data (AnyApi returns `any`)
+interface AnalysisWithBook {
+  _id: string;
+  bookId: string;
+  verdict: string;
+  summary: string;
+  book: {
+    title: string;
+    authors: string[];
+    coverUrl?: string;
+  } | null;
+}
+
+interface Kid {
+  _id: string;
+  name: string;
+  age?: number;
 }

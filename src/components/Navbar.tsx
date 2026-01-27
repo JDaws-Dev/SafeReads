@@ -21,6 +21,12 @@ export function Navbar() {
               href="/dashboard"
               className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
             >
+              Home
+            </Link>
+            <Link
+              href="/dashboard/search"
+              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+            >
               Search
             </Link>
             <Link
