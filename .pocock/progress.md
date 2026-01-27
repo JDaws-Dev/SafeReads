@@ -10,6 +10,29 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 17 — SafeReads-w1e: Book cover photo identification via vision AI
+
+- Created `convex/books.ts:identifyCover` action — OpenAI GPT-4o vision for book identification
+  - Takes base64-encoded JPEG image of book cover
+  - Sends to GPT-4o with `image_url` content block, `detail: "low"` to minimize token cost
+  - Extracts title + author from cover image via structured JSON response
+  - Reuses existing `searchGoogleBooks` + Open Library enrichment + upsert flow (no duplication)
+  - Returns same shape as `books.search` — results drop into existing UI seamlessly
+  - Throws descriptive error if title can't be extracted
+- Created `src/components/CoverScanner.tsx` — camera capture component
+  - Button with `Camera` icon, same styling as BarcodeScanner for consistency
+  - Opens modal with live camera preview (rear camera via `facingMode: "environment"`)
+  - "Take Photo" button captures frame to canvas → base64 JPEG (0.8 quality)
+  - Cleans up camera stream on close/capture/unmount
+  - Loading + error states match BarcodeScanner patterns
+- Updated `src/app/dashboard/page.tsx` — added CoverScanner next to BarcodeScanner
+  - `handleCoverCapture` calls `identifyCover` action, shows results in same list
+  - Error messages surface vision AI failures (e.g. "could not identify the book")
+  - Disabled while any search/identify is loading
+- No new dependencies — uses existing `openai` package and native browser APIs (`getUserMedia`, `canvas`)
+- Build + lint pass clean
+- Files: `src/components/CoverScanner.tsx` (new), `convex/books.ts` (modified), `src/app/dashboard/page.tsx` (modified)
+
 ### Iteration 16 — SafeReads-tpl.7: Research: Replace sensitivity sliders with objective content review
 
 - **Recommendation: Switch to objective content review** (no more sensitivity profiles/sliders)
@@ -48,27 +71,6 @@ This file maintains context between autonomous iterations.
 - Note: `convex/_generated/api.d.ts` must be reverted to `AnyApi` stub after any `npx convex dev` run
 - Build + lint pass clean
 - Files: `src/components/BarcodeScanner.tsx` (new), `src/app/dashboard/page.tsx` (modified), `package.json` (modified)
-
-### Iteration 14 — SafeReads-tpl.5: Simplify to single profile per user
-
-- Rewrote `convex/profiles.ts` — replaced multi-profile CRUD with two functions:
-  - `getByUser`: returns the user's single profile (`.first()` instead of `.collect()`)
-  - `upsert`: creates on first save, updates on subsequent saves. Keeps `isDefault: true` for schema compat
-  - Removed: `listByUser`, `getById`, `getDefault`, `create`, `update`, `setDefault`, `remove`
-- Rewrote `src/app/dashboard/profiles/page.tsx` — single edit form, no list/dialog/create-delete
-  - Shows ValuesProfileForm directly in a card
-  - Uses `profiles.getByUser` + `profiles.upsert`
-  - "Create Profile" label when no profile exists, "Save Profile" when editing
-  - Success message on save
-- Updated `src/components/VerdictSection.tsx` — uses `profiles.getByUser` instead of `profiles.getDefault`
-  - Renamed `defaultProfile` → `profile` throughout
-- Simplified `src/components/KidForm.tsx` — removed `profiles` prop and profile select dropdown
-  - `KidFormValues` no longer has `profileId`
-- Updated `src/app/dashboard/kids/page.tsx` — removed profiles query, profile display, profile props to KidForm
-- Updated `src/components/Navbar.tsx` — "Profiles" → "Profile"
-- Schema unchanged (`isDefault` field kept for backward compat with existing data)
-- Build + lint pass clean
-- Files: `convex/profiles.ts` (rewritten), `src/app/dashboard/profiles/page.tsx` (rewritten), `src/components/VerdictSection.tsx` (modified), `src/components/KidForm.tsx` (simplified), `src/app/dashboard/kids/page.tsx` (simplified), `src/components/Navbar.tsx` (modified)
 
 ---
 
@@ -125,6 +127,8 @@ Patterns, gotchas, and decisions that affect future work:
 - `html5-qrcode` for barcode scanning: dynamic import (`import("html5-qrcode")`) to avoid SSR. Uses `Html5Qrcode` class — create instance, call `.start()` with camera config, `.stop()` on cleanup. Scanned ISBN barcodes are EAN-13 (13 digits) or ISBN-10 (10 digits).
 - BarcodeScanner creates its own container div imperatively (html5-qrcode manages its own DOM). Use a ref to a wrapper div, create child div with unique ID.
 - **DECISION (iteration 16)**: Switching from sensitivity sliders to objective content review. One analysis per book (not per book+profile). Removes profiles dependency from analysis flow. See SafeReads-tpl.7 issue notes for full rationale and migration plan.
+- CoverScanner uses native `getUserMedia` + `<canvas>` for photo capture — no library needed. Converts video frame to base64 JPEG via `canvas.toDataURL("image/jpeg", 0.8)`. Strip `data:image/jpeg;base64,` prefix before sending to API.
+- GPT-4o vision with `detail: "low"` is sufficient for book cover text extraction and keeps token cost minimal.
 
 ### Testing
 
@@ -133,6 +137,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 14 — SafeReads-tpl.5: Simplify to single profile per user
+
+- Rewrote `convex/profiles.ts` — replaced multi-profile CRUD with two functions
+- Rewrote `src/app/dashboard/profiles/page.tsx` — single edit form
+- Updated VerdictSection, KidForm, kids page, Navbar
+- Build + lint pass clean
 
 ### Iteration 13 — SafeReads-bmt: Build kids management and wishlists
 

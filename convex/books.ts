@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { action, internalMutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
+import OpenAI from "openai";
 
 // --- Public queries ---
 
@@ -325,3 +326,102 @@ async function fetchOpenLibraryData(
     return null;
   }
 }
+
+// --- Vision AI book identification ---
+
+/**
+ * Identify a book from a cover photo using OpenAI GPT-4o vision.
+ * Takes a base64-encoded image, extracts title/author via vision AI,
+ * then searches Google Books with the extracted info.
+ * Returns the same shape as the search action.
+ */
+export const identifyCover = action({
+  args: {
+    imageBase64: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const openai = new OpenAI();
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content:
+            'You are a book identification assistant. Given an image of a book cover, extract the title and author. Respond with JSON: {"title": "...", "author": "..."}. If you cannot determine the title, set title to an empty string. If you cannot determine the author, set author to an empty string.',
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "What book is shown in this image? Extract the title and author from the cover.",
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${args.imageBase64}`,
+                detail: "low",
+              },
+            },
+          ],
+        },
+      ],
+      max_tokens: 200,
+    });
+
+    const raw = completion.choices[0]?.message?.content;
+    if (!raw) {
+      throw new Error("Vision AI returned an empty response");
+    }
+
+    const parsed = JSON.parse(raw) as { title: string; author: string };
+
+    if (!parsed.title) {
+      throw new Error(
+        "Could not identify the book from this image. Try taking a clearer photo of the front cover."
+      );
+    }
+
+    // Build a search query from the extracted title and author
+    const query = parsed.author
+      ? `${parsed.title} ${parsed.author}`
+      : parsed.title;
+
+    // Reuse the existing Google Books search + enrichment + upsert flow
+    const googleResults = await searchGoogleBooks(query, 5);
+
+    const books = await Promise.all(
+      googleResults.map(async (item) => {
+        const parsedBook = parseGoogleBooksItem(item);
+
+        if (!parsedBook.description || !parsedBook.categories?.length) {
+          const enrichment = await fetchOpenLibraryData(
+            parsedBook.isbn13 ?? parsedBook.isbn10,
+            parsedBook.title,
+            parsedBook.authors[0]
+          );
+          if (enrichment) {
+            parsedBook.description =
+              parsedBook.description || enrichment.description;
+            parsedBook.categories = parsedBook.categories?.length
+              ? parsedBook.categories
+              : enrichment.subjects;
+            parsedBook.openLibraryKey = enrichment.key;
+            parsedBook.coverUrl = parsedBook.coverUrl || enrichment.coverUrl;
+          }
+        }
+
+        const bookId = await ctx.runMutation(internal.books.upsert, parsedBook);
+
+        return {
+          _id: bookId,
+          ...parsedBook,
+        };
+      })
+    );
+
+    return books;
+  },
+});

@@ -6,12 +6,14 @@ import { useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { SearchBar } from "@/components/SearchBar";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
+import { CoverScanner } from "@/components/CoverScanner";
 import { BookCard, BookCardBook } from "@/components/BookCard";
 import { BookOpen } from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useUser();
   const searchBooks = useAction(api.books.search);
+  const identifyCover = useAction(api.books.identifyCover);
 
   const [results, setResults] = useState<BookCardBook[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,6 +34,22 @@ export default function DashboardPage() {
     }
   }
 
+  async function handleCoverCapture(imageBase64: string) {
+    setLoading(true);
+    setError(null);
+    try {
+      const books = await identifyCover({ imageBase64 });
+      setResults(books as BookCardBook[]);
+      setSearched(true);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not identify the book.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div>
       <h1 className="font-serif text-3xl font-bold text-ink-900">
@@ -46,6 +64,7 @@ export default function DashboardPage() {
           <SearchBar onSearch={handleSearch} loading={loading} />
         </div>
         <BarcodeScanner onScan={handleSearch} disabled={loading} />
+        <CoverScanner onCapture={handleCoverCapture} disabled={loading} />
       </div>
 
       {error && (
