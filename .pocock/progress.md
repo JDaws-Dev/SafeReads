@@ -10,6 +10,20 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 4 — SafeReads-yau: Root layout with ClerkProvider + ConvexProviderWithClerk
+
+- Created `src/components/ConvexClientProvider.tsx` — "use client" component wrapping ConvexProviderWithClerk
+  - Instantiates ConvexReactClient with NEXT_PUBLIC_CONVEX_URL
+  - Passes `useAuth` from @clerk/nextjs for token flow
+- Updated `src/app/layout.tsx` — wrapped with `<ClerkProvider dynamic>` → `<ConvexClientProvider>`
+  - `dynamic` prop avoids build-time prerendering errors when CLERK keys not set
+  - Provider order: ClerkProvider (server) > ConvexClientProvider (client) > children
+- Created `src/proxy.ts` — Next.js 16 uses proxy.ts (not middleware.ts, deprecated)
+  - Uses clerkMiddleware + createRouteMatcher to protect /dashboard(.*)
+  - Standard matcher config excludes static assets and _next internals
+- Build + lint pass clean
+- Files: `src/components/ConvexClientProvider.tsx` (new), `src/app/layout.tsx` (modified), `src/proxy.ts` (new)
+
 ### Iteration 3 — SafeReads-zr4: Configure Tailwind with bookish theme
 
 - Tailwind v4 CSS-first config (no tailwind.config.ts — theme lives in globals.css `@theme inline`)
@@ -34,18 +48,6 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `.env.local.example` (new), `convex/schema.ts` (new)
 
-### Iteration 1 — SafeReads-5i8: Scaffold Next.js project
-
-- Scaffolded via `create-next-app@latest` (Next.js 16.x / React 19.x — latest stable)
-- Used `--app --src-dir --typescript --tailwind --eslint --turbopack`
-- Replaced default Geist fonts with Inter (bookish theme will add Libre Baskerville later)
-- Stripped boilerplate page/layout to minimal SafeReads placeholders
-- Installed all deps: Convex, @clerk/nextjs, Radix UI primitives (dialog, dropdown-menu, slider, switch, tabs, tooltip), lucide-react, openai
-- Created directory structure: `src/app/dashboard/`, `src/components/`, `convex/lib/`
-- Build + lint pass clean
-- NOTE: Tailwind theme config is separate issue (SafeReads-zr4)
-- NOTE: .env.local template + Convex schema is SafeReads-1tc
-
 ---
 
 ## Active Roadblocks
@@ -60,7 +62,7 @@ Patterns, gotchas, and decisions that affect future work:
 
 ### Stack
 
-- Next.js 15 (App Router, TypeScript) on Vercel
+- Next.js 16 (App Router, TypeScript) on Vercel
 - Convex for backend + real-time DB
 - Clerk for auth (Google sign-in)
 - OpenAI GPT-4o for AI verdict engine
@@ -69,6 +71,9 @@ Patterns, gotchas, and decisions that affect future work:
 
 ### Patterns
 
+- Next.js 16: use `proxy.ts` not `middleware.ts` (deprecated). Same API, just renamed.
+- ClerkProvider needs `dynamic` prop to avoid build errors when env vars aren't set
+- Provider nesting: ClerkProvider (server) > ConvexClientProvider (client "use client") > app
 - `src/` directory structure with App Router
 - Convex actions for external API calls (Google Books, Open Library, OpenAI)
 - Convex queries/mutations for DB reads/writes
@@ -84,4 +89,12 @@ Patterns, gotchas, and decisions that affect future work:
 
 ## Archive (Older Iterations)
 
-<!-- Move entries here when they roll out of "Recent Context" -->
+### Iteration 1 — SafeReads-5i8: Scaffold Next.js project
+
+- Scaffolded via `create-next-app@latest` (Next.js 16.x / React 19.x — latest stable)
+- Used `--app --src-dir --typescript --tailwind --eslint --turbopack`
+- Replaced default Geist fonts with Inter (bookish theme will add Libre Baskerville later)
+- Stripped boilerplate page/layout to minimal SafeReads placeholders
+- Installed all deps: Convex, @clerk/nextjs, Radix UI primitives (dialog, dropdown-menu, slider, switch, tabs, tooltip), lucide-react, openai
+- Created directory structure: `src/app/dashboard/`, `src/components/`, `convex/lib/`
+- Build + lint pass clean
