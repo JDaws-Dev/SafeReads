@@ -10,6 +10,29 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 11 — SafeReads-t99: Build book detail page with BookHeader and AmazonButton
+
+- Created `src/components/BookHeader.tsx` — full book header component
+  - Large cover image (176×256) with Image fallback, priority loading
+  - Title (serif h1), authors, year, page count, ISBN display
+  - Category pills (no max limit — detail page shows all)
+  - Full description (no line-clamp — detail page shows everything)
+  - `actions` slot for composing action buttons (AmazonButton, future verdict trigger)
+  - Exports `BookHeaderBook` type
+- Created `src/components/AmazonButton.tsx` — Amazon search link
+  - Builds Amazon search URL with ISBN (exact match) or title+author fallback
+  - Opens in new tab with `noopener noreferrer`
+  - ExternalLink icon, parchment-themed button styling
+- Created `src/app/dashboard/book/[id]/page.tsx` — book detail route
+  - Uses `useQuery(api.books.getById)` for real-time book data
+  - Next.js 16 async params: `params: Promise<{ id: string }>` unwrapped with `use()`
+  - Loading state with spinner, 404 state with back link
+  - Back to search link at top
+  - Placeholder comment for verdict section (SafeReads-1sw)
+- Fixed `convex/_generated/api.d.ts` — reverted to `AnyApi` stub (was overwritten to `ApiFromModules` causing circular type inference error)
+- Build + lint pass clean
+- Files: `src/components/BookHeader.tsx` (new), `src/components/AmazonButton.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (new), `convex/_generated/api.d.ts` (fixed)
+
 ### Iteration 10 — SafeReads-4fd: Build SearchBar, BookCard, and search page
 
 - Created `src/components/SearchBar.tsx` — search input with submit button
@@ -39,32 +62,6 @@ This file maintains context between autonomous iterations.
 - ConvexProviderWithClerk was already wired in root layout (iteration 4)
 - Build + lint pass clean
 - Files: `convex/auth.config.ts` (new), `.env.local.example` (modified)
-
-### Iteration 8 — SafeReads-2eg: Build profiles CRUD and ValuesProfileForm
-
-- Created `convex/profiles.ts` — full CRUD module for sensitivity profiles
-  - `listByUser` — public query: fetches all profiles for a user via `by_user` index
-  - `getById` — public query: single profile fetch by ID
-  - `getDefault` — public query: returns default profile (or first, or null)
-  - `create` — mutation: creates profile, auto-sets `isDefault` if first profile
-  - `update` — mutation: patches name + all 6 sensitivity fields
-  - `setDefault` — mutation: unsets current default, sets new one
-  - `remove` — mutation: deletes profile, prevents deleting last one, reassigns default if needed
-- Created `src/components/ValuesProfileForm.tsx` — reusable form component
-  - 6 Radix UI sliders (1-10) for sensitivity settings
-  - Profile name text input
-  - Human-readable sensitivity labels (Very Relaxed → Very Strict)
-  - Accepts `initialName`/`initialValues` for edit mode, `onSubmit` callback
-  - Exports `SensitivityValues` type for consumers
-- Created `src/app/dashboard/profiles/page.tsx` — profiles management page
-  - Lists profiles with default star indicator
-  - Create/edit via Radix Dialog modal with ValuesProfileForm
-  - Set default, delete (prevented for last profile) actions
-  - Uses Clerk `useUser` → Convex `getByClerkId` → `listByUser` chain
-- Added "Profiles" nav link to Navbar
-- With AnyApi stubs, `useQuery` returns `any` — need explicit type annotations on `.map()` callbacks
-- Build + lint pass clean
-- Files: `convex/profiles.ts` (new), `src/components/ValuesProfileForm.tsx` (new), `src/app/dashboard/profiles/page.tsx` (new), `src/components/Navbar.tsx` (modified)
 
 ---
 
@@ -107,7 +104,9 @@ Patterns, gotchas, and decisions that affect future work:
 - Convex auth config: `convex/auth.config.ts` exports `{ providers: [{ domain, applicationID }] }`. Domain comes from `CLERK_JWT_ISSUER_DOMAIN` env var. No JWT template needed with newer Clerk/Convex integration.
 - Convex actions use `useAction` (not `useQuery`/`useMutation`). Actions require manual loading/error state — they don't auto-subscribe like queries.
 - Next.js Image component requires `images.remotePatterns` in `next.config.ts` for external image hosts (books.google.com, covers.openlibrary.org).
-- BookCard links to `/dashboard/book/{_id}` — book detail page is the next task (SafeReads-t99).
+- BookCard links to `/dashboard/book/{_id}` — book detail page is SafeReads-t99.
+- Next.js 16 dynamic route params are `Promise` — use `use(params)` in client components to unwrap. Type: `params: Promise<{ id: string }>`.
+- `convex/_generated/api.d.ts` gets overwritten by `npx convex dev` to use `ApiFromModules` — must revert to `AnyApi` stub for builds without Convex deployment.
 
 ### Testing
 
@@ -116,6 +115,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 8 — SafeReads-2eg: Build profiles CRUD and ValuesProfileForm
+
+- Created `convex/profiles.ts` — full CRUD module for sensitivity profiles
+- Created `src/components/ValuesProfileForm.tsx` — reusable form with 6 sliders
+- Created `src/app/dashboard/profiles/page.tsx` — profiles management page
+- Build + lint pass clean
 
 ### Iteration 7 — SafeReads-5g4: Build Google Books API action and Open Library fallback
 

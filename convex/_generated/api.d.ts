@@ -30,4 +30,4 @@ export declare const api: AnyApi;
  */
 export declare const internal: AnyApi;
 
-export declare const components: {};
+export declare const components: Record<string, never>;
