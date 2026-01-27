@@ -10,27 +10,36 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 6 — SafeReads-pqw: Build profile hash and AI verdict engine
+
+- Created `convex/lib/profileHash.ts` — `computeProfileHash()` utility
+  - Deterministic join of 6 sensitivity values with "-" separator
+  - e.g. "3-5-2-7-4-6" for violence=3, language=5, etc.
+- Created `convex/analyses.ts` — full verdict engine module
+  - `getByBookAndProfile` — public query for frontend cache lookups by (bookId, profileHash) index
+  - `getCachedAnalysis` — internal query (same logic) for use by the action
+  - `getBookById` / `getProfileById` — internal queries for action to fetch DB docs
+  - `store` — internal mutation to persist analysis results
+  - `analyze` — public action: the main verdict engine
+    - Fetches book + profile → computes profileHash → checks cache
+    - Returns "no_verdict" early if book lacks description and categories
+    - Calls OpenAI GPT-4o with `response_format: { type: "json_object" }`
+    - System prompt instructs structured JSON with verdict, ageRecommendation, summary, contentFlags (6 categories), reasoning
+    - Validates verdict + severity enums from OpenAI response (falls back to safe defaults)
+    - Stores result via internal mutation and returns it
+  - Helper functions: `sensitivityLevel()` maps 1-10 to human labels, `buildSensitivityLabels()` and `buildBookContext()` format the prompt
+- Updated `convex/_generated/api.d.ts` — simplified to `AnyApi` types to avoid circular type reference
+  - Previous stub used `ApiFromModules<{ analyses: typeof analyses }>` which created circular inference when `analyses.ts` imports `internal` from `api`
+  - `AnyApi` breaks the cycle; real codegen overwrites this anyway
+- Build + lint pass clean
+- Files: `convex/lib/profileHash.ts` (new), `convex/analyses.ts` (new), `convex/_generated/api.d.ts` (modified)
+
 ### Iteration 5 — SafeReads-aa5: Implement convex/users.ts and basic Navbar + dashboard layout
 
 - Created `convex/users.ts` — upsert mutation + getByClerkId query
-  - upsert: finds by clerkId index, patches if exists, inserts if new
-  - getByClerkId: simple lookup query for use after sign-in
-- Created `convex/_generated/` stubs (server.ts, dataModel.ts, api.ts)
-  - Re-exports generic Convex builders (queryGeneric, mutationGeneric, etc.)
-  - Needed because `npx convex dev` hasn't run (no deployment yet)
-  - Will be overwritten by real codegen when Convex is deployed
-- Created `src/components/Navbar.tsx` — "use client" component
-  - BookOpen icon + "SafeReads" serif branding link
-  - SignedIn: Dashboard link + Clerk UserButton (avatar)
-  - SignedOut: modal SignInButton styled with parchment theme
-  - Responsive with max-w-5xl centered layout
-- Updated `src/app/layout.tsx` — added Navbar + `<main>` wrapper around children
-- Created `src/app/dashboard/layout.tsx` — centered container with max-w-5xl + padding
-- Created `src/app/dashboard/page.tsx` — "use client" welcome page
-  - Uses Clerk useUser() to show personalized greeting
-  - Placeholder text for future search functionality
+- Created `convex/_generated/` stubs (server.js/d.ts, dataModel.d.ts, api.js/d.ts)
+- Created `src/components/Navbar.tsx`, dashboard layout + page
 - Build + lint pass clean
-- Files: `convex/users.ts` (new), `convex/_generated/server.ts` (new), `convex/_generated/dataModel.ts` (new), `convex/_generated/api.ts` (new), `src/components/Navbar.tsx` (new), `src/app/layout.tsx` (modified), `src/app/dashboard/layout.tsx` (new), `src/app/dashboard/page.tsx` (new)
 
 ### Iteration 4 — SafeReads-yau: Root layout with ClerkProvider + ConvexProviderWithClerk
 
@@ -45,18 +54,6 @@ This file maintains context between autonomous iterations.
   - Standard matcher config excludes static assets and _next internals
 - Build + lint pass clean
 - Files: `src/components/ConvexClientProvider.tsx` (new), `src/app/layout.tsx` (modified), `src/proxy.ts` (new)
-
-### Iteration 3 — SafeReads-zr4: Configure Tailwind with bookish theme
-
-- Tailwind v4 CSS-first config (no tailwind.config.ts — theme lives in globals.css `@theme inline`)
-- Added Libre Baskerville font (400, 700 weights) via next/font/google as `--font-serif`
-- Parchment palette: 10 shades from cream (#fdf8f0) to deep brown (#6c4025)
-- Ink palette: 10 shades for text from light (#f6f5f4) to near-black (#2a2622)
-- Verdict semantic colors: safe (green), caution (amber), warning (red), none (gray)
-- Base body styles: parchment-50 bg, ink-900 text
-- Usage: `text-parchment-500`, `bg-ink-900`, `text-verdict-safe`, `font-serif` for headings
-- Build + lint pass clean
-- Files: `src/app/globals.css` (modified), `src/app/layout.tsx` (modified)
 
 ---
 
@@ -91,6 +88,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Books cached permanently (metadata is static)
 - Analyses keyed by (bookId, profileHash) so profile changes auto-invalidate
 - `convex/_generated/` stubs exist for builds without deployment — re-export generics from convex/server. Real codegen overwrites these when `npx convex dev` runs.
+- `convex/_generated/api.d.ts` must use `AnyApi` (not `ApiFromModules<typeof modules>`) in stubs — importing module types that themselves import from `api` creates circular type inference errors. Real codegen handles this differently.
 
 ### Testing
 
@@ -99,6 +97,12 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 3 — SafeReads-zr4: Configure Tailwind with bookish theme
+
+- Tailwind v4 CSS-first config, parchment + ink palettes, verdict semantic colors
+- Libre Baskerville serif font for headings, Inter for body
+- Build + lint pass clean
 
 ### Iteration 2 — SafeReads-1tc: .env.local template and Convex schema
 
