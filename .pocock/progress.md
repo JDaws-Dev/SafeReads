@@ -10,6 +10,29 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 15 — SafeReads-ba5: Barcode scanner for ISBN lookup
+
+- Installed `html5-qrcode` — browser-based barcode scanning library
+  - Supports EAN-13 (ISBN-13) and EAN-10 (ISBN-10) formats
+  - Uses native `BarcodeDetector` API when available (Chromium), falls back to JS decoder
+  - Dynamic import to avoid SSR issues
+- Created `src/components/BarcodeScanner.tsx` — barcode scanner component
+  - Button with `ScanBarcode` icon opens full-screen camera modal
+  - Uses rear camera (`facingMode: "environment"`) for book scanning
+  - Scans at 10fps with focused scan region (280x150px)
+  - Validates scanned text is 10 or 13 digits (ISBN format)
+  - Calls `onScan` callback with cleaned ISBN, closes modal automatically
+  - Loading state while camera starts, error state for camera permission denial
+  - Cleanup: stops camera stream on close or unmount
+- Updated `src/app/dashboard/page.tsx` — added BarcodeScanner next to SearchBar
+  - Scanner triggers `handleSearch` with scanned ISBN (same flow as manual search)
+  - Disabled while search is loading
+- Chose `html5-qrcode` over native `BarcodeDetector` API (Chromium-only, unreliable across devices)
+- Chose `html5-qrcode` over `zxing-js` (simpler API, handles camera lifecycle)
+- Note: `convex/_generated/api.d.ts` must be reverted to `AnyApi` stub after any `npx convex dev` run
+- Build + lint pass clean
+- Files: `src/components/BarcodeScanner.tsx` (new), `src/app/dashboard/page.tsx` (modified), `package.json` (modified)
+
 ### Iteration 14 — SafeReads-tpl.5: Simplify to single profile per user
 
 - Rewrote `convex/profiles.ts` — replaced multi-profile CRUD with two functions:
@@ -64,31 +87,6 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `convex/schema.ts` (modified), `convex/kids.ts` (new), `convex/wishlists.ts` (new), `src/components/KidForm.tsx` (new), `src/components/WishlistButton.tsx` (new), `src/app/dashboard/kids/page.tsx` (new), `src/app/dashboard/kids/[kidId]/wishlist/page.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (modified), `src/components/Navbar.tsx` (modified), `convex/_generated/api.d.ts` (reverted)
 
-### Iteration 12 — SafeReads-1sw: Build verdict UI components and wire into book detail page
-
-- Created `src/components/VerdictCard.tsx` — verdict result display
-  - Color-coded card (green/yellow/red/gray) matching verdict type
-  - Shield icon variants per verdict, verdict badge, age recommendation pill
-  - Summary text, collapsible reasoning via `<details>`
-  - Uses theme verdict colors (`verdict-safe`, `verdict-caution`, `verdict-warning`, `verdict-none`)
-  - Exports `VerdictCardAnalysis` type
-- Created `src/components/ContentFlagList.tsx` — content flags list
-  - Color-coded severity dots (none/mild/moderate/heavy)
-  - Category name, severity label, details per flag
-  - Exports `ContentFlag` type
-- Created `src/components/AnalyzeButton.tsx` — analyze trigger button
-  - Sparkles icon, loading spinner state, disabled handling
-  - Parchment-themed button styling matching existing buttons
-- Created `src/components/VerdictSection.tsx` — orchestrator component
-  - Fetches Clerk user → Convex user → default profile → cached analysis
-  - Uses `computeProfileHash` to check cache via `useQuery(api.analyses.getByBookAndProfile)`
-  - Falls back to `useAction(api.analyses.analyze)` when no cache
-  - Displays profile name, prompts profile creation if none exists
-  - Error handling for failed analysis
-- Updated `src/app/dashboard/book/[id]/page.tsx` — wired VerdictSection below BookHeader
-- Build + lint pass clean
-- Files: `src/components/VerdictCard.tsx` (new), `src/components/ContentFlagList.tsx` (new), `src/components/AnalyzeButton.tsx` (new), `src/components/VerdictSection.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (modified)
-
 ---
 
 ## Active Roadblocks
@@ -141,6 +139,8 @@ Patterns, gotchas, and decisions that affect future work:
 - Kid deletion cascades to wishlist entries (manual cascade in `kids.remove`).
 - VerdictSection orchestrates: Clerk user → Convex user → profile → profileHash → cached analysis query. Falls back to `useAction` for fresh analysis. Action results stored in local state until Convex query picks up the cache.
 - `computeProfileHash` from `convex/lib/profileHash` can be imported client-side (pure function, no server deps).
+- `html5-qrcode` for barcode scanning: dynamic import (`import("html5-qrcode")`) to avoid SSR. Uses `Html5Qrcode` class — create instance, call `.start()` with camera config, `.stop()` on cleanup. Scanned ISBN barcodes are EAN-13 (13 digits) or ISBN-10 (10 digits).
+- BarcodeScanner creates its own container div imperatively (html5-qrcode manages its own DOM). Use a ref to a wrapper div, create child div with unique ID.
 
 ### Testing
 
@@ -149,6 +149,12 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 12 — SafeReads-1sw: Build verdict UI components and wire into book detail page
+
+- Created `src/components/VerdictCard.tsx`, `ContentFlagList.tsx`, `AnalyzeButton.tsx`, `VerdictSection.tsx`
+- Wired VerdictSection into book detail page
+- Build + lint pass clean
 
 ### Iteration 11 — SafeReads-t99: Build book detail page with BookHeader and AmazonButton
 

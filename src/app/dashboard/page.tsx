@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useAction } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { SearchBar } from "@/components/SearchBar";
+import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { BookCard, BookCardBook } from "@/components/BookCard";
 import { BookOpen } from "lucide-react";
 
@@ -40,8 +41,11 @@ export default function DashboardPage() {
         Search for a book to get started with your content analysis.
       </p>
 
-      <div className="mt-6">
-        <SearchBar onSearch={handleSearch} loading={loading} />
+      <div className="mt-6 flex gap-2">
+        <div className="flex-1">
+          <SearchBar onSearch={handleSearch} loading={loading} />
+        </div>
+        <BarcodeScanner onScan={handleSearch} disabled={loading} />
       </div>
 
       {error && (
