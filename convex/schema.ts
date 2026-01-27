@@ -7,6 +7,7 @@ export default defineSchema({
     email: v.string(),
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
+    onboardingComplete: v.optional(v.boolean()),
   }).index("by_clerk_id", ["clerkId"]),
 
   profiles: defineTable({
@@ -54,6 +55,7 @@ export default defineSchema({
 
   analyses: defineTable({
     bookId: v.id("books"),
+    profileHash: v.optional(v.string()), // Legacy field — kept for backward compat with old records
     verdict: v.union(
       v.literal("safe"),
       v.literal("caution"),

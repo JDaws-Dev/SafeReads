@@ -10,6 +10,27 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 21 — SafeReads-tpl.4: Build onboarding flow for new users
+
+- Added `onboardingComplete: v.optional(v.boolean())` to users schema
+- Added `completeOnboarding` mutation to `convex/users.ts`
+- Created `/onboarding` route with 3-step flow:
+  - Step 0: Welcome screen explaining SafeReads
+  - Step 1: Optional kid setup (reuses KidForm component) — collects names/ages locally, bulk-creates on completion
+  - Step 2: Done screen with CTA to start searching
+  - Skipped sensitivity profile step — analyses are now objective (not profile-dependent)
+- Updated `src/app/dashboard/layout.tsx`:
+  - Queries convexUser by clerkId to check `onboardingComplete`
+  - Redirects to `/onboarding` if not complete
+  - Always renders UserSync so user record gets created in Convex
+  - Returns null during loading to prevent flash
+- Onboarding page also renders UserSync and waits for convexUser before showing steps
+- Returning users (onboardingComplete=true) go straight to dashboard
+- `convex/_generated/api.d.ts` reverted to `AnyApi` stub (was overwritten by `npx convex dev`)
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `convex/users.ts` (modified), `src/app/onboarding/page.tsx` (new), `src/app/dashboard/layout.tsx` (rewritten), `convex/_generated/api.d.ts` (reverted)
+
 ### Iteration 20 — SafeReads-90b: Rewrite AI prompt and analyses backend for objective content review
 
 - Removed `profileHash` from analyses schema — analyses now keyed by `bookId` only (one per book)
@@ -56,25 +77,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/app/page.tsx` (rewritten)
-
-### Iteration 18 — SafeReads-xza: Mobile-first scan UX
-
-- Redesigned dashboard search controls for mobile-first layout
-  - Scanner buttons moved below search bar (stacked layout) instead of cramped side-by-side
-  - Both scanner buttons now full-width with text labels ("Scan Barcode", "Photo Cover") for discoverability
-  - Buttons use `flex-1` within a `flex gap-2` row so they split space equally
-- Scanner modals now use bottom-sheet pattern on mobile
-  - `items-end` + `rounded-t-2xl` on mobile → slides up from bottom (natural mobile gesture)
-  - `sm:items-center sm:justify-center sm:rounded-xl` → centered dialog on desktop
-  - Added explicit "Cancel" button on mobile (sm:hidden) for easy dismissal
-  - Close button padded to `p-2` for better touch target
-- SearchBar placeholder shortened for mobile ("Title, author, or ISBN…")
-  - `text-sm` on mobile, `sm:text-base` on desktop
-  - Right padding `pr-20` on mobile, `sm:pr-24` on desktop to fit search button
-- Heading scales: `text-2xl` → `sm:text-3xl`, subheading `text-sm` → `sm:text-base`
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/app/dashboard/page.tsx`, `src/components/BarcodeScanner.tsx`, `src/components/CoverScanner.tsx`, `src/components/SearchBar.tsx` (all modified)
 
 ---
 
@@ -142,6 +144,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 18 — SafeReads-xza: Mobile-first scan UX
+
+- Redesigned dashboard search controls for mobile-first layout
+- Scanner modals now use bottom-sheet pattern on mobile
+- SearchBar placeholder shortened for mobile
+- Build + lint pass clean
 
 ### Iteration 17 — SafeReads-w1e: Book cover photo identification via vision AI
 

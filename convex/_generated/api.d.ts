@@ -8,25 +8,15 @@
  * @module
  */
 
-import type { AnyApi } from "convex/server";
+import type { AnyApi, AnyDataModel } from "convex/server";
 
 /**
  * A utility for referencing Convex functions in your app's public API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = api.myModule.myFunction;
- * ```
  */
 export declare const api: AnyApi;
 
 /**
  * A utility for referencing Convex functions in your app's internal API.
- *
- * Usage:
- * ```js
- * const myFunctionReference = internal.myModule.myFunction;
- * ```
  */
 export declare const internal: AnyApi;
 
