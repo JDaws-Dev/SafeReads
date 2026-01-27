@@ -30,6 +30,12 @@ export function Navbar() {
               Search
             </Link>
             <Link
+              href="/dashboard/history"
+              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+            >
+              History
+            </Link>
+            <Link
               href="/dashboard/kids"
               className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
             >

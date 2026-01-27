@@ -78,4 +78,18 @@ export default defineSchema({
     ),
     reasoning: v.optional(v.string()),
   }).index("by_book", ["bookId"]),
+
+  notes: defineTable({
+    userId: v.id("users"),
+    bookId: v.id("books"),
+    content: v.string(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_book", ["userId", "bookId"]),
+
+  searchHistory: defineTable({
+    userId: v.id("users"),
+    query: v.string(),
+    resultCount: v.number(),
+  }).index("by_user", ["userId"]),
 });

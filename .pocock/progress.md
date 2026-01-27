@@ -10,6 +10,28 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 23 — SafeReads-zve: Build notes and search history pages
+
+- Added `notes` table to schema: `userId`, `bookId`, `content` — indexes `by_user` and `by_user_and_book`
+- Added `searchHistory` table to schema: `userId`, `query`, `resultCount` — index `by_user`
+- Created `convex/notes.ts`: `getByUserAndBook`, `listByUser` (with book data), `upsert` (create-or-update), `remove`
+- Created `convex/searchHistory.ts`: `listByUser`, `record`, `clearAll`
+- Created `/dashboard/history` page with tabbed UI (Searches / Notes):
+  - Searches tab: list with query, result count, relative timestamp, link to re-run search, "Clear all" button
+  - Notes tab: list with book cover thumbnail, title, note content preview, link to book detail
+  - Loading skeletons and empty states for both tabs
+- Created `src/components/BookNotes.tsx` — inline note editor on book detail page:
+  - Shows "Add a note" dashed button when no note exists
+  - Displays note with edit/delete controls when note exists
+  - Editing mode with textarea, save/cancel/delete buttons
+  - Uses upsert pattern (one note per user per book)
+- Updated `src/app/dashboard/search/page.tsx` — records searches to history (best-effort, non-blocking)
+- Updated `src/app/dashboard/book/[id]/page.tsx` — added BookNotes component above VerdictSection
+- Updated `src/components/Navbar.tsx` — added "History" link between Search and Kids
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `convex/notes.ts` (new), `convex/searchHistory.ts` (new), `src/app/dashboard/history/page.tsx` (new), `src/components/BookNotes.tsx` (new), `src/app/dashboard/search/page.tsx` (modified), `src/app/dashboard/book/[id]/page.tsx` (modified), `src/components/Navbar.tsx` (modified)
+
 ### Iteration 22 — SafeReads-0xq: Build dashboard home and polish UI
 
 - Split dashboard into two routes: `/dashboard` (home) and `/dashboard/search` (search)
@@ -44,31 +66,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `convex/schema.ts` (modified), `convex/users.ts` (modified), `src/app/onboarding/page.tsx` (new), `src/app/dashboard/layout.tsx` (rewritten), `convex/_generated/api.d.ts` (reverted)
-
-### Iteration 20 — SafeReads-90b: Rewrite AI prompt and analyses backend for objective content review
-
-- Removed `profileHash` from analyses schema — analyses now keyed by `bookId` only (one per book)
-  - Schema index changed from `by_book_and_profile` to `by_book`
-- Rewrote `convex/analyses.ts`:
-  - `analyze` action: removed `profileId` arg, no longer fetches profile or computes hash
-  - `getByBook` query replaces `getByBookAndProfile` (takes only `bookId`)
-  - `store` mutation: no `profileHash` field
-  - Removed `getProfileById` internal query (no longer needed)
-  - Removed `getCachedAnalysis` profileHash arg — looks up by bookId only
-  - Removed `buildSensitivityLabels` and `sensitivityLevel` helpers
-- New objective system prompt:
-  - Neutral assessment, no personalization to reader sensitivity
-  - Verdict guidelines based on general age ranges (8+/12+/16+) not individual tolerance
-  - Still provides 6 content flag categories with severity levels
-- Deleted `convex/lib/profileHash.ts` — no longer imported anywhere
-- Updated `VerdictSection.tsx` to work with new API:
-  - Removed Clerk user lookup, profile lookup, profileHash computation
-  - Calls `api.analyses.getByBook` (bookId only) and `api.analyses.analyze` (bookId only)
-  - Removed "Create Profile" prompt — analysis is now profile-independent
-  - Simplified UI text: "Get an objective content review of this book"
-- No new dependencies
-- Build + lint pass clean
-- Files: `convex/schema.ts` (modified), `convex/analyses.ts` (rewritten), `src/components/VerdictSection.tsx` (rewritten), `convex/lib/profileHash.ts` (deleted)
 
 ---
 
@@ -136,6 +133,14 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 20 — SafeReads-90b: Rewrite AI prompt and analyses backend for objective content review
+
+- Removed `profileHash` from analyses schema — analyses now keyed by `bookId` only (one per book)
+- Rewrote `convex/analyses.ts` — profile-independent analysis
+- Deleted `convex/lib/profileHash.ts`
+- Updated VerdictSection.tsx — no longer needs profile lookup
+- Build + lint pass clean
 
 ### Iteration 19 — SafeReads-tpl.3: Landing page for unauthenticated visitors
 
