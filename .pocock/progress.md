@@ -10,6 +10,39 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 13 — SafeReads-bmt: Build kids management and wishlists
+
+- Added `kids` and `wishlists` tables to `convex/schema.ts`
+  - kids: userId, name, optional age, optional profileId (links to sensitivity profile)
+  - wishlists: kidId, bookId, optional note. Indexed by kid and by (kid, book) for dedup
+- Created `convex/kids.ts` — full CRUD module
+  - listByUser, getById, create, update, remove
+  - remove cascades: deletes all wishlist entries for the kid
+- Created `convex/wishlists.ts` — full CRUD module
+  - listByKid (joins book data), isOnWishlist, add (dedup), updateNote, remove, removeByKidAndBook
+  - add prevents duplicate entries via index lookup
+- Created `src/components/KidForm.tsx` — reusable form for kid create/edit
+  - Name input (required), age input (optional, 0-18), profile select dropdown (optional)
+  - Receives profiles list for the select options
+- Created `src/app/dashboard/kids/page.tsx` — kids management page
+  - Lists kids with avatar, name, age, linked profile name
+  - Each kid has Wishlist link, Edit button, Delete button
+  - Dialog-based create/edit using Radix Dialog + KidForm
+  - Empty state with "Add Your First Child" CTA
+- Created `src/app/dashboard/kids/[kidId]/wishlist/page.tsx` — per-kid wishlist page
+  - Lists wishlist books with cover thumbnail, title, authors, year
+  - Each item links to book detail page, has remove button
+  - Empty state with "Search Books" CTA
+- Created `src/components/WishlistButton.tsx` — add-to-wishlist button for book detail page
+  - Opens dialog listing user's kids with toggle per kid
+  - Each row shows checkmark if book already on that kid's wishlist
+  - Click toggles add/remove. Hidden when user has no kids
+- Updated `src/app/dashboard/book/[id]/page.tsx` — added WishlistButton alongside AmazonButton
+- Updated `src/components/Navbar.tsx` — added "Kids" nav link between Search and Profiles
+- Reverted `convex/_generated/api.d.ts` to `AnyApi` stub (was overwritten by `npx convex dev`)
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `convex/kids.ts` (new), `convex/wishlists.ts` (new), `src/components/KidForm.tsx` (new), `src/components/WishlistButton.tsx` (new), `src/app/dashboard/kids/page.tsx` (new), `src/app/dashboard/kids/[kidId]/wishlist/page.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (modified), `src/components/Navbar.tsx` (modified), `convex/_generated/api.d.ts` (reverted)
+
 ### Iteration 12 — SafeReads-1sw: Build verdict UI components and wire into book detail page
 
 - Created `src/components/VerdictCard.tsx` — verdict result display
@@ -58,26 +91,6 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `src/components/BookHeader.tsx` (new), `src/components/AmazonButton.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (new), `convex/_generated/api.d.ts` (fixed)
 
-### Iteration 10 — SafeReads-4fd: Build SearchBar, BookCard, and search page
-
-- Created `src/components/SearchBar.tsx` — search input with submit button
-  - Controlled text input with search icon and loading spinner
-  - Calls `onSearch(query)` callback on form submit
-  - Disabled state while loading
-- Created `src/components/BookCard.tsx` — book result card component
-  - Shows cover (Next.js Image with fallback BookOpen icon), title, authors, year, page count
-  - Description clamped to 2 lines, categories as pills (max 3)
-  - Links to `/dashboard/book/{_id}` for future book detail page
-  - Exports `BookCardBook` type for consumers
-- Updated `src/app/dashboard/page.tsx` — wired search into dashboard
-  - Uses `useAction(api.books.search)` for Convex action calls
-  - States: loading, searched (empty results), error, results list
-  - BookCard list layout (vertical stack, not grid — better for book metadata)
-- Updated `next.config.ts` — added `images.remotePatterns` for books.google.com and covers.openlibrary.org
-- Renamed Navbar "Dashboard" link to "Search" for clarity
-- Build + lint pass clean
-- Files: `src/components/SearchBar.tsx` (new), `src/components/BookCard.tsx` (new), `src/app/dashboard/page.tsx` (modified), `next.config.ts` (modified), `src/components/Navbar.tsx` (modified)
-
 ---
 
 ## Active Roadblocks
@@ -122,6 +135,9 @@ Patterns, gotchas, and decisions that affect future work:
 - BookCard links to `/dashboard/book/{_id}` — book detail page is SafeReads-t99.
 - Next.js 16 dynamic route params are `Promise` — use `use(params)` in client components to unwrap. Type: `params: Promise<{ id: string }>`.
 - `convex/_generated/api.d.ts` gets overwritten by `npx convex dev` to use `ApiFromModules` — must revert to `AnyApi` stub for builds without Convex deployment.
+- Kids link to profiles optionally — `profileId` on kid is nullable. WishlistButton hidden when user has no kids (returns null).
+- Wishlists use (kidId, bookId) composite index for dedup. `add` mutation checks existing before insert.
+- Kid deletion cascades to wishlist entries (manual cascade in `kids.remove`).
 - VerdictSection orchestrates: Clerk user → Convex user → default profile → profileHash → cached analysis query. Falls back to `useAction` for fresh analysis. Action results stored in local state until Convex query picks up the cache.
 - `computeProfileHash` from `convex/lib/profileHash` can be imported client-side (pure function, no server deps).
 
@@ -132,6 +148,15 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 10 — SafeReads-4fd: Build SearchBar, BookCard, and search page
+
+- Created `src/components/SearchBar.tsx` — search input with submit button
+- Created `src/components/BookCard.tsx` — book result card component
+- Updated `src/app/dashboard/page.tsx` — wired search into dashboard
+- Updated `next.config.ts` — added `images.remotePatterns`
+- Renamed Navbar "Dashboard" link to "Search"
+- Build + lint pass clean
 
 ### Iteration 9 — SafeReads-tpl.1: Configure Convex auth.config.ts for Clerk integration
 

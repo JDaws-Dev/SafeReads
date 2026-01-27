@@ -6,6 +6,7 @@ import { api } from "../../../../../convex/_generated/api";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { BookHeader } from "@/components/BookHeader";
 import { AmazonButton } from "@/components/AmazonButton";
+import { WishlistButton } from "@/components/WishlistButton";
 import { VerdictSection } from "@/components/VerdictSection";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -56,11 +57,14 @@ export default function BookDetailPage({
       <BookHeader
         book={book}
         actions={
-          <AmazonButton
-            title={book.title}
-            authors={book.authors}
-            isbn={book.isbn13 ?? book.isbn10}
-          />
+          <div className="flex flex-wrap gap-2">
+            <AmazonButton
+              title={book.title}
+              authors={book.authors}
+              isbn={book.isbn13 ?? book.isbn10}
+            />
+            <WishlistButton bookId={book._id} />
+          </div>
         }
       />
 

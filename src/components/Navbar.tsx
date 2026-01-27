@@ -24,6 +24,12 @@ export function Navbar() {
               Search
             </Link>
             <Link
+              href="/dashboard/kids"
+              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+            >
+              Kids
+            </Link>
+            <Link
               href="/dashboard/profiles"
               className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
             >

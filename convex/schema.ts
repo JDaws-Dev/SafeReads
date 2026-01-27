@@ -37,6 +37,21 @@ export default defineSchema({
     .index("by_google_books_id", ["googleBooksId"])
     .index("by_isbn13", ["isbn13"]),
 
+  kids: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    age: v.optional(v.number()),
+    profileId: v.optional(v.id("profiles")),
+  }).index("by_user", ["userId"]),
+
+  wishlists: defineTable({
+    kidId: v.id("kids"),
+    bookId: v.id("books"),
+    note: v.optional(v.string()),
+  })
+    .index("by_kid", ["kidId"])
+    .index("by_kid_and_book", ["kidId", "bookId"]),
+
   analyses: defineTable({
     bookId: v.id("books"),
     profileHash: v.string(),
