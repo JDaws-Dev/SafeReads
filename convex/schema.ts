@@ -54,7 +54,6 @@ export default defineSchema({
 
   analyses: defineTable({
     bookId: v.id("books"),
-    profileHash: v.string(),
     verdict: v.union(
       v.literal("safe"),
       v.literal("caution"),
@@ -76,5 +75,5 @@ export default defineSchema({
       })
     ),
     reasoning: v.optional(v.string()),
-  }).index("by_book_and_profile", ["bookId", "profileHash"]),
+  }).index("by_book", ["bookId"]),
 });

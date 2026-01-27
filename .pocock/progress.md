@@ -10,6 +10,31 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 20 — SafeReads-90b: Rewrite AI prompt and analyses backend for objective content review
+
+- Removed `profileHash` from analyses schema — analyses now keyed by `bookId` only (one per book)
+  - Schema index changed from `by_book_and_profile` to `by_book`
+- Rewrote `convex/analyses.ts`:
+  - `analyze` action: removed `profileId` arg, no longer fetches profile or computes hash
+  - `getByBook` query replaces `getByBookAndProfile` (takes only `bookId`)
+  - `store` mutation: no `profileHash` field
+  - Removed `getProfileById` internal query (no longer needed)
+  - Removed `getCachedAnalysis` profileHash arg — looks up by bookId only
+  - Removed `buildSensitivityLabels` and `sensitivityLevel` helpers
+- New objective system prompt:
+  - Neutral assessment, no personalization to reader sensitivity
+  - Verdict guidelines based on general age ranges (8+/12+/16+) not individual tolerance
+  - Still provides 6 content flag categories with severity levels
+- Deleted `convex/lib/profileHash.ts` — no longer imported anywhere
+- Updated `VerdictSection.tsx` to work with new API:
+  - Removed Clerk user lookup, profile lookup, profileHash computation
+  - Calls `api.analyses.getByBook` (bookId only) and `api.analyses.analyze` (bookId only)
+  - Removed "Create Profile" prompt — analysis is now profile-independent
+  - Simplified UI text: "Get an objective content review of this book"
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `convex/analyses.ts` (rewritten), `src/components/VerdictSection.tsx` (rewritten), `convex/lib/profileHash.ts` (deleted)
+
 ### Iteration 19 — SafeReads-tpl.3: Landing page for unauthenticated visitors
 
 - Built full marketing landing page at `/` (root route)
@@ -50,29 +75,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/app/dashboard/page.tsx`, `src/components/BarcodeScanner.tsx`, `src/components/CoverScanner.tsx`, `src/components/SearchBar.tsx` (all modified)
-
-### Iteration 17 — SafeReads-w1e: Book cover photo identification via vision AI
-
-- Created `convex/books.ts:identifyCover` action — OpenAI GPT-4o vision for book identification
-  - Takes base64-encoded JPEG image of book cover
-  - Sends to GPT-4o with `image_url` content block, `detail: "low"` to minimize token cost
-  - Extracts title + author from cover image via structured JSON response
-  - Reuses existing `searchGoogleBooks` + Open Library enrichment + upsert flow (no duplication)
-  - Returns same shape as `books.search` — results drop into existing UI seamlessly
-  - Throws descriptive error if title can't be extracted
-- Created `src/components/CoverScanner.tsx` — camera capture component
-  - Button with `Camera` icon, same styling as BarcodeScanner for consistency
-  - Opens modal with live camera preview (rear camera via `facingMode: "environment"`)
-  - "Take Photo" button captures frame to canvas → base64 JPEG (0.8 quality)
-  - Cleans up camera stream on close/capture/unmount
-  - Loading + error states match BarcodeScanner patterns
-- Updated `src/app/dashboard/page.tsx` — added CoverScanner next to BarcodeScanner
-  - `handleCoverCapture` calls `identifyCover` action, shows results in same list
-  - Error messages surface vision AI failures (e.g. "could not identify the book")
-  - Disabled while any search/identify is loading
-- No new dependencies — uses existing `openai` package and native browser APIs (`getUserMedia`, `canvas`)
-- Build + lint pass clean
-- Files: `src/components/CoverScanner.tsx` (new), `convex/books.ts` (modified), `src/app/dashboard/page.tsx` (modified)
 
 ---
 
@@ -128,7 +130,7 @@ Patterns, gotchas, and decisions that affect future work:
 - `computeProfileHash` from `convex/lib/profileHash` can be imported client-side (pure function, no server deps).
 - `html5-qrcode` for barcode scanning: dynamic import (`import("html5-qrcode")`) to avoid SSR. Uses `Html5Qrcode` class — create instance, call `.start()` with camera config, `.stop()` on cleanup. Scanned ISBN barcodes are EAN-13 (13 digits) or ISBN-10 (10 digits).
 - BarcodeScanner creates its own container div imperatively (html5-qrcode manages its own DOM). Use a ref to a wrapper div, create child div with unique ID.
-- **DECISION (iteration 16)**: Switching from sensitivity sliders to objective content review. One analysis per book (not per book+profile). Removes profiles dependency from analysis flow. See SafeReads-tpl.7 issue notes for full rationale and migration plan.
+- **DECISION (iteration 16, implemented iteration 20)**: Switched from sensitivity sliders to objective content review. One analysis per book (not per book+profile). Analyses no longer depend on profiles. `convex/lib/profileHash.ts` deleted. Schema uses `by_book` index instead of `by_book_and_profile`. VerdictSection no longer needs Clerk user or profile lookup.
 - CoverScanner uses native `getUserMedia` + `<canvas>` for photo capture — no library needed. Converts video frame to base64 JPEG via `canvas.toDataURL("image/jpeg", 0.8)`. Strip `data:image/jpeg;base64,` prefix before sending to API.
 - GPT-4o vision with `detail: "low"` is sufficient for book cover text extraction and keeps token cost minimal.
 - Mobile modals use bottom-sheet pattern: `items-end` + `rounded-t-2xl` on mobile, `sm:items-center sm:rounded-xl` on desktop. Always add explicit "Cancel" button on mobile (`sm:hidden`).
@@ -140,6 +142,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 17 — SafeReads-w1e: Book cover photo identification via vision AI
+
+- Created `convex/books.ts:identifyCover` action — OpenAI GPT-4o vision for book identification
+- Created `src/components/CoverScanner.tsx` — camera capture component
+- Updated `src/app/dashboard/page.tsx` — added CoverScanner next to BarcodeScanner
+- Build + lint pass clean
 
 ### Iteration 16 — SafeReads-tpl.7: Research: Replace sensitivity sliders with objective content review
 

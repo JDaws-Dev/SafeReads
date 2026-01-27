@@ -1,6 +1,6 @@
 # SafeReads
 
-AI-powered book content analysis for parents. Search books, get safety verdicts based on your family's values profile.
+AI-powered book content analysis for parents. Search books, get objective content reviews to make informed decisions.
 
 ## Stack
 
@@ -25,9 +25,9 @@ npm run lint         # ESLint
 
 - **Convex actions** for external API calls (Google Books, Open Library, OpenAI)
 - **Convex queries/mutations** for DB reads/writes
-- **Profile hash** for analysis caching: deterministic concat of 6 sensitivity settings
 - Books cached permanently (metadata is static)
-- Analyses keyed by `(bookId, profileHash)` — profile changes auto-invalidate cache
+- **One analysis per book** — objective content review, not personalized to user profiles
+- Analyses keyed by `bookId` only (no profile dependency)
 - "No Verdict" returned when insufficient book data
 
 ## Key Directories
@@ -37,7 +37,7 @@ src/app/                    # Next.js App Router pages
 src/app/dashboard/          # Authenticated pages (protected by middleware)
 src/components/             # React components
 convex/                     # Convex backend (schema, queries, mutations, actions)
-convex/lib/                 # Shared utilities (profile hash, etc.)
+convex/lib/                 # Shared utilities
 ```
 
 ## Quality Gates
