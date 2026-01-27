@@ -33,7 +33,7 @@ export function Navbar() {
               href="/dashboard/profiles"
               className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
             >
-              Profiles
+              Profile
             </Link>
             <UserButton
               afterSignOutUrl="/"

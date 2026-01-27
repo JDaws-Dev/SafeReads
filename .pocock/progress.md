@@ -10,6 +10,27 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 14 — SafeReads-tpl.5: Simplify to single profile per user
+
+- Rewrote `convex/profiles.ts` — replaced multi-profile CRUD with two functions:
+  - `getByUser`: returns the user's single profile (`.first()` instead of `.collect()`)
+  - `upsert`: creates on first save, updates on subsequent saves. Keeps `isDefault: true` for schema compat
+  - Removed: `listByUser`, `getById`, `getDefault`, `create`, `update`, `setDefault`, `remove`
+- Rewrote `src/app/dashboard/profiles/page.tsx` — single edit form, no list/dialog/create-delete
+  - Shows ValuesProfileForm directly in a card
+  - Uses `profiles.getByUser` + `profiles.upsert`
+  - "Create Profile" label when no profile exists, "Save Profile" when editing
+  - Success message on save
+- Updated `src/components/VerdictSection.tsx` — uses `profiles.getByUser` instead of `profiles.getDefault`
+  - Renamed `defaultProfile` → `profile` throughout
+- Simplified `src/components/KidForm.tsx` — removed `profiles` prop and profile select dropdown
+  - `KidFormValues` no longer has `profileId`
+- Updated `src/app/dashboard/kids/page.tsx` — removed profiles query, profile display, profile props to KidForm
+- Updated `src/components/Navbar.tsx` — "Profiles" → "Profile"
+- Schema unchanged (`isDefault` field kept for backward compat with existing data)
+- Build + lint pass clean
+- Files: `convex/profiles.ts` (rewritten), `src/app/dashboard/profiles/page.tsx` (rewritten), `src/components/VerdictSection.tsx` (modified), `src/components/KidForm.tsx` (simplified), `src/app/dashboard/kids/page.tsx` (simplified), `src/components/Navbar.tsx` (modified)
+
 ### Iteration 13 — SafeReads-bmt: Build kids management and wishlists
 
 - Added `kids` and `wishlists` tables to `convex/schema.ts`
@@ -68,29 +89,6 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `src/components/VerdictCard.tsx` (new), `src/components/ContentFlagList.tsx` (new), `src/components/AnalyzeButton.tsx` (new), `src/components/VerdictSection.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (modified)
 
-### Iteration 11 — SafeReads-t99: Build book detail page with BookHeader and AmazonButton
-
-- Created `src/components/BookHeader.tsx` — full book header component
-  - Large cover image (176×256) with Image fallback, priority loading
-  - Title (serif h1), authors, year, page count, ISBN display
-  - Category pills (no max limit — detail page shows all)
-  - Full description (no line-clamp — detail page shows everything)
-  - `actions` slot for composing action buttons (AmazonButton, future verdict trigger)
-  - Exports `BookHeaderBook` type
-- Created `src/components/AmazonButton.tsx` — Amazon search link
-  - Builds Amazon search URL with ISBN (exact match) or title+author fallback
-  - Opens in new tab with `noopener noreferrer`
-  - ExternalLink icon, parchment-themed button styling
-- Created `src/app/dashboard/book/[id]/page.tsx` — book detail route
-  - Uses `useQuery(api.books.getById)` for real-time book data
-  - Next.js 16 async params: `params: Promise<{ id: string }>` unwrapped with `use()`
-  - Loading state with spinner, 404 state with back link
-  - Back to search link at top
-  - Placeholder comment for verdict section (SafeReads-1sw)
-- Fixed `convex/_generated/api.d.ts` — reverted to `AnyApi` stub (was overwritten to `ApiFromModules` causing circular type inference error)
-- Build + lint pass clean
-- Files: `src/components/BookHeader.tsx` (new), `src/components/AmazonButton.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (new), `convex/_generated/api.d.ts` (fixed)
-
 ---
 
 ## Active Roadblocks
@@ -135,10 +133,13 @@ Patterns, gotchas, and decisions that affect future work:
 - BookCard links to `/dashboard/book/{_id}` — book detail page is SafeReads-t99.
 - Next.js 16 dynamic route params are `Promise` — use `use(params)` in client components to unwrap. Type: `params: Promise<{ id: string }>`.
 - `convex/_generated/api.d.ts` gets overwritten by `npx convex dev` to use `ApiFromModules` — must revert to `AnyApi` stub for builds without Convex deployment.
-- Kids link to profiles optionally — `profileId` on kid is nullable. WishlistButton hidden when user has no kids (returns null).
+- Single profile per user. `profiles.getByUser` returns one profile or null. `profiles.upsert` auto-creates on first save.
+- `isDefault` field kept in schema for backward compat — always set to `true`.
+- Kids no longer link to profiles (per-kid profileId removed from KidForm UI). Schema still has the optional field.
+- WishlistButton hidden when user has no kids (returns null).
 - Wishlists use (kidId, bookId) composite index for dedup. `add` mutation checks existing before insert.
 - Kid deletion cascades to wishlist entries (manual cascade in `kids.remove`).
-- VerdictSection orchestrates: Clerk user → Convex user → default profile → profileHash → cached analysis query. Falls back to `useAction` for fresh analysis. Action results stored in local state until Convex query picks up the cache.
+- VerdictSection orchestrates: Clerk user → Convex user → profile → profileHash → cached analysis query. Falls back to `useAction` for fresh analysis. Action results stored in local state until Convex query picks up the cache.
 - `computeProfileHash` from `convex/lib/profileHash` can be imported client-side (pure function, no server deps).
 
 ### Testing
@@ -148,6 +149,14 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 11 — SafeReads-t99: Build book detail page with BookHeader and AmazonButton
+
+- Created `src/components/BookHeader.tsx` — full book header component
+- Created `src/components/AmazonButton.tsx` — Amazon search link
+- Created `src/app/dashboard/book/[id]/page.tsx` — book detail route
+- Fixed `convex/_generated/api.d.ts` — reverted to `AnyApi` stub
+- Build + lint pass clean
 
 ### Iteration 10 — SafeReads-4fd: Build SearchBar, BookCard, and search page
 

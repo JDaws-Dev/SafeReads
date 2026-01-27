@@ -14,12 +14,6 @@ type Kid = {
   _id: Id<"kids">;
   name: string;
   age?: number;
-  profileId?: Id<"profiles">;
-};
-
-type Profile = {
-  _id: Id<"profiles">;
-  name: string;
 };
 
 export default function KidsPage() {
@@ -30,10 +24,6 @@ export default function KidsPage() {
   );
   const kids = useQuery(
     api.kids.listByUser,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
-  );
-  const profiles = useQuery(
-    api.profiles.listByUser,
     convexUser?._id ? { userId: convexUser._id } : "skip"
   );
 
@@ -65,14 +55,12 @@ export default function KidsPage() {
           kidId: editing._id,
           name: values.name,
           age: values.age,
-          profileId: values.profileId,
         });
       } else {
         await createKid({
           userId: convexUser._id,
           name: values.name,
           age: values.age,
-          profileId: values.profileId,
         });
       }
       setDialogOpen(false);
@@ -89,12 +77,6 @@ export default function KidsPage() {
     } finally {
       setDeleting(null);
     }
-  }
-
-  function getProfileName(profileId?: Id<"profiles">): string | null {
-    if (!profileId || !profiles) return null;
-    const profile = profiles.find((p: Profile) => p._id === profileId);
-    return profile?.name ?? null;
   }
 
   if (!clerkUser || !convexUser) {
@@ -156,17 +138,11 @@ export default function KidsPage() {
                     <span className="font-medium text-ink-900">
                       {kid.name}
                     </span>
-                    <div className="flex items-center gap-2 text-xs text-ink-400">
-                      {kid.age !== undefined && (
-                        <span>Age {kid.age}</span>
-                      )}
-                      {getProfileName(kid.profileId) && (
-                        <>
-                          {kid.age !== undefined && <span>·</span>}
-                          <span>{getProfileName(kid.profileId)}</span>
-                        </>
-                      )}
-                    </div>
+                    {kid.age !== undefined && (
+                      <div className="text-xs text-ink-400">
+                        Age {kid.age}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -222,11 +198,9 @@ export default function KidsPage() {
                   ? {
                       name: editing.name,
                       age: editing.age,
-                      profileId: editing.profileId,
                     }
                   : undefined
               }
-              profiles={(profiles ?? []) as Profile[]}
               onSubmit={handleSubmit}
               submitLabel={editing ? "Update" : "Add Child"}
               loading={saving}

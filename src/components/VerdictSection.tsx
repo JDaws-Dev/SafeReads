@@ -21,19 +21,19 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
     api.users.getByClerkId,
     clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
   );
-  const defaultProfile = useQuery(
-    api.profiles.getDefault,
+  const profile = useQuery(
+    api.profiles.getByUser,
     convexUser?._id ? { userId: convexUser._id } : "skip"
   );
 
-  const profileHash = defaultProfile
+  const profileHash = profile
     ? computeProfileHash({
-        violence: defaultProfile.violence,
-        language: defaultProfile.language,
-        sexualContent: defaultProfile.sexualContent,
-        substanceUse: defaultProfile.substanceUse,
-        darkThemes: defaultProfile.darkThemes,
-        religiousSensitivity: defaultProfile.religiousSensitivity,
+        violence: profile.violence,
+        language: profile.language,
+        sexualContent: profile.sexualContent,
+        substanceUse: profile.substanceUse,
+        darkThemes: profile.darkThemes,
+        religiousSensitivity: profile.religiousSensitivity,
       })
     : null;
 
@@ -54,13 +54,13 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
   const [error, setError] = useState<string | null>(null);
 
   async function handleAnalyze() {
-    if (!defaultProfile) return;
+    if (!profile) return;
     setAnalyzing(true);
     setError(null);
     try {
       const result = await analyzeAction({
         bookId,
-        profileId: defaultProfile._id,
+        profileId: profile._id,
       });
       setActionResult(result as typeof actionResult);
     } catch (err) {
@@ -95,7 +95,7 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
     [];
 
   // No profile yet — prompt user to create one
-  if (convexUser && defaultProfile === null) {
+  if (convexUser && profile === null) {
     return (
       <div className="rounded-xl border border-parchment-200 bg-white p-6 text-center">
         <p className="text-sm text-ink-600">
@@ -112,7 +112,7 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
   }
 
   // Still loading user/profile data
-  if (!convexUser || defaultProfile === undefined) {
+  if (!convexUser || profile === undefined) {
     return null;
   }
 
@@ -122,9 +122,9 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
         <h2 className="font-serif text-xl font-bold text-ink-900">
           Content Analysis
         </h2>
-        {defaultProfile && (
+        {profile && (
           <span className="text-xs text-ink-400">
-            Profile: {defaultProfile.name}
+            Profile: {profile.name}
           </span>
         )}
       </div>
@@ -137,7 +137,7 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
       ) : (
         <div className="rounded-xl border border-parchment-200 bg-white p-6 text-center">
           <p className="mb-4 text-sm text-ink-600">
-            Analyze this book against your &ldquo;{defaultProfile.name}&rdquo; profile.
+            Analyze this book against your &ldquo;{profile.name}&rdquo; profile.
           </p>
           <AnalyzeButton onClick={handleAnalyze} loading={analyzing} />
         </div>
