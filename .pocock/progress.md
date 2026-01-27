@@ -10,6 +10,16 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 9 — SafeReads-tpl.1: Configure Convex auth.config.ts for Clerk integration
+
+- Created `convex/auth.config.ts` — Convex auth config for Clerk JWT verification
+  - Uses `CLERK_JWT_ISSUER_DOMAIN` env var for Clerk issuer domain
+  - `applicationID: "convex"` — standard Convex/Clerk integration pattern
+- Added `CLERK_JWT_ISSUER_DOMAIN` to `.env.local.example` with comment
+- ConvexProviderWithClerk was already wired in root layout (iteration 4)
+- Build + lint pass clean
+- Files: `convex/auth.config.ts` (new), `.env.local.example` (modified)
+
 ### Iteration 8 — SafeReads-2eg: Build profiles CRUD and ValuesProfileForm
 
 - Created `convex/profiles.ts` — full CRUD module for sensitivity profiles
@@ -57,30 +67,6 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `convex/books.ts` (new), `.env.local.example` (modified)
 
-### Iteration 6 — SafeReads-pqw: Build profile hash and AI verdict engine
-
-- Created `convex/lib/profileHash.ts` — `computeProfileHash()` utility
-  - Deterministic join of 6 sensitivity values with "-" separator
-  - e.g. "3-5-2-7-4-6" for violence=3, language=5, etc.
-- Created `convex/analyses.ts` — full verdict engine module
-  - `getByBookAndProfile` — public query for frontend cache lookups by (bookId, profileHash) index
-  - `getCachedAnalysis` — internal query (same logic) for use by the action
-  - `getBookById` / `getProfileById` — internal queries for action to fetch DB docs
-  - `store` — internal mutation to persist analysis results
-  - `analyze` — public action: the main verdict engine
-    - Fetches book + profile → computes profileHash → checks cache
-    - Returns "no_verdict" early if book lacks description and categories
-    - Calls OpenAI GPT-4o with `response_format: { type: "json_object" }`
-    - System prompt instructs structured JSON with verdict, ageRecommendation, summary, contentFlags (6 categories), reasoning
-    - Validates verdict + severity enums from OpenAI response (falls back to safe defaults)
-    - Stores result via internal mutation and returns it
-  - Helper functions: `sensitivityLevel()` maps 1-10 to human labels, `buildSensitivityLabels()` and `buildBookContext()` format the prompt
-- Updated `convex/_generated/api.d.ts` — simplified to `AnyApi` types to avoid circular type reference
-  - Previous stub used `ApiFromModules<{ analyses: typeof analyses }>` which created circular inference when `analyses.ts` imports `internal` from `api`
-  - `AnyApi` breaks the cycle; real codegen overwrites this anyway
-- Build + lint pass clean
-- Files: `convex/lib/profileHash.ts` (new), `convex/analyses.ts` (new), `convex/_generated/api.d.ts` (modified)
-
 ---
 
 ## Active Roadblocks
@@ -119,6 +105,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Open Library fallback: ISBN lookup → title+author search → work details. Description field is polymorphic (string | {type, value}). Best-effort only — wrapped in try/catch.
 - Book upsert deduplicates by `googleBooksId` index — patches existing records to enrich data over time.
 - With `AnyApi` stubs, `useQuery` returns `any` — always add explicit type annotations on `.map()` callbacks and similar to satisfy `noImplicitAny`.
+- Convex auth config: `convex/auth.config.ts` exports `{ providers: [{ domain, applicationID }] }`. Domain comes from `CLERK_JWT_ISSUER_DOMAIN` env var. No JWT template needed with newer Clerk/Convex integration.
 
 ### Testing
 
@@ -127,6 +114,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 6 — SafeReads-pqw: Build profile hash and AI verdict engine
+
+- Created `convex/lib/profileHash.ts` — `computeProfileHash()` utility
+- Created `convex/analyses.ts` — full verdict engine module (analyze action, cache queries, store mutation)
+- Updated `convex/_generated/api.d.ts` — simplified to `AnyApi` types to avoid circular type reference
+- Build + lint pass clean
 
 ### Iteration 5 — SafeReads-aa5: Implement convex/users.ts and basic Navbar + dashboard layout
 
