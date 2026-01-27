@@ -10,6 +10,32 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 8 — SafeReads-2eg: Build profiles CRUD and ValuesProfileForm
+
+- Created `convex/profiles.ts` — full CRUD module for sensitivity profiles
+  - `listByUser` — public query: fetches all profiles for a user via `by_user` index
+  - `getById` — public query: single profile fetch by ID
+  - `getDefault` — public query: returns default profile (or first, or null)
+  - `create` — mutation: creates profile, auto-sets `isDefault` if first profile
+  - `update` — mutation: patches name + all 6 sensitivity fields
+  - `setDefault` — mutation: unsets current default, sets new one
+  - `remove` — mutation: deletes profile, prevents deleting last one, reassigns default if needed
+- Created `src/components/ValuesProfileForm.tsx` — reusable form component
+  - 6 Radix UI sliders (1-10) for sensitivity settings
+  - Profile name text input
+  - Human-readable sensitivity labels (Very Relaxed → Very Strict)
+  - Accepts `initialName`/`initialValues` for edit mode, `onSubmit` callback
+  - Exports `SensitivityValues` type for consumers
+- Created `src/app/dashboard/profiles/page.tsx` — profiles management page
+  - Lists profiles with default star indicator
+  - Create/edit via Radix Dialog modal with ValuesProfileForm
+  - Set default, delete (prevented for last profile) actions
+  - Uses Clerk `useUser` → Convex `getByClerkId` → `listByUser` chain
+- Added "Profiles" nav link to Navbar
+- With AnyApi stubs, `useQuery` returns `any` — need explicit type annotations on `.map()` callbacks
+- Build + lint pass clean
+- Files: `convex/profiles.ts` (new), `src/components/ValuesProfileForm.tsx` (new), `src/app/dashboard/profiles/page.tsx` (new), `src/components/Navbar.tsx` (modified)
+
 ### Iteration 7 — SafeReads-5g4: Build Google Books API action and Open Library fallback
 
 - Created `convex/books.ts` — full book search + caching module
@@ -55,13 +81,6 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `convex/lib/profileHash.ts` (new), `convex/analyses.ts` (new), `convex/_generated/api.d.ts` (modified)
 
-### Iteration 5 — SafeReads-aa5: Implement convex/users.ts and basic Navbar + dashboard layout
-
-- Created `convex/users.ts` — upsert mutation + getByClerkId query
-- Created `convex/_generated/` stubs (server.js/d.ts, dataModel.d.ts, api.js/d.ts)
-- Created `src/components/Navbar.tsx`, dashboard layout + page
-- Build + lint pass clean
-
 ---
 
 ## Active Roadblocks
@@ -99,6 +118,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Google Books API works without API key (lower rate limits). Key is optional env var.
 - Open Library fallback: ISBN lookup → title+author search → work details. Description field is polymorphic (string | {type, value}). Best-effort only — wrapped in try/catch.
 - Book upsert deduplicates by `googleBooksId` index — patches existing records to enrich data over time.
+- With `AnyApi` stubs, `useQuery` returns `any` — always add explicit type annotations on `.map()` callbacks and similar to satisfy `noImplicitAny`.
 
 ### Testing
 
@@ -107,6 +127,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 5 — SafeReads-aa5: Implement convex/users.ts and basic Navbar + dashboard layout
+
+- Created `convex/users.ts` — upsert mutation + getByClerkId query
+- Created `convex/_generated/` stubs (server.js/d.ts, dataModel.d.ts, api.js/d.ts)
+- Created `src/components/Navbar.tsx`, dashboard layout + page
+- Build + lint pass clean
 
 ### Iteration 4 — SafeReads-yau: Root layout with ClerkProvider + ConvexProviderWithClerk
 

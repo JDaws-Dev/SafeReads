@@ -23,6 +23,12 @@ export function Navbar() {
             >
               Dashboard
             </Link>
+            <Link
+              href="/dashboard/profiles"
+              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+            >
+              Profiles
+            </Link>
             <UserButton
               afterSignOutUrl="/"
               appearance={{
