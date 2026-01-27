@@ -10,6 +10,31 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 12 — SafeReads-1sw: Build verdict UI components and wire into book detail page
+
+- Created `src/components/VerdictCard.tsx` — verdict result display
+  - Color-coded card (green/yellow/red/gray) matching verdict type
+  - Shield icon variants per verdict, verdict badge, age recommendation pill
+  - Summary text, collapsible reasoning via `<details>`
+  - Uses theme verdict colors (`verdict-safe`, `verdict-caution`, `verdict-warning`, `verdict-none`)
+  - Exports `VerdictCardAnalysis` type
+- Created `src/components/ContentFlagList.tsx` — content flags list
+  - Color-coded severity dots (none/mild/moderate/heavy)
+  - Category name, severity label, details per flag
+  - Exports `ContentFlag` type
+- Created `src/components/AnalyzeButton.tsx` — analyze trigger button
+  - Sparkles icon, loading spinner state, disabled handling
+  - Parchment-themed button styling matching existing buttons
+- Created `src/components/VerdictSection.tsx` — orchestrator component
+  - Fetches Clerk user → Convex user → default profile → cached analysis
+  - Uses `computeProfileHash` to check cache via `useQuery(api.analyses.getByBookAndProfile)`
+  - Falls back to `useAction(api.analyses.analyze)` when no cache
+  - Displays profile name, prompts profile creation if none exists
+  - Error handling for failed analysis
+- Updated `src/app/dashboard/book/[id]/page.tsx` — wired VerdictSection below BookHeader
+- Build + lint pass clean
+- Files: `src/components/VerdictCard.tsx` (new), `src/components/ContentFlagList.tsx` (new), `src/components/AnalyzeButton.tsx` (new), `src/components/VerdictSection.tsx` (new), `src/app/dashboard/book/[id]/page.tsx` (modified)
+
 ### Iteration 11 — SafeReads-t99: Build book detail page with BookHeader and AmazonButton
 
 - Created `src/components/BookHeader.tsx` — full book header component
@@ -52,16 +77,6 @@ This file maintains context between autonomous iterations.
 - Renamed Navbar "Dashboard" link to "Search" for clarity
 - Build + lint pass clean
 - Files: `src/components/SearchBar.tsx` (new), `src/components/BookCard.tsx` (new), `src/app/dashboard/page.tsx` (modified), `next.config.ts` (modified), `src/components/Navbar.tsx` (modified)
-
-### Iteration 9 — SafeReads-tpl.1: Configure Convex auth.config.ts for Clerk integration
-
-- Created `convex/auth.config.ts` — Convex auth config for Clerk JWT verification
-  - Uses `CLERK_JWT_ISSUER_DOMAIN` env var for Clerk issuer domain
-  - `applicationID: "convex"` — standard Convex/Clerk integration pattern
-- Added `CLERK_JWT_ISSUER_DOMAIN` to `.env.local.example` with comment
-- ConvexProviderWithClerk was already wired in root layout (iteration 4)
-- Build + lint pass clean
-- Files: `convex/auth.config.ts` (new), `.env.local.example` (modified)
 
 ---
 
@@ -107,6 +122,8 @@ Patterns, gotchas, and decisions that affect future work:
 - BookCard links to `/dashboard/book/{_id}` — book detail page is SafeReads-t99.
 - Next.js 16 dynamic route params are `Promise` — use `use(params)` in client components to unwrap. Type: `params: Promise<{ id: string }>`.
 - `convex/_generated/api.d.ts` gets overwritten by `npx convex dev` to use `ApiFromModules` — must revert to `AnyApi` stub for builds without Convex deployment.
+- VerdictSection orchestrates: Clerk user → Convex user → default profile → profileHash → cached analysis query. Falls back to `useAction` for fresh analysis. Action results stored in local state until Convex query picks up the cache.
+- `computeProfileHash` from `convex/lib/profileHash` can be imported client-side (pure function, no server deps).
 
 ### Testing
 
@@ -115,6 +132,16 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 9 — SafeReads-tpl.1: Configure Convex auth.config.ts for Clerk integration
+
+- Created `convex/auth.config.ts` — Convex auth config for Clerk JWT verification
+  - Uses `CLERK_JWT_ISSUER_DOMAIN` env var for Clerk issuer domain
+  - `applicationID: "convex"` — standard Convex/Clerk integration pattern
+- Added `CLERK_JWT_ISSUER_DOMAIN` to `.env.local.example` with comment
+- ConvexProviderWithClerk was already wired in root layout (iteration 4)
+- Build + lint pass clean
+- Files: `convex/auth.config.ts` (new), `.env.local.example` (modified)
 
 ### Iteration 8 — SafeReads-2eg: Build profiles CRUD and ValuesProfileForm
 

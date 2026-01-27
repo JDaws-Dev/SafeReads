@@ -6,6 +6,7 @@ import { api } from "../../../../../convex/_generated/api";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { BookHeader } from "@/components/BookHeader";
 import { AmazonButton } from "@/components/AmazonButton";
+import { VerdictSection } from "@/components/VerdictSection";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -63,7 +64,9 @@ export default function BookDetailPage({
         }
       />
 
-      {/* Verdict section will be added by SafeReads-1sw */}
+      <div className="mt-8">
+        <VerdictSection bookId={book._id} />
+      </div>
     </div>
   );
 }
