@@ -123,6 +123,14 @@ export default defineSchema({
     content: v.string(),
   }).index("by_conversation", ["conversationId"]),
 
+  authorOverviews: defineTable({
+    authorName: v.string(),
+    summary: v.string(),
+    typicalAgeRange: v.optional(v.string()),
+    commonThemes: v.array(v.string()),
+    contentPatterns: v.string(),
+  }).index("by_author_name", ["authorName"]),
+
   reports: defineTable({
     userId: v.id("users"),
     bookId: v.id("books"),

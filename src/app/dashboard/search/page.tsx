@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { CoverScanner } from "@/components/CoverScanner";
 import { BookCard, BookCardBook } from "@/components/BookCard";
+import { AuthorCard, AuthorCardData } from "@/components/AuthorCard";
 import { BookOpen, Search, Trash2 } from "lucide-react";
 
 export default function SearchPage() {
@@ -37,16 +38,77 @@ export default function SearchPage() {
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
+  const [authorMatch, setAuthorMatch] = useState<AuthorCardData | null>(null);
   const autoSearched = useRef(false);
 
   const handleSearch = useCallback(
     async (query: string) => {
       setLoading(true);
       setError(null);
+      setAuthorMatch(null);
       try {
         const books = await searchBooks({ query });
-        setResults(books as BookCardBook[]);
+        const bookResults = books as BookCardBook[];
+        setResults(bookResults);
         setSearched(true);
+
+        // Detect author match: if majority of results share the same author,
+        // surface an author card
+        if (bookResults.length >= 2) {
+          const authorCounts = new Map<string, number>();
+          for (const book of bookResults) {
+            for (const author of book.authors) {
+              const normalized = author.toLowerCase().trim();
+              authorCounts.set(
+                normalized,
+                (authorCounts.get(normalized) ?? 0) + 1
+              );
+            }
+          }
+          // Find the most common author
+          let topAuthor = "";
+          let topCount = 0;
+          for (const [author, count] of authorCounts) {
+            if (count > topCount) {
+              topAuthor = author;
+              topCount = count;
+            }
+          }
+          // Show author card if ≥50% of results share the same author
+          if (topCount >= Math.ceil(bookResults.length / 2)) {
+            // Get the properly-cased author name from the first matching book
+            const matchingBook = bookResults.find((b) =>
+              b.authors.some(
+                (a) => a.toLowerCase().trim() === topAuthor
+              )
+            );
+            const displayName =
+              matchingBook?.authors.find(
+                (a) => a.toLowerCase().trim() === topAuthor
+              ) ?? topAuthor;
+
+            const authorBooks = bookResults.filter((b) =>
+              b.authors.some(
+                (a) => a.toLowerCase().trim() === topAuthor
+              )
+            );
+            const allCategories = authorBooks.flatMap(
+              (b) => b.categories ?? []
+            );
+            const uniqueCategories = [...new Set(allCategories)];
+
+            setAuthorMatch({
+              name: displayName,
+              bookCount: authorBooks.length,
+              topBooks: authorBooks.slice(0, 4).map((b) => ({
+                title: b.title,
+                coverUrl: b.coverUrl,
+              })),
+              categories: uniqueCategories.slice(0, 5),
+            });
+          }
+        }
+
         // Record search in history
         if (convexUser?._id) {
           recordSearch({
@@ -135,6 +197,13 @@ export default function SearchPage() {
           <p className="mt-3 text-ink-500">
             No books found. Try a different search term.
           </p>
+        </div>
+      )}
+
+      {/* Author card — shown when results strongly match one author */}
+      {authorMatch && (
+        <div className="mt-6">
+          <AuthorCard author={authorMatch} />
         </div>
       )}
 

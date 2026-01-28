@@ -1,5 +1,10 @@
 import { v } from "convex/values";
-import { action, internalMutation, query } from "./_generated/server";
+import {
+  action,
+  internalMutation,
+  internalQuery,
+  query,
+} from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import OpenAI from "openai";
@@ -381,6 +386,189 @@ async function fetchOpenLibraryData(
     return null;
   }
 }
+
+// --- Author search ---
+
+/**
+ * Search for books by a specific author using Google Books inauthor: query.
+ * Returns up to 20 books, upserted for caching.
+ */
+export const searchByAuthor = action({
+  args: {
+    authorName: v.string(),
+    maxResults: v.optional(v.number()),
+  },
+  handler: async (ctx, args): Promise<BookResult[]> => {
+    const maxResults = args.maxResults ?? 20;
+    const googleResults = await searchGoogleBooks(
+      `inauthor:"${args.authorName}"`,
+      maxResults
+    );
+
+    const books: BookResult[] = await Promise.all(
+      googleResults.map(async (item) => {
+        const parsed = parseGoogleBooksItem(item);
+
+        if (!parsed.description || !parsed.categories?.length) {
+          const enrichment = await fetchOpenLibraryData(
+            parsed.isbn13 ?? parsed.isbn10,
+            parsed.title,
+            parsed.authors[0]
+          );
+          if (enrichment) {
+            parsed.description = parsed.description || enrichment.description;
+            parsed.categories = parsed.categories?.length
+              ? parsed.categories
+              : enrichment.subjects;
+            parsed.openLibraryKey = enrichment.key;
+            parsed.coverUrl = parsed.coverUrl || enrichment.coverUrl;
+            parsed.firstSentence =
+              parsed.firstSentence || enrichment.firstSentence;
+          }
+        }
+
+        const bookId = await ctx.runMutation(internal.books.upsert, parsed);
+        return { _id: bookId, ...parsed };
+      })
+    );
+
+    return books;
+  },
+});
+
+/**
+ * Generate an AI overview of an author's writing style and content patterns.
+ * Uses GPT-4o with the author's known works as context.
+ */
+export const authorOverview = action({
+  args: {
+    authorName: v.string(),
+    bookTitles: v.array(v.string()),
+    categories: v.array(v.string()),
+  },
+  handler: async (ctx, args): Promise<AuthorOverviewResult> => {
+    // Check cache first
+    const cached = await ctx.runQuery(
+      internal.books.getCachedAuthorOverview,
+      { authorName: args.authorName }
+    );
+    if (cached) {
+      return {
+        authorName: cached.authorName,
+        summary: cached.summary,
+        typicalAgeRange: cached.typicalAgeRange,
+        commonThemes: cached.commonThemes,
+        contentPatterns: cached.contentPatterns,
+      };
+    }
+
+    const openai = new OpenAI();
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: AUTHOR_OVERVIEW_PROMPT,
+        },
+        {
+          role: "user",
+          content: `Author: ${args.authorName}\n\nKnown works: ${args.bookTitles.join(", ")}\n\nGenres/categories found: ${args.categories.join(", ")}\n\nProvide your author overview as JSON.`,
+        },
+      ],
+    });
+
+    const raw = completion.choices[0]?.message?.content;
+    if (!raw) {
+      throw new Error("OpenAI returned an empty response");
+    }
+
+    const parsed = JSON.parse(raw) as AuthorOverviewResult;
+
+    const result: AuthorOverviewResult = {
+      authorName: args.authorName,
+      summary: String(parsed.summary ?? "No overview available."),
+      typicalAgeRange: parsed.typicalAgeRange
+        ? String(parsed.typicalAgeRange)
+        : undefined,
+      commonThemes: (parsed.commonThemes ?? []).map(String),
+      contentPatterns: String(
+        parsed.contentPatterns ?? "No content patterns identified."
+      ),
+    };
+
+    // Cache the result
+    await ctx.runMutation(internal.books.storeAuthorOverview, {
+      authorName: args.authorName,
+      summary: result.summary,
+      typicalAgeRange: result.typicalAgeRange,
+      commonThemes: result.commonThemes,
+      contentPatterns: result.contentPatterns,
+    });
+
+    return result;
+  },
+});
+
+type AuthorOverviewResult = {
+  authorName: string;
+  summary: string;
+  typicalAgeRange?: string;
+  commonThemes: string[];
+  contentPatterns: string;
+};
+
+const AUTHOR_OVERVIEW_PROMPT = `You are SafeReads, an AI book content analyst for parents. Given an author's name and their known works, provide an objective overview of their writing.
+
+Respond with a JSON object:
+
+{
+  "summary": "2-3 sentence overview of the author's writing style, target audience, and what parents should know about their works in general.",
+  "typicalAgeRange": "Typical age range for their books (e.g., '8-12', '12+', '16+', 'All ages')",
+  "commonThemes": ["theme1", "theme2", "theme3"],
+  "contentPatterns": "1-2 sentences about common content patterns across their works that parents should be aware of (e.g., 'Generally clean language with mild fantasy violence. Romance is minimal.' or 'Contains mature themes including violence, substance use, and strong language in most works.')."
+}
+
+Guidelines:
+- Be objective and factual — describe patterns, don't judge them
+- Focus on what parents need to know to make informed decisions
+- Base your assessment on widely known information about the author's body of work
+- If the author writes across different age groups, note the range
+- Common themes should be 3-5 concise labels`;
+
+// --- Author overview caching ---
+
+export const getCachedAuthorOverview = internalQuery({
+  args: { authorName: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("authorOverviews")
+      .withIndex("by_author_name", (q) => q.eq("authorName", args.authorName))
+      .first();
+  },
+});
+
+export const storeAuthorOverview = internalMutation({
+  args: {
+    authorName: v.string(),
+    summary: v.string(),
+    typicalAgeRange: v.optional(v.string()),
+    commonThemes: v.array(v.string()),
+    contentPatterns: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Upsert — delete existing, then insert
+    const existing = await ctx.db
+      .query("authorOverviews")
+      .withIndex("by_author_name", (q) => q.eq("authorName", args.authorName))
+      .first();
+    if (existing) {
+      await ctx.db.delete(existing._id);
+    }
+    return await ctx.db.insert("authorOverviews", args);
+  },
+});
 
 // --- Vision AI book identification ---
 

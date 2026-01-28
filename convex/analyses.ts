@@ -83,6 +83,40 @@ export const getByBook = query({
 });
 
 /**
+ * Get analyses for multiple books at once.
+ * Returns a map of bookId → analysis (or null) for each requested book.
+ */
+export const getByBooks = query({
+  args: {
+    bookIds: v.array(v.id("books")),
+  },
+  handler: async (ctx, args) => {
+    const results: Array<{
+      bookId: Id<"books">;
+      verdict: string;
+      ageRecommendation?: string;
+    } | null> = [];
+    for (const bookId of args.bookIds) {
+      const analysis = await ctx.db
+        .query("analyses")
+        .withIndex("by_book", (q) => q.eq("bookId", bookId))
+        .order("desc")
+        .first();
+      if (analysis) {
+        results.push({
+          bookId: analysis.bookId,
+          verdict: analysis.verdict,
+          ageRecommendation: analysis.ageRecommendation,
+        });
+      } else {
+        results.push(null);
+      }
+    }
+    return results;
+  },
+});
+
+/**
  * Internal mutation to store an analysis result.
  * Called by the analyze action after OpenAI returns a verdict.
  */

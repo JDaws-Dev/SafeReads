@@ -10,6 +10,16 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 50 — SafeReads-b8x: Author profiles — search + detail page
+
+- Author detection in search: when ≥50% of results share same author, shows AuthorCard at top of results
+- AuthorCard links to `/dashboard/author/[name]` detail page
+- Author detail page: header, AI overview (cached in `authorOverviews` table), verdict aggregate badges, full book catalog with BookCards + verdict badges
+- Backend: `searchByAuthor` action uses `inauthor:` Google Books query, `authorOverview` action generates GPT-4o summary of author's writing patterns, `getByBooks` batch query for aggregate verdicts
+- New schema table: `authorOverviews` with `by_author_name` index — cached author AI summaries
+- Build + lint pass clean
+- Files: `convex/books.ts` (modified), `convex/analyses.ts` (modified), `convex/schema.ts` (modified), `src/components/AuthorCard.tsx` (new), `src/app/dashboard/author/[name]/page.tsx` (new), `src/app/dashboard/search/page.tsx` (modified)
+
 ### Iteration 49 — SafeReads-ybb: Punch up landing page copy
 
 - H1: "Every parent deserves to know what's inside the book"
@@ -22,11 +32,6 @@ This file maintains context between autonomous iterations.
 ### Iteration 48 — SafeReads-vwi: Horizontal book cover carousel for recent reviews
 
 - Horizontal CSS scroll-snap carousel of book covers with verdict badges
-- Build + lint pass clean
-
-### Iteration 47 — SafeReads-zai: Rich book cards in chat advisor responses
-
-- Book titles in chat as mini card chips
 - Build + lint pass clean
 
 ---
@@ -98,6 +103,11 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 47 — SafeReads-zai: Rich book cards in chat advisor responses
+
+- Book titles in chat as mini card chips
+- Build + lint pass clean
 
 ### Iteration 46 — SafeReads-jw3: Consolidate History into Search tab
 
