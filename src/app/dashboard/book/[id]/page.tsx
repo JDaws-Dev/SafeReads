@@ -37,7 +37,7 @@ export default function BookDetailPage({
       <div className="py-12 text-center">
         <p className="text-lg text-ink-500">Book not found.</p>
         <Link
-          href="/dashboard"
+          href="/dashboard/search"
           className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-parchment-700 hover:text-parchment-800"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -50,7 +50,7 @@ export default function BookDetailPage({
   return (
     <div>
       <Link
-        href="/dashboard"
+        href="/dashboard/search"
         className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-ink-500 transition-colors hover:text-ink-700"
       >
         <ArrowLeft className="h-4 w-4" />
