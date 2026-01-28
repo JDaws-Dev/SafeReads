@@ -61,7 +61,7 @@ export default function DashboardPage() {
             Ask the SafeReads Advisor
           </p>
           <p className="mt-0.5 text-sm text-ink-500">
-            Get book recommendations, check age-appropriateness, or ask about any book your kids want to read
+            &ldquo;What should my 8-year-old read?&rdquo; &middot; &ldquo;Is this book ok for my kid?&rdquo; &middot; &ldquo;Find safer alternatives&rdquo;
           </p>
         </div>
         <ChevronRight className="h-5 w-5 flex-shrink-0 text-ink-300" />

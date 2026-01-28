@@ -10,6 +10,20 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 40 — SafeReads-zqk: Make chat UX more intuitive for parents
+
+- Updated chat welcome screen (`src/app/dashboard/chat/page.tsx`):
+  - Changed heading "SafeReads Advisor" → "Your Book Advisor"
+  - Rewrote description to be specific: "Ask me anything about kids' books — I can recommend titles, check if a book is right for your child, or find safer alternatives."
+  - Added 3 tappable suggested prompt buttons: "What should my 8-year-old read next?", "Is Hunger Games ok for a 12-year-old?", "Books like Harry Potter but less scary"
+  - Prompts call `handleWelcomeSend` — auto-create conversation and send
+- Updated ChatWindow empty state heading to match ("Your Book Advisor")
+- Updated dashboard CTA card (`src/app/dashboard/page.tsx`):
+  - Description now shows example questions: "What should my 8-year-old read?" · "Is this book ok for my kid?" · "Find safer alternatives"
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/dashboard/chat/page.tsx` (modified), `src/components/chat/ChatWindow.tsx` (modified), `src/app/dashboard/page.tsx` (modified)
+
 ### Iteration 39 — SafeReads-71w: Rename 'analyses' to 'reviews' site-wide and remove re-analyze button
 
 - Renamed all user-facing instances of "analysis/analyses/analyze" to "review/reviews/review" across 11 files
@@ -41,17 +55,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/components/Navbar.tsx` (modified), `src/components/NotificationBell.tsx` (deleted)
-
-### Iteration 37 — SafeReads-6pk: Fix clickable book links in chat not finding books
-
-- Fixed `src/components/chat/ChatMessage.tsx` — `strong` renderer couldn't extract text from ReactMarkdown children
-  - `typeof children === "string"` was always false because ReactMarkdown wraps text in React node trees
-  - Added `extractText()` helper that recursively walks React nodes to extract plain text
-  - Book title links now correctly detect and link bold text starting with uppercase
-  - Search page auto-trigger from `?q=` was already working (added in prior work)
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/components/chat/ChatMessage.tsx` (modified)
 
 ---
 
@@ -122,6 +125,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 37 — SafeReads-6pk: Fix clickable book links in chat not finding books
+
+- Fixed ChatMessage `strong` renderer to extract text from React nodes (not just strings)
+- Added `extractText()` recursive helper
+- Build + lint pass clean
+- Files: `src/components/chat/ChatMessage.tsx` (modified)
 
 ### Iteration 36 — SafeReads-397: Fix chat input hidden behind bottom nav on mobile
 

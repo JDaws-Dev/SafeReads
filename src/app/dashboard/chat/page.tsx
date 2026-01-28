@@ -10,6 +10,12 @@ import { ChatWindow } from "@/components/chat/ChatWindow";
 import { ArrowLeft, Bot, History } from "lucide-react";
 import { ChatInput } from "@/components/chat/ChatInput";
 
+const SUGGESTED_PROMPTS = [
+  "What should my 8-year-old read next?",
+  "Is Hunger Games ok for a 12-year-old?",
+  "Books like Harry Potter but less scary",
+];
+
 export default function ChatPage() {
   const { user: clerkUser } = useUser();
   const convexUser = useQuery(
@@ -198,12 +204,25 @@ export default function ChatPage() {
                 <Bot className="h-16 w-16 text-parchment-200" />
                 <div>
                   <p className="font-serif text-xl font-bold text-ink-700">
-                    SafeReads Advisor
+                    Your Book Advisor
                   </p>
                   <p className="mt-1 text-sm text-ink-400">
-                    Ask about books, get recommendations, or check
-                    age-appropriateness
+                    Ask me anything about kids&apos; books — I can recommend
+                    titles, check if a book is right for your child, or find
+                    safer alternatives.
                   </p>
+                </div>
+                <div className="mt-2 flex flex-wrap justify-center gap-2">
+                  {SUGGESTED_PROMPTS.map((prompt) => (
+                    <button
+                      key={prompt}
+                      onClick={() => handleWelcomeSend(prompt)}
+                      disabled={isSending}
+                      className="rounded-full border border-parchment-300 bg-white px-4 py-2 text-xs font-medium text-ink-600 transition-colors hover:border-parchment-500 hover:bg-parchment-50 disabled:opacity-50"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
                 </div>
               </div>
               <ChatInput onSend={handleWelcomeSend} disabled={isSending} />

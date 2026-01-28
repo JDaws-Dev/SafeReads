@@ -40,11 +40,11 @@ export function ChatWindow({
             <Bot className="h-12 w-12 text-parchment-300" />
             <div>
               <p className="font-serif text-lg font-bold text-ink-700">
-                SafeReads Advisor
+                Your Book Advisor
               </p>
               <p className="mt-1 text-sm text-ink-400">
-                Ask me about books, age-appropriateness, or get recommendations
-                for your kids.
+                Ask me anything — book recommendations, age checks, or safer
+                alternatives for your kids.
               </p>
             </div>
           </div>
