@@ -4,21 +4,36 @@ import { Bot, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import type { Components } from "react-markdown";
+import { Children, isValidElement, type ReactNode } from "react";
 
 type ChatMessageProps = {
   role: "user" | "assistant";
   content: string;
 };
 
+function extractText(node: ReactNode): string {
+  if (typeof node === "string") return node;
+  if (typeof node === "number") return String(node);
+  if (!node) return "";
+  if (isValidElement(node)) {
+    return extractText((node.props as { children?: ReactNode }).children);
+  }
+  if (Array.isArray(node)) {
+    return Children.toArray(node).map(extractText).join("");
+  }
+  return "";
+}
+
 const markdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   strong: ({ children }) => {
-    // Check if this bold text looks like a book title (inside a numbered list context)
-    const text = typeof children === "string" ? children : "";
-    if (text && /^[""]?[A-Z]/.test(text)) {
+    // Extract plain text from children (ReactMarkdown may wrap text in nodes)
+    const text = extractText(children);
+    if (text && /^[""\u201C]?[A-Z]/.test(text)) {
+      const query = text.replace(/^[""\u201C]|[""\u201D]$/g, "");
       return (
         <Link
-          href={`/dashboard/search?q=${encodeURIComponent(text.replace(/^[""]|[""]$/g, ""))}`}
+          href={`/dashboard/search?q=${encodeURIComponent(query)}`}
           className="font-semibold text-parchment-800 underline decoration-parchment-400 underline-offset-2 hover:decoration-parchment-700"
         >
           {children}

@@ -12,15 +12,14 @@ This file maintains context between autonomous iterations.
 
 ### Iteration 37 — SafeReads-6pk: Fix clickable book links in chat not finding books
 
-- Fixed `src/app/dashboard/search/page.tsx` — search page didn't read `?q=` query param, so chat links to `/dashboard/search?q=...` never triggered a search
-  - Added `useSearchParams()` to read `q` param
-  - Added `useEffect` with ref guard to auto-trigger search on mount when `?q=` is present
-  - Wrapped `handleSearch` in `useCallback` for effect dependency
-  - Pass `initialQuery` to SearchBar so input is pre-filled
-- Updated `src/components/SearchBar.tsx` — added optional `initialQuery` prop to pre-fill the search input
+- Fixed `src/components/chat/ChatMessage.tsx` — `strong` renderer couldn't extract text from ReactMarkdown children
+  - `typeof children === "string"` was always false because ReactMarkdown wraps text in React node trees
+  - Added `extractText()` helper that recursively walks React nodes to extract plain text
+  - Book title links now correctly detect and link bold text starting with uppercase
+  - Search page auto-trigger from `?q=` was already working (added in prior work)
 - No new dependencies
 - Build + lint pass clean
-- Files: `src/app/dashboard/search/page.tsx` (modified), `src/components/SearchBar.tsx` (modified)
+- Files: `src/components/chat/ChatMessage.tsx` (modified)
 
 ### Iteration 36 — SafeReads-397: Fix chat input hidden behind bottom nav on mobile
 
