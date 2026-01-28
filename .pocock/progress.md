@@ -10,10 +10,11 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
-### Iteration 51 — SafeReads-q4w: Fix heading overlap on mobile
+### Iteration 51 — SafeReads-q4w: Fix 'Search more' overlapping heading on mobile
 
-- Shortened heading to "Recent Reviews" on mobile (`sm:hidden` / `hidden sm:inline`)
-- Added `gap-3` and `flex-shrink-0` on "Search more" link to prevent crowding
+- Heading already had responsive text (short on mobile). Issue was "Search more" link crowding it.
+- Hid "Search more" text link on mobile (`hidden sm:inline`), kept it on desktop
+- Added "Search more" card tile as last item in the horizontal carousel (`sm:hidden`) — discoverable by scrolling
 - Build + lint pass clean
 - Files: `src/app/dashboard/page.tsx` (modified)
 

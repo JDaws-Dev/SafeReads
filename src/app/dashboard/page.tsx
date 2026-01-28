@@ -99,7 +99,7 @@ export default function DashboardPage() {
           {recentAnalyses && recentAnalyses.length > 0 && (
             <Link
               href="/dashboard/search"
-              className="flex-shrink-0 text-sm font-medium text-parchment-700 hover:text-parchment-800"
+              className="hidden flex-shrink-0 text-sm font-medium text-parchment-700 hover:text-parchment-800 sm:inline"
             >
               Search more
             </Link>
@@ -172,6 +172,18 @@ export default function DashboardPage() {
                 </Link>
               );
             })}
+            {/* Search more tile — mobile only (text link shown on sm+) */}
+            <Link
+              href="/dashboard/search"
+              className="group flex-shrink-0 snap-start sm:hidden"
+            >
+              <div className="flex h-40 w-28 flex-col items-center justify-center gap-2 rounded-lg border border-parchment-200 bg-white transition-colors group-hover:border-parchment-300 group-hover:shadow-sm">
+                <Search className="h-6 w-6 text-parchment-400 group-hover:text-parchment-600" />
+                <p className="text-xs font-medium text-parchment-700 group-hover:text-parchment-800">
+                  Search more
+                </p>
+              </div>
+            </Link>
           </div>
         )}
       </section>
