@@ -18,36 +18,38 @@ export function Navbar() {
 
         <div className="flex items-center gap-4">
           <SignedIn>
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-            >
-              Home
-            </Link>
-            <Link
-              href="/dashboard/search"
-              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-            >
-              Search
-            </Link>
-            <Link
-              href="/dashboard/history"
-              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-            >
-              History
-            </Link>
-            <Link
-              href="/dashboard/kids"
-              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-            >
-              Kids
-            </Link>
-            <Link
-              href="/dashboard/profiles"
-              className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-            >
-              Profile
-            </Link>
+            <div className="hidden items-center gap-4 sm:flex">
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+              >
+                Home
+              </Link>
+              <Link
+                href="/dashboard/search"
+                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+              >
+                Search
+              </Link>
+              <Link
+                href="/dashboard/history"
+                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+              >
+                History
+              </Link>
+              <Link
+                href="/dashboard/kids"
+                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+              >
+                Kids
+              </Link>
+              <Link
+                href="/dashboard/profiles"
+                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+              >
+                Profile
+              </Link>
+            </div>
             <NotificationBell />
             <UserButton
               afterSignOutUrl="/"

@@ -447,19 +447,19 @@ Respond with a JSON object containing:
 5. **Dark Themes & Mental Health** — Death and grief, abuse (emotional/physical), trauma, depression, anxiety, suicide, self-harm, eating disorders, mental illness, trafficking, slavery.
    - none: No dark themes | mild: Pet death, mild sadness | moderate: Parent death, bullying, depression, divorce | heavy: Suicide depicted, self-harm, severe abuse, eating disorders central to plot
 
-6. **Supernatural & Occult** — Magic systems, witchcraft, sorcery, divination, demons, ghosts, séances, paranormal activity, pagan rituals. (Distinct from religious worldview content.)
+6. **Supernatural & Occult** — Magic systems, witchcraft, sorcery, divination, demons, ghosts, séances, paranormal activity, pagan rituals. (Distinct from religious worldview content.) Describe both the content and how the book frames or presents it (e.g., "witchcraft portrayed as whimsical fantasy" vs "occult practices presented as real spiritual paths").
    - none: No supernatural elements | mild: Fairy-tale magic, whimsical fantasy | moderate: Structured magic systems, witches/wizards, ghosts as plot devices | heavy: Occult rituals in detail, demon summoning, dark spiritual practices
 
-7. **Religious & Worldview Content** — Explicit religious themes (Christianity, Islam, Judaism, etc.), atheism/agnosticism as worldview, secular humanism, nihilism, moral relativism, anti-religious messaging, evangelism, spiritual searching.
+7. **Religious & Worldview Content** — Explicit religious themes (Christianity, Islam, Judaism, etc.), atheism/agnosticism as worldview, secular humanism, nihilism, moral relativism, anti-religious messaging, evangelism, spiritual searching. Describe both the content and how the book frames or presents it (e.g., "faith portrayed as a source of strength" vs "religion portrayed as oppressive and harmful").
    - none: No notable religious/worldview content | mild: Characters attend services, casual religious references | moderate: Faith as significant theme, character questions belief, specific worldview presented | heavy: Overt evangelism or anti-religious argument, worldview is central thesis
 
 8. **Romance** — Romantic relationships, crushes, dating, love triangles, heartbreak, romantic tension (all orientations). About the romantic relationship content, not sexual content (cat 3) or identity of people involved (cat 9).
    - none: No romantic content | mild: First crush, hand-holding | moderate: Dating central to plot, kissing, heartbreak, love triangle | heavy: Intense/obsessive romantic relationships, co-dependency, romance is dominant focus
 
-9. **Identity & Gender** — LGBTQ+ characters and themes, gender identity exploration, sexual orientation as a theme, transgender experiences, non-binary identity, coming out narratives, same-sex relationships, gender role questioning. Describe what is present neutrally — do not judge whether it is positive or negative.
+9. **Identity & Gender** — LGBTQ+ characters and themes, gender identity exploration, sexual orientation as a theme, transgender experiences, non-binary identity, coming out narratives, same-sex relationships, gender role questioning. Describe both the content and how the book frames or presents it (e.g., "gender nonconformity portrayed as courageous self-discovery" vs "character questions identity but narrative doesn't advocate a position").
    - none: No identity/gender themes | mild: Minor LGBTQ+ side character, brief mention of diverse family structures | moderate: Coming-out narrative as significant subplot, gender identity exploration by main character | heavy: Identity/gender is central theme, detailed transition exploration, sexuality as primary narrative arc
 
-10. **Social & Political Themes** — Racism and racial justice, political ideology/messaging, activism, social class/inequality, immigration, environmentalism as advocacy, anti-authority/rebellion, propaganda, censorship themes. Describe what is present neutrally — do not judge the political direction.
+10. **Social & Political Themes** — Racism and racial justice, political ideology/messaging, activism, social class/inequality, immigration, environmentalism as advocacy, anti-authority/rebellion, propaganda, censorship themes. Describe both the content and how the book frames or presents it (e.g., "historical racism depicted to educate" vs "overt political activism presented as a moral imperative").
     - none: No notable social/political themes | mild: Background awareness of social differences, historical context | moderate: Racism/injustice as significant theme, political systems explored, activism depicted | heavy: Overt political advocacy, heavy ideological messaging, graphic depictions of systemic oppression
 
 Guidelines:
@@ -467,6 +467,7 @@ Guidelines:
 - "caution" = content contains some mature elements that parents may want to be aware of (roughly ages 12+)
 - "warning" = content contains significant mature themes and is best suited for older teens or adults (roughly ages 16+)
 - "no_verdict" = insufficient information to make a determination
+- VERDICT ESCALATION: If ANY category is rated "moderate", the overall verdict MUST be at least "caution". If ANY category is rated "heavy", the overall verdict MUST be "warning". No exceptions — parents deserve to know when notable content is present, regardless of which category it falls in.
 - Always provide content flags for ALL 10 categories, even if severity is "none"
 - Be specific and factual in details (e.g., "battlefield violence with graphic injuries" not just "violence")
 - Be objective — describe what the content IS, not whether it's good or bad. Parents decide that.

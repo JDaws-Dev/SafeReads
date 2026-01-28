@@ -3,6 +3,7 @@ import { Inter, Libre_Baskerville } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { Navbar } from "@/components/Navbar";
+import { BottomNav } from "@/components/BottomNav";
 import "./globals.css";
 
 const inter = Inter({
@@ -17,12 +18,16 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://safereads.app"),
   title: {
     default: "SafeReads",
     template: "%s — SafeReads",
   },
   description:
     "AI-powered book content analysis for parents. Search books, get objective content reviews to make informed decisions.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "SafeReads",
     description:
@@ -31,7 +36,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "SafeReads",
     description:
       "Know what's in the book before your kid reads it. AI-powered content analysis for parents.",
@@ -49,7 +54,8 @@ export default function RootLayout({
         <body className={`${inter.variable} ${libreBaskerville.variable} font-sans antialiased`}>
           <ConvexClientProvider>
             <Navbar />
-            <main>{children}</main>
+            <main className="pb-20 sm:pb-0">{children}</main>
+            <BottomNav />
           </ConvexClientProvider>
         </body>
       </html>
