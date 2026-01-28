@@ -125,52 +125,13 @@ export default function KidsPage() {
       ) : (
         <div className="space-y-3">
           {kids.map((kid: Kid) => (
-            <div
+            <KidCard
               key={kid._id}
-              className="rounded-lg border border-parchment-200 bg-white px-4 py-3"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-parchment-100">
-                    <User className="h-4 w-4 text-parchment-600" />
-                  </div>
-                  <div>
-                    <span className="font-medium text-ink-900">
-                      {kid.name}
-                    </span>
-                    {kid.age !== undefined && (
-                      <div className="text-xs text-ink-400">
-                        Age {kid.age}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Link
-                    href={`/dashboard/kids/${kid._id}/wishlist`}
-                    className="flex items-center gap-1 rounded px-2 py-1.5 text-xs font-medium text-parchment-700 transition-colors hover:bg-parchment-100"
-                  >
-                    <BookOpen className="h-3.5 w-3.5" />
-                    Wishlist
-                  </Link>
-                  <button
-                    onClick={() => openEdit(kid as Kid)}
-                    className="rounded p-1.5 text-ink-400 transition-colors hover:bg-parchment-100 hover:text-ink-600"
-                    title="Edit"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(kid._id)}
-                    disabled={deleting === kid._id}
-                    className="rounded p-1.5 text-ink-400 transition-colors hover:bg-red-50 hover:text-verdict-warning disabled:opacity-50"
-                    title="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            </div>
+              kid={kid}
+              onEdit={() => openEdit(kid as Kid)}
+              onDelete={() => handleDelete(kid._id)}
+              deleting={deleting === kid._id}
+            />
           ))}
         </div>
       )}
@@ -208,6 +169,62 @@ export default function KidsPage() {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
+    </div>
+  );
+}
+
+function KidCard({
+  kid,
+  onEdit,
+  onDelete,
+  deleting,
+}: {
+  kid: Kid;
+  onEdit: () => void;
+  onDelete: () => void;
+  deleting: boolean;
+}) {
+  const wishlistCount = useQuery(api.wishlists.countByKid, { kidId: kid._id });
+
+  return (
+    <div className="rounded-lg border border-parchment-200 bg-white px-4 py-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-parchment-100">
+            <User className="h-4 w-4 text-parchment-600" />
+          </div>
+          <div>
+            <span className="font-medium text-ink-900">{kid.name}</span>
+            {kid.age !== undefined && (
+              <div className="text-xs text-ink-400">Age {kid.age}</div>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <Link
+            href={`/dashboard/kids/${kid._id}/wishlist`}
+            className="flex items-center gap-1 rounded px-2 py-1.5 text-xs font-medium text-parchment-700 transition-colors hover:bg-parchment-100"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            Wishlist{wishlistCount !== undefined ? ` (${wishlistCount})` : ""}
+          </Link>
+          <button
+            onClick={onEdit}
+            className="rounded p-1.5 text-ink-400 transition-colors hover:bg-parchment-100 hover:text-ink-600"
+            title="Edit"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            onClick={onDelete}
+            disabled={deleting}
+            className="rounded p-1.5 text-ink-400 transition-colors hover:bg-red-50 hover:text-verdict-warning disabled:opacity-50"
+            title="Delete"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

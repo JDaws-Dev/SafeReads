@@ -33,10 +33,11 @@ export const listRecent = query({
   },
   handler: async (ctx, args) => {
     const limit = args.count ?? 10;
+    // Over-fetch to account for duplicates that get filtered out
     const analyses = await ctx.db
       .query("analyses")
       .order("desc")
-      .take(limit);
+      .take(limit * 2);
 
     const results = await Promise.all(
       analyses.map(async (analysis) => {
@@ -45,7 +46,17 @@ export const listRecent = query({
       })
     );
 
-    return results.filter((r) => r.book !== null);
+    // Deduplicate by bookId, keeping only the newest (first seen) per book
+    const seen = new Set<string>();
+    const deduped = results.filter((r) => {
+      if (!r.book) return false;
+      const key = r.bookId as string;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return deduped.slice(0, limit);
   },
 });
 

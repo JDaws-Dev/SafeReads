@@ -9,6 +9,7 @@ import { AmazonButton } from "@/components/AmazonButton";
 import { WishlistButton } from "@/components/WishlistButton";
 import { VerdictSection } from "@/components/VerdictSection";
 import { AlternativesSuggestions } from "@/components/AlternativesSuggestions";
+import { ContentFlagSummary } from "@/components/ContentFlagSummary";
 import { BookNotes } from "@/components/BookNotes";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -69,6 +70,10 @@ export default function BookDetailPage({
           </div>
         }
       />
+
+      <div className="mt-4">
+        <ContentFlagSummary bookId={book._id} />
+      </div>
 
       <div className="mt-6">
         <BookNotes bookId={book._id} />

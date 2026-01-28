@@ -14,6 +14,7 @@ type WishlistItem = {
   kidId: Id<"kids">;
   bookId: Id<"books">;
   note?: string;
+  verdict: string | null;
   book: {
     _id: Id<"books">;
     title: string;
@@ -21,6 +22,13 @@ type WishlistItem = {
     coverUrl?: string;
     publishedDate?: string;
   } | null;
+};
+
+const VERDICT_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  safe: { bg: "bg-verdict-safe/10", text: "text-verdict-safe", label: "Safe" },
+  caution: { bg: "bg-verdict-caution/10", text: "text-verdict-caution", label: "Caution" },
+  warning: { bg: "bg-verdict-warning/10", text: "text-verdict-warning", label: "Warning" },
+  no_verdict: { bg: "bg-parchment-100", text: "text-ink-400", label: "No Verdict" },
 };
 
 export default function WishlistPage({
@@ -148,6 +156,13 @@ export default function WishlistPage({
                     </p>
                   )}
                 </div>
+                {item.verdict && VERDICT_STYLES[item.verdict] && (
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${VERDICT_STYLES[item.verdict].bg} ${VERDICT_STYLES[item.verdict].text}`}
+                  >
+                    {VERDICT_STYLES[item.verdict].label}
+                  </span>
+                )}
                 <button
                   onClick={() => handleRemove(item._id)}
                   disabled={removing === item._id}

@@ -15,11 +15,30 @@ export const listByKid = query({
     const withBooks = await Promise.all(
       items.map(async (item) => {
         const book = await ctx.db.get(item.bookId);
-        return { ...item, book };
+        const analysis = await ctx.db
+          .query("analyses")
+          .withIndex("by_book", (q) => q.eq("bookId", item.bookId))
+          .order("desc")
+          .first();
+        return { ...item, book, verdict: analysis?.verdict ?? null };
       })
     );
 
     return withBooks;
+  },
+});
+
+/**
+ * Count wishlist entries for a kid.
+ */
+export const countByKid = query({
+  args: { kidId: v.id("kids") },
+  handler: async (ctx, args) => {
+    const items = await ctx.db
+      .query("wishlists")
+      .withIndex("by_kid", (q) => q.eq("kidId", args.kidId))
+      .collect();
+    return items.length;
   },
 });
 

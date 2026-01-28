@@ -73,7 +73,7 @@ export default function DashboardPage() {
       <section className="mt-10">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-lg font-bold text-ink-900">
-            Recent Analyses
+            Recently Reviewed on SafeReads
           </h2>
           {recentAnalyses && recentAnalyses.length > 0 && (
             <Link
@@ -140,6 +140,13 @@ export default function DashboardPage() {
                     <p className="truncate text-xs text-ink-400">
                       {analysis.book?.authors?.join(", ") ?? ""}
                     </p>
+                    {analysis.summary && (
+                      <p className="mt-0.5 truncate text-xs text-ink-400">
+                        {analysis.summary.length > 80
+                          ? `${analysis.summary.slice(0, 80)}…`
+                          : analysis.summary}
+                      </p>
+                    )}
                   </div>
                   <span
                     className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}
