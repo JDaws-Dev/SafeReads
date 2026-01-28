@@ -45,23 +45,6 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `src/app/dashboard/settings/page.tsx` (new), `src/components/Navbar.tsx` (modified), `src/components/BottomNav.tsx` (modified)
 
-### Iteration 33 — SafeReads-cm4.5: Add upgrade prompt and paywall UI to VerdictSection
-
-- Created `src/components/UpgradePrompt.tsx` — modal with pricing ($2.99/mo), feature list, Upgrade button
-  - Upgrade button calls `POST /api/stripe/checkout`, redirects to Stripe checkout URL
-  - Bottom-sheet pattern on mobile (`rounded-t-2xl`), centered modal on desktop
-  - "Maybe later" dismiss button, backdrop click to close
-- Modified `src/components/VerdictSection.tsx`:
-  - Added `useUser` from Clerk to get `clerkId`, passed to analyze/reanalyze actions
-  - Added `subscriptions.checkAccess` query (skipped when no clerkId) for real-time access state
-  - Free tier banner: "X of 3 free analyses remaining" shown for non-subscribed users before analysis
-  - `UPGRADE_REQUIRED` error caught in both handleAnalyze and handleReanalyze → shows UpgradePrompt instead of error
-  - AnalyzeButton disabled when `hasAccess === false`, with "Upgrade to unlock" link below
-  - Subscribed users see no limits banner
-- **Decision**: Used `useQuery` with `"skip"` for `checkAccess` when clerkId isn't available yet (Clerk loading). Cast result type explicitly since AnyApi stubs lose type info.
-- **Decision**: Duplicate "Maybe later" buttons (one `sm:hidden`, one `hidden sm:block`) kept identical — simpler than conditional classes for same behavior.
-- No new dependencies
-- Build + lint pass clean
 ---
 
 ## Active Roadblocks
@@ -131,6 +114,14 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 33 — SafeReads-cm4.5: Add upgrade prompt and paywall UI to VerdictSection
+
+- Created `src/components/UpgradePrompt.tsx` — modal with pricing, Upgrade button → Stripe checkout
+- Modified `src/components/VerdictSection.tsx` — free tier banner, paywall enforcement, upgrade prompt on UPGRADE_REQUIRED
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/components/UpgradePrompt.tsx` (new), `src/components/VerdictSection.tsx` (modified)
 
 ### Iteration 32 — SafeReads-cm4.4: Create Stripe API routes (checkout, portal, webhook)
 
