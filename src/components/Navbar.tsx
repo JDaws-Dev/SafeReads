@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { BookOpen } from "lucide-react";
+import { NotificationBell } from "./NotificationBell";
 
 export function Navbar() {
   return (
@@ -47,6 +48,7 @@ export function Navbar() {
             >
               Profile
             </Link>
+            <NotificationBell />
             <UserButton
               afterSignOutUrl="/"
               appearance={{

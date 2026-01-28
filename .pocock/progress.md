@@ -10,37 +10,20 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
-### Iteration 25 — SafeReads-0uf: Build alternatives suggestions and reports system
+### Iteration 28 — SafeReads-3xr: Push notifications for analysis completion
 
-- Added `reports` table to schema: `userId`, `bookId`, `analysisId`, `reason` (union of 5 types), `details` — indexes `by_book`, `by_user`, `by_user_and_analysis`
-- Created `convex/reports.ts`: `submit` (upsert per user+analysis), `getByUserAndAnalysis`, `countByBook`, `remove`
-- Added `suggestAlternatives` public action to `convex/analyses.ts` — OpenAI GPT-4o generates 3-5 similar but more age-appropriate books
-- Created `src/components/ReportButton.tsx` — Radix Dialog with radio buttons for report reason, optional details textarea, submit/remove flow
-  - Shows "Reported" state with warning color when user has existing report
-  - One report per user per analysis (upsert pattern)
-- Created `src/components/AlternativesSuggestions.tsx` — on-demand AI-powered book suggestions
-  - "Suggest Alternatives" CTA triggers OpenAI action
-  - Cards with book icon, title, author, age range badge, reasoning
-  - "Get new suggestions" refresh button
-- Updated `VerdictSection.tsx` — added ReportButton next to Re-analyze button
-- Updated book detail page — added AlternativesSuggestions section below VerdictSection
+- Created `src/hooks/useNotification.ts` — browser Notifications API hook
+  - `permission` state (default/granted/denied/unsupported), lazy initialized
+  - `requestPermission()` — requests browser notification permission
+  - `notify()` — fires notification only when page is not visible (user tabbed away)
+- Created `src/components/NotificationBell.tsx` — bell icon in Navbar
+  - Click to request permission (default state), shows active bell (granted), disabled bell-off (denied), hidden (unsupported)
+- Updated `VerdictSection.tsx` — fires browser notification on analysis/re-analysis completion with verdict result
+- Updated `Navbar.tsx` — added NotificationBell next to UserButton
+- **Decision**: Used browser Notifications API (not full Web Push with service workers/VAPID) — analyses complete synchronously while user waits, so notifications only help when user has tabbed away. No backend changes needed.
 - No new dependencies
 - Build + lint pass clean
-- Files: `convex/schema.ts` (modified), `convex/reports.ts` (new), `convex/analyses.ts` (modified), `src/components/ReportButton.tsx` (new), `src/components/AlternativesSuggestions.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/app/dashboard/book/[id]/page.tsx` (modified)
-
-### Iteration 24 — SafeReads-tpl.6: Add re-analyze button to bypass verdict cache
-
-- Extracted OpenAI analysis logic from `analyze` action into `runOpenAIAnalysis` helper (pure function, no Convex context needed)
-- Added `AnalysisResult` and `BookData` types to reduce duplication
-- Added `deleteByBook` internal mutation — deletes cached analysis by book index
-- Added `reanalyze` public action — deletes cache, fetches book, calls `runOpenAIAnalysis`, stores new result
-- Updated `VerdictSection.tsx` — added "Re-analyze" button (with `RefreshCw` icon) below content flags when verdict exists
-  - Separate `reanalyzing` loading state with spinning icon
-  - Calls `reanalyze` action (not `analyze`) to force fresh OpenAI call
-  - Error state with distinct message for re-analysis failures
-- No new dependencies
-- Build + lint pass clean
-- Files: `convex/analyses.ts` (modified), `src/components/VerdictSection.tsx` (modified)
+- Files: `src/hooks/useNotification.ts` (new), `src/components/NotificationBell.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/components/Navbar.tsx` (modified)
 
 ### Iteration 27 — SafeReads-tpl.2: Add Amazon affiliate tag support
 
@@ -123,6 +106,8 @@ Patterns, gotchas, and decisions that affect future work:
 - CoverScanner uses native `getUserMedia` + `<canvas>` for photo capture — no library needed. Converts video frame to base64 JPEG via `canvas.toDataURL("image/jpeg", 0.8)`. Strip `data:image/jpeg;base64,` prefix before sending to API.
 - GPT-4o vision with `detail: "low"` is sufficient for book cover text extraction and keeps token cost minimal.
 - Mobile modals use bottom-sheet pattern: `items-end` + `rounded-t-2xl` on mobile, `sm:items-center sm:rounded-xl` on desktop. Always add explicit "Cancel" button on mobile (`sm:hidden`).
+- Browser Notifications API (`new Notification()`) for in-page notifications — no service worker needed. Use lazy `useState` initializer (not `useEffect` + `setState`) to read `Notification.permission` to avoid React lint error `react-hooks/set-state-in-effect`. Only fire notification when `document.visibilityState !== "visible"` (user tabbed away).
+- Web Share API (`navigator.share()`) for mobile native sharing — clipboard fallback for desktop. Check `navigator.share` exists before calling. Catch `AbortError` (user cancelled) silently.
 
 ### Testing
 
@@ -131,6 +116,19 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 25 — SafeReads-0uf: Build alternatives suggestions and reports system
+
+- Added reports table, convex/reports.ts CRUD, suggestAlternatives action
+- Created ReportButton (Radix Dialog) and AlternativesSuggestions components
+- Updated VerdictSection and book detail page
+- Build + lint pass clean
+
+### Iteration 24 — SafeReads-tpl.6: Add re-analyze button to bypass verdict cache
+
+- Extracted runOpenAIAnalysis helper, added reanalyze action, deleteByBook mutation
+- Updated VerdictSection with Re-analyze button
+- Build + lint pass clean
 
 ### Iteration 23 — SafeReads-zve: Build notes and search history pages
 

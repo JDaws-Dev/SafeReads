@@ -9,6 +9,7 @@ import { ContentFlagList, ContentFlag } from "./ContentFlagList";
 import { AnalyzeButton } from "./AnalyzeButton";
 import { ReportButton } from "./ReportButton";
 import { ShareVerdictButton } from "./ShareVerdictButton";
+import { useNotification } from "@/hooks/useNotification";
 import { RefreshCw } from "lucide-react";
 
 interface VerdictSectionProps {
@@ -18,6 +19,7 @@ interface VerdictSectionProps {
 
 export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
   const cachedAnalysis = useQuery(api.analyses.getByBook, { bookId });
+  const { notify } = useNotification();
 
   const analyzeAction = useAction(api.analyses.analyze);
   const reanalyzeAction = useAction(api.analyses.reanalyze);
@@ -38,6 +40,10 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
     try {
       const result = await analyzeAction({ bookId });
       setActionResult(result as typeof actionResult);
+      notify(`SafeReads: ${bookTitle}`, {
+        body: `Analysis complete — ${(result as { verdict: string }).verdict.replace("_", " ")}`,
+        tag: `analysis-${bookId as string}`,
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Analysis failed. Please try again."
@@ -53,6 +59,10 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
     try {
       const result = await reanalyzeAction({ bookId });
       setActionResult(result as typeof actionResult);
+      notify(`SafeReads: ${bookTitle}`, {
+        body: `Re-analysis complete — ${(result as { verdict: string }).verdict.replace("_", " ")}`,
+        tag: `analysis-${bookId as string}`,
+      });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Re-analysis failed. Please try again."
