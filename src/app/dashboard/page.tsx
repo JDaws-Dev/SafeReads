@@ -17,10 +17,10 @@ import {
 } from "lucide-react";
 
 const VERDICT_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  safe: { bg: "bg-verdict-safe/10", text: "text-verdict-safe", label: "Safe" },
-  caution: { bg: "bg-verdict-caution/10", text: "text-verdict-caution", label: "Caution" },
-  warning: { bg: "bg-verdict-warning/10", text: "text-verdict-warning", label: "Warning" },
-  no_verdict: { bg: "bg-parchment-100", text: "text-ink-400", label: "No Verdict" },
+  safe: { bg: "bg-verdict-safe", text: "text-white", label: "Safe" },
+  caution: { bg: "bg-verdict-caution", text: "text-white", label: "Caution" },
+  warning: { bg: "bg-verdict-warning", text: "text-white", label: "Warning" },
+  no_verdict: { bg: "bg-parchment-300", text: "text-ink-600", label: "No Verdict" },
 };
 
 export default function DashboardPage() {
@@ -158,7 +158,7 @@ export default function DashboardPage() {
                     )}
                     {/* Verdict badge overlay */}
                     <span
-                      className={`absolute bottom-1.5 left-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold shadow-sm ${style.bg} ${style.text} backdrop-blur-sm`}
+                      className={`absolute bottom-1.5 left-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold shadow ${style.bg} ${style.text}`}
                     >
                       {style.label}
                     </span>
