@@ -10,6 +10,13 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 51 — SafeReads-q4w: Fix heading overlap on mobile
+
+- Shortened heading to "Recent Reviews" on mobile (`sm:hidden` / `hidden sm:inline`)
+- Added `gap-3` and `flex-shrink-0` on "Search more" link to prevent crowding
+- Build + lint pass clean
+- Files: `src/app/dashboard/page.tsx` (modified)
+
 ### Iteration 50 — SafeReads-b8x: Author profiles — search + detail page
 
 - Author detection in search: when ≥50% of results share same author, shows AuthorCard at top of results
@@ -28,11 +35,6 @@ This file maintains context between autonomous iterations.
 - Final CTA: "Stop guessing. Start knowing."
 - Build + lint pass clean
 - Files: `src/app/page.tsx` (modified)
-
-### Iteration 48 — SafeReads-vwi: Horizontal book cover carousel for recent reviews
-
-- Horizontal CSS scroll-snap carousel of book covers with verdict badges
-- Build + lint pass clean
 
 ---
 
@@ -103,6 +105,11 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 48 — SafeReads-vwi: Horizontal book cover carousel for recent reviews
+
+- Horizontal CSS scroll-snap carousel of book covers with verdict badges
+- Build + lint pass clean
 
 ### Iteration 47 — SafeReads-zai: Rich book cards in chat advisor responses
 

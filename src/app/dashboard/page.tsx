@@ -91,14 +91,15 @@ export default function DashboardPage() {
 
       {/* Recent Analyses */}
       <section className="mt-10">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <h2 className="font-serif text-lg font-bold text-ink-900">
-            Recently Reviewed on SafeReads
+            <span className="sm:hidden">Recent Reviews</span>
+            <span className="hidden sm:inline">Recently Reviewed on SafeReads</span>
           </h2>
           {recentAnalyses && recentAnalyses.length > 0 && (
             <Link
               href="/dashboard/search"
-              className="text-sm font-medium text-parchment-700 hover:text-parchment-800"
+              className="flex-shrink-0 text-sm font-medium text-parchment-700 hover:text-parchment-800"
             >
               Search more
             </Link>
