@@ -13,6 +13,7 @@ import {
   Users,
   Shield,
   ChevronRight,
+  MessageCircle,
 } from "lucide-react";
 
 const VERDICT_STYLES: Record<string, { bg: string; text: string; label: string }> = {
@@ -47,8 +48,27 @@ export default function DashboardPage() {
         What would you like to do today?
       </p>
 
+      {/* Ask Advisor — prominent CTA */}
+      <Link
+        href="/dashboard/chat"
+        className="mt-6 flex items-center gap-4 rounded-xl border border-parchment-200 bg-gradient-to-r from-parchment-100 to-white p-4 transition-colors hover:border-parchment-300 hover:shadow-sm"
+      >
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-parchment-700 text-parchment-50">
+          <MessageCircle className="h-6 w-6" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-serif text-base font-bold text-ink-900">
+            Ask the SafeReads Advisor
+          </p>
+          <p className="mt-0.5 text-sm text-ink-500">
+            Get book recommendations, check age-appropriateness, or ask about any book your kids want to read
+          </p>
+        </div>
+        <ChevronRight className="h-5 w-5 flex-shrink-0 text-ink-300" />
+      </Link>
+
       {/* Quick Actions */}
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
         <QuickAction
           href="/dashboard/search"
           icon={<Search className="h-5 w-5" />}

@@ -5,9 +5,10 @@ import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
-import { ConversationList } from "@/components/ConversationList";
-import { ChatWindow } from "@/components/ChatWindow";
-import { ArrowLeft, MessageCircle, Plus } from "lucide-react";
+import { ConversationList } from "@/components/chat/ConversationList";
+import { ChatWindow } from "@/components/chat/ChatWindow";
+import { ArrowLeft, Bot } from "lucide-react";
+import { ChatInput } from "@/components/chat/ChatInput";
 
 export default function ChatPage() {
   const { user: clerkUser } = useUser();
@@ -28,7 +29,6 @@ export default function ChatPage() {
   const [activeConversationId, setActiveConversationId] =
     useState<Id<"conversations"> | null>(null);
   const [isSending, setIsSending] = useState(false);
-  // Mobile: show chat window when a conversation is selected
   const [showChat, setShowChat] = useState(false);
 
   const handleNewConversation = useCallback(async () => {
@@ -39,6 +39,7 @@ export default function ChatPage() {
     });
     setActiveConversationId(id);
     setShowChat(true);
+    return id;
   }, [convexUser?._id, createConversation]);
 
   const handleSelectConversation = useCallback(
@@ -78,6 +79,28 @@ export default function ChatPage() {
     [activeConversationId, sendMessage]
   );
 
+  // Send from the welcome screen — auto-create conversation first
+  const handleWelcomeSend = useCallback(
+    async (content: string) => {
+      if (!convexUser?._id) return;
+      setIsSending(true);
+      try {
+        const id = await createConversation({
+          userId: convexUser._id,
+          title: "New conversation",
+        });
+        setActiveConversationId(id);
+        setShowChat(true);
+        await sendMessage({ conversationId: id, content });
+      } catch (err) {
+        console.error("Failed to send message:", err);
+      } finally {
+        setIsSending(false);
+      }
+    },
+    [convexUser?._id, createConversation, sendMessage]
+  );
+
   if (!convexUser) {
     return (
       <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
@@ -110,8 +133,8 @@ export default function ChatPage() {
 
         {/* Chat window — hidden on mobile when viewing list */}
         <div
-          className={`flex flex-1 flex-col sm:block ${
-            showChat ? "block" : "hidden"
+          className={`flex flex-1 flex-col sm:flex ${
+            showChat ? "flex" : "hidden"
           }`}
         >
           {activeConversationId ? (
@@ -140,23 +163,20 @@ export default function ChatPage() {
               </div>
             </div>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-              <MessageCircle className="h-16 w-16 text-parchment-200" />
-              <div>
-                <p className="font-serif text-xl font-bold text-ink-700">
-                  SafeReads Advisor
-                </p>
-                <p className="mt-1 text-sm text-ink-400">
-                  Get personalized book recommendations and advice
-                </p>
+            <div className="flex h-full flex-col">
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+                <Bot className="h-16 w-16 text-parchment-200" />
+                <div>
+                  <p className="font-serif text-xl font-bold text-ink-700">
+                    SafeReads Advisor
+                  </p>
+                  <p className="mt-1 text-sm text-ink-400">
+                    Ask about books, get recommendations, or check
+                    age-appropriateness
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={handleNewConversation}
-                className="flex items-center gap-2 rounded-lg bg-parchment-700 px-4 py-2 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800"
-              >
-                <Plus className="h-4 w-4" />
-                Start a conversation
-              </button>
+              <ChatInput onSend={handleWelcomeSend} disabled={isSending} />
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 
 const FREE_ANALYSIS_LIMIT = 3;
 
@@ -85,7 +85,7 @@ export const incrementAnalysisCount = mutation({
  * Update subscription status fields from Stripe webhook.
  * Looks up user by stripeCustomerId.
  */
-export const updateSubscription = internalMutation({
+export const updateSubscription = mutation({
   args: {
     stripeCustomerId: v.string(),
     stripeSubscriptionId: v.string(),
@@ -119,7 +119,7 @@ export const updateSubscription = internalMutation({
  * Store the Stripe customer ID on a user record.
  * Called after creating a Stripe customer during checkout.
  */
-export const setStripeCustomerId = internalMutation({
+export const setStripeCustomerId = mutation({
   args: {
     clerkId: v.string(),
     stripeCustomerId: v.string(),

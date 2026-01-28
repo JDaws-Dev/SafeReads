@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, Trash2, MessageCircle } from "lucide-react";
-import { Id } from "../../convex/_generated/dataModel";
+import { Id } from "../../../convex/_generated/dataModel";
 
 type Conversation = {
   _id: Id<"conversations">;
