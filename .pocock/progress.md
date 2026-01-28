@@ -10,6 +10,25 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 29 — SafeReads-3k3: AI Chat Advisor Feature
+
+- Added `conversations` and `messages` tables to `convex/schema.ts`
+- Created `convex/chat.ts` — full chat backend module
+  - Queries: `listConversations`, `getMessages`
+  - Mutations: `createConversation`, `deleteConversation`
+  - Internal: `storeMessage`, `updateTitle`, `getMessagesInternal`, `getConversationInternal`, `getKidsInternal`
+  - Action: `sendMessage` — stores user msg, loads context (kids + recent analyses + last 20 msgs), calls GPT-4o, stores response, auto-titles from first message
+- Added `listRecentInternal` internalQuery to `convex/analyses.ts` — recent analyses with book data for chat context
+- Created 4 chat UI components: `ChatMessage`, `ChatInput`, `ConversationList`, `ChatWindow`
+- Created `/dashboard/chat` page — side-by-side layout on desktop (conversation list + chat), stacked on mobile with back button
+- Updated `Navbar.tsx` — added Chat link after Kids
+- Updated `BottomNav.tsx` — added Chat as 5th item with MessageCircle icon
+- **Decision**: No streaming (Convex actions return complete results). Typing indicator (spinner) covers the wait UX. Auto-title from first user message (50 char truncation).
+- **Decision**: Context sent to GPT-4o includes kids names/ages + last 5 global recent analyses + last 20 messages in conversation. Keeps token usage reasonable.
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `convex/analyses.ts` (modified), `convex/chat.ts` (new), `convex/_generated/api.d.ts` (modified), `src/components/ChatMessage.tsx` (new), `src/components/ChatInput.tsx` (new), `src/components/ConversationList.tsx` (new), `src/components/ChatWindow.tsx` (new), `src/app/dashboard/chat/page.tsx` (new), `src/components/Navbar.tsx` (modified), `src/components/BottomNav.tsx` (modified)
+
 ### Iteration 28 — SafeReads-3xr: Push notifications for analysis completion
 
 - Created `src/hooks/useNotification.ts` — browser Notifications API hook
@@ -34,19 +53,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/components/AmazonButton.tsx` (modified), `.env.local.example` (modified)
-
-### Iteration 26 — SafeReads-i3n: Share verdict with co-parent
-
-- Created `src/components/ShareVerdictButton.tsx` — share button for verdict results
-  - Web Share API on mobile (native share sheet — text/WhatsApp/email/etc.)
-  - Clipboard fallback on desktop with "Copied!" feedback
-  - Formatted share text: emoji verdict badge, book title, verdict label, age recommendation, summary, link
-- Updated `VerdictSection.tsx` — added `bookTitle` prop, ShareVerdictButton in action bar next to Report and Re-analyze
-- Updated book detail page — passes `bookTitle` to VerdictSection
-- No backend changes needed — analyses are global per-book, not per-user private data
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/components/ShareVerdictButton.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/app/dashboard/book/[id]/page.tsx` (modified)
 
 ---
 
@@ -108,6 +114,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Mobile modals use bottom-sheet pattern: `items-end` + `rounded-t-2xl` on mobile, `sm:items-center sm:rounded-xl` on desktop. Always add explicit "Cancel" button on mobile (`sm:hidden`).
 - Browser Notifications API (`new Notification()`) for in-page notifications — no service worker needed. Use lazy `useState` initializer (not `useEffect` + `setState`) to read `Notification.permission` to avoid React lint error `react-hooks/set-state-in-effect`. Only fire notification when `document.visibilityState !== "visible"` (user tabbed away).
 - Web Share API (`navigator.share()`) for mobile native sharing — clipboard fallback for desktop. Check `navigator.share` exists before calling. Catch `AbortError` (user cancelled) silently.
+- Convex chat pattern: action `sendMessage` stores user msg via internalMutation, loads context (kids, analyses, last 20 msgs) via internalQueries, calls GPT-4o, stores assistant msg. No streaming — Convex actions return complete results. `useQuery(api.chat.getMessages)` auto-updates reactively when new messages are stored, so the UI picks up both user and assistant messages without manual state management. Typing indicator shown via local `isSending` state during the action call.
 
 ### Testing
 
@@ -116,6 +123,19 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 26 — SafeReads-i3n: Share verdict with co-parent
+
+- Created `src/components/ShareVerdictButton.tsx` — share button for verdict results
+  - Web Share API on mobile (native share sheet — text/WhatsApp/email/etc.)
+  - Clipboard fallback on desktop with "Copied!" feedback
+  - Formatted share text: emoji verdict badge, book title, verdict label, age recommendation, summary, link
+- Updated `VerdictSection.tsx` — added `bookTitle` prop, ShareVerdictButton in action bar next to Report and Re-analyze
+- Updated book detail page — passes `bookTitle` to VerdictSection
+- No backend changes needed — analyses are global per-book, not per-user private data
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/components/ShareVerdictButton.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/app/dashboard/book/[id]/page.tsx` (modified)
 
 ### Iteration 25 — SafeReads-0uf: Build alternatives suggestions and reports system
 

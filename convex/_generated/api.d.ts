@@ -10,6 +10,7 @@
 
 import type * as analyses from "../analyses.js";
 import type * as books from "../books.js";
+import type * as chat from "../chat.js";
 import type * as kids from "../kids.js";
 import type * as notes from "../notes.js";
 import type * as reports from "../reports.js";
@@ -26,6 +27,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   analyses: typeof analyses;
   books: typeof books;
+  chat: typeof chat;
   kids: typeof kids;
   notes: typeof notes;
   reports: typeof reports;

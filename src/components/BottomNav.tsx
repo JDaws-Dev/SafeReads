@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignedIn } from "@clerk/nextjs";
-import { Home, Search, Clock, Users } from "lucide-react";
+import { Home, Search, Clock, Users, MessageCircle } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/dashboard/search", label: "Search", icon: Search },
   { href: "/dashboard/history", label: "History", icon: Clock },
   { href: "/dashboard/kids", label: "Kids", icon: Users },
+  { href: "/dashboard/chat", label: "Chat", icon: MessageCircle },
 ] as const;
 
 export function BottomNav() {

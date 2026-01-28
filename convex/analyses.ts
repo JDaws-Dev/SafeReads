@@ -292,6 +292,41 @@ export const suggestAlternatives = action({
   },
 });
 
+/**
+ * Internal query: recent analyses with book data (for chat context).
+ * Returns the most recent unique-book analyses, newest first.
+ */
+export const listRecentInternal = internalQuery({
+  args: {
+    count: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.count ?? 5;
+    const analyses = await ctx.db
+      .query("analyses")
+      .order("desc")
+      .take(limit * 2);
+
+    const results = await Promise.all(
+      analyses.map(async (analysis) => {
+        const book = await ctx.db.get(analysis.bookId);
+        return { ...analysis, book };
+      })
+    );
+
+    const seen = new Set<string>();
+    const deduped = results.filter((r) => {
+      if (!r.book) return false;
+      const key = r.bookId as string;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    return deduped.slice(0, limit);
+  },
+});
+
 // --- Helpers ---
 
 type BookData = {

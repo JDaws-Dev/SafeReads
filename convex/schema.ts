@@ -93,6 +93,18 @@ export default defineSchema({
     resultCount: v.number(),
   }).index("by_user", ["userId"]),
 
+  conversations: defineTable({
+    userId: v.id("users"),
+    title: v.string(),
+    lastMessageAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  messages: defineTable({
+    conversationId: v.id("conversations"),
+    role: v.union(v.literal("user"), v.literal("assistant")),
+    content: v.string(),
+  }).index("by_conversation", ["conversationId"]),
+
   reports: defineTable({
     userId: v.id("users"),
     bookId: v.id("books"),

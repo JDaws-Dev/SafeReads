@@ -43,6 +43,12 @@ export function Navbar() {
               >
                 Kids
               </Link>
+              <Link
+                href="/dashboard/chat"
+                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+              >
+                Chat
+              </Link>
             </div>
             <NotificationBell />
             <UserButton
