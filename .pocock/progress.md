@@ -10,60 +10,29 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
-### Iteration 43 — SafeReads-sn1: Integrate DoesTheDogDie.com API for trigger warnings
+### Iteration 47 — SafeReads-zai: Rich book cards in chat advisor responses
 
-- Created `convex/lib/doesTheDogDie.ts` — helper module for DTDD API integration
-  - `fetchTriggerWarnings(title, apiKey)` — searches DTDD by book title, fetches media details, returns filtered trigger warnings (topics where community says "yes")
-  - `formatTriggerWarnings(warnings)` — formats as prompt context string with vote percentages
-  - Graceful fallback: returns null if no API key, API down, no match, or no warnings
-- Updated `runOpenAIAnalysis` in `convex/analyses.ts` — fetches DTDD trigger warnings before GPT-4o call, includes as `## Community Content Warnings` section in user prompt
-- Updated system prompt — added guidance for GPT-4o to use community warnings as supplementary evidence, weigh alongside its own knowledge
-- Added `DOES_THE_DOG_DIE_API_KEY` to `.env.local.example`
-- **Decision**: API key is optional env var (like Google Books key). When absent, analysis works exactly as before. No schema changes needed — trigger data flows through prompt only.
+- Updated ChatMessage `strong` renderer to render book titles as mini card chips instead of plain underlined links
+- Card shows: BookOpen icon + title text + Search icon, with border, shadow, rounded corners
+- Styled with `inline-flex` to work within flowing text in message bubbles
+- No API calls — uses existing pattern of detecting bold capitalized text as book titles
+- **Decision**: Kept the lightweight approach (CSS-only visual enhancement) rather than adding API enrichment. Avoids extra network calls and latency in chat responses.
 - No new dependencies
 - Build + lint pass clean
-- Files: `convex/lib/doesTheDogDie.ts` (new), `convex/analyses.ts` (modified), `.env.local.example` (modified)
+- Files: `src/components/chat/ChatMessage.tsx` (modified)
 
 ### Iteration 46 — SafeReads-jw3: Consolidate History into Search tab
 
 - Merged search history into search page as "Recent Searches" pill buttons
-  - Shows when idle (no active search performed yet)
-  - Each pill re-runs that search query on click
-  - Clear button to wipe search history
-- Removed History from Navbar (desktop) and BottomNav (mobile)
-- Deleted `/dashboard/history` page entirely
-- **Notes remain accessible** via BookNotes component on book detail pages — no change needed
-- Bottom nav now has 5 items: Home, Search, Kids, Chat, Settings
-- **Decision**: Used tappable pill/chip UI for recent searches — more compact and actionable than the list format of the old history page. Notes tab was dropped from the consolidated view since notes are per-book (accessed from book detail page).
-- No new dependencies
+- Removed History from Navbar and BottomNav, deleted history page
+- Notes remain accessible via BookNotes on book detail pages
+- Bottom nav: 5 items (Home, Search, Kids, Chat, Settings)
 - Build + lint pass clean
-- Files: `src/app/dashboard/search/page.tsx` (modified), `src/components/Navbar.tsx` (modified), `src/components/BottomNav.tsx` (modified), `src/app/dashboard/history/page.tsx` (deleted)
 
 ### Iteration 45 — SafeReads-9yt: Extract first_sentence from Open Library for GPT-4o context
 
-- Added `firstSentence: v.optional(v.string())` to books schema
-- Updated `BookResult`, `ParsedBook` types and `upsert` mutation args + patch logic
-- Updated Open Library search `fields` to include `first_sentence`
-- Extracted `first_sentence` from `OpenLibrarySearchDoc` (already typed, just never used)
-- Passed `firstSentence` through enrichment in both `search` and `identifyCover` actions
-- Updated `buildBookContext` in `convex/analyses.ts` to include first sentence as quoted text
-- Updated `BookData` type in analyses.ts
-- **Decision**: First sentence placed before description in prompt context — gives GPT-4o actual writing sample to assess tone/reading level
-- No new dependencies
+- Added `firstSentence` to books schema, types, upsert, OL extraction, GPT-4o context
 - Build + lint pass clean
-- Files: `convex/schema.ts` (modified), `convex/books.ts` (modified), `convex/analyses.ts` (modified)
-
-### Iteration 44 — SafeReads-3xw: Improve body text contrast for accessibility
-
-- Audited ink color scale against parchment-50 background (#fdf8f0)
-- ink-400 (#968e84) had 3.06:1 contrast — FAIL WCAG AA
-- ink-500 (#7b7269) had 4.46:1 contrast — FAIL WCAG AA (barely)
-- **Fix**: Darkened ink-400 to #78706a (4.59:1 — PASS), ink-500 to #6e665c (5.34:1 — PASS)
-- Changes in Tailwind theme (globals.css), not individual components
-- Warm brown undertone preserved, scale still progresses naturally 400→500→600
-- Placeholder text (ink-300, ink-400) not required to meet 4.5:1 per WCAG, but new ink-400 now passes anyway
-- Build + lint pass clean
-- Files: `src/app/globals.css` (modified)
 
 ---
 
@@ -134,6 +103,18 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 44 — SafeReads-3xw: Improve body text contrast for accessibility
+
+- Darkened ink-400 (#968e84 → #78706a, 4.59:1) and ink-500 (#7b7269 → #6e665c, 5.34:1) to pass WCAG AA
+- Changes in Tailwind theme only
+- Build + lint pass clean
+
+### Iteration 43 — SafeReads-sn1: Integrate DoesTheDogDie.com API for trigger warnings
+
+- Created convex/lib/doesTheDogDie.ts, integrated into analysis pipeline
+- Optional API key, graceful fallback
+- Build + lint pass clean
 
 ### Iteration 42 — SafeReads-c4h: Fix back-to-search button navigating to dashboard
 

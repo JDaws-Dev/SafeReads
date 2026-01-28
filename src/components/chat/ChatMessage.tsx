@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, User } from "lucide-react";
+import { BookOpen, Bot, Search, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import type { Components } from "react-markdown";
@@ -34,9 +34,11 @@ const markdownComponents: Components = {
       return (
         <Link
           href={`/dashboard/search?q=${encodeURIComponent(query)}`}
-          className="font-semibold text-parchment-800 underline decoration-parchment-400 underline-offset-2 hover:decoration-parchment-700"
+          className="my-1 inline-flex items-center gap-1.5 rounded-lg border border-parchment-300 bg-white/80 px-2.5 py-1 text-sm font-semibold text-parchment-800 shadow-sm transition-colors hover:border-parchment-400 hover:bg-white"
         >
-          {children}
+          <BookOpen className="h-3.5 w-3.5 flex-shrink-0 text-parchment-500" />
+          <span className="truncate">{children}</span>
+          <Search className="h-3 w-3 flex-shrink-0 text-parchment-400" />
         </Link>
       );
     }
