@@ -10,6 +10,27 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 43 — SafeReads-sn1: Integrate DoesTheDogDie.com API for trigger warnings
+
+- Created `convex/lib/doesTheDogDie.ts` — helper module for DTDD API integration
+  - `fetchTriggerWarnings(title, apiKey)` — searches DTDD by book title, fetches media details, returns filtered trigger warnings (topics where community says "yes")
+  - `formatTriggerWarnings(warnings)` — formats as prompt context string with vote percentages
+  - Graceful fallback: returns null if no API key, API down, no match, or no warnings
+- Updated `runOpenAIAnalysis` in `convex/analyses.ts` — fetches DTDD trigger warnings before GPT-4o call, includes as `## Community Content Warnings` section in user prompt
+- Updated system prompt — added guidance for GPT-4o to use community warnings as supplementary evidence, weigh alongside its own knowledge
+- Added `DOES_THE_DOG_DIE_API_KEY` to `.env.local.example`
+- **Decision**: API key is optional env var (like Google Books key). When absent, analysis works exactly as before. No schema changes needed — trigger data flows through prompt only.
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/lib/doesTheDogDie.ts` (new), `convex/analyses.ts` (modified), `.env.local.example` (modified)
+
+### Iteration 42 — SafeReads-c4h: Fix back-to-search button navigating to dashboard
+
+- Fixed both "Back to search" Link hrefs from `/dashboard` to `/dashboard/search` on book detail page
+- Both normal view (line 53) and not-found state (line 40) links corrected
+- Build + lint pass clean
+- Files: `src/app/dashboard/book/[id]/page.tsx` (modified)
+
 ### Iteration 41 — SafeReads-whc: Capture maturityRating from Google Books API
 
 - Added 3 new optional fields to books schema: `maturityRating` (string), `averageRating` (number), `ratingsCount` (number)
@@ -38,26 +59,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/app/dashboard/chat/page.tsx` (modified), `src/components/chat/ChatWindow.tsx` (modified), `src/app/dashboard/page.tsx` (modified)
-
-### Iteration 39 — SafeReads-71w: Rename 'analyses' to 'reviews' site-wide and remove re-analyze button
-
-- Renamed all user-facing instances of "analysis/analyses/analyze" to "review/reviews/review" across 11 files
-- Removed re-analyze button from VerdictSection (and all related state: reanalyzing, reanalyzeAction, handleReanalyze, RefreshCw import)
-- Updated landing page: "AI Content Analysis" → "AI Content Review", "3 book analyses" → "3 book reviews", "Unlimited book analyses" → "Unlimited book reviews", "Re-analyze any book anytime" → "Priority support", "AI-powered analysis" → "AI-powered reviews"
-- Updated settings page: "Analyses used" → "Reviews used", "Total analyses" → "Total reviews", "Unlimited book analyses" → "Unlimited book reviews", "Re-analyze any book anytime" → "Priority support"
-- Updated VerdictSection: "Content Analysis" → "Content Review", free tier banner text, notification text, error messages
-- Updated dashboard: "No analyses yet" → "No reviews yet"
-- Updated about, terms, privacy pages, layout metadata, opengraph image alt text
-- Updated chat system prompt: "recently analyzed books" → "recently reviewed books"
-- **Scope**: User-facing text only. Backend table names, function names, and code variables unchanged.
-- **Decision**: "Re-analyze" feature replaced with "Priority support" in pricing feature lists (re-analyze backend action kept for admin/dev use)
-- No new dependencies
-- Build + lint pass clean
-- Updated AnalyzeButton: "Analyze Content" → "Get Review", "Analyzing…" → "Reviewing…"
-- Updated UpgradePrompt: "free analyses" → "free reviews", "Re-analyze" → "Priority support", RefreshCw icon → Heart icon
-- Updated ReportButton: "Factual error in analysis" → "in review", "Report Analysis Issue" → "Report Review Issue"
-- Updated onboarding: "analyzes books" → "reviews books"
-- Files: `src/app/page.tsx`, `src/app/layout.tsx`, `src/app/about/page.tsx`, `src/app/terms/page.tsx`, `src/app/privacy/page.tsx`, `src/app/opengraph-image.tsx`, `src/app/onboarding/page.tsx`, `src/app/dashboard/page.tsx`, `src/app/dashboard/settings/page.tsx`, `src/components/VerdictSection.tsx`, `src/components/AnalyzeButton.tsx`, `src/components/UpgradePrompt.tsx`, `src/components/ReportButton.tsx`, `convex/chat.ts` (all modified)
 
 ---
 
@@ -128,6 +129,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 39 — SafeReads-71w: Rename 'analyses' to 'reviews' site-wide and remove re-analyze button
+
+- Renamed all user-facing instances of "analysis/analyses/analyze" to "review/reviews/review" across 11 files
+- Removed re-analyze button from VerdictSection
+- **Scope**: User-facing text only. Backend table names, function names, and code variables unchanged.
+- Build + lint pass clean
 
 ### Iteration 38 — SafeReads-0je: Streamline navbar: remove bell, merge settings into avatar
 

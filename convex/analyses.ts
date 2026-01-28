@@ -8,6 +8,10 @@ import {
 import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import OpenAI from "openai";
+import {
+  fetchTriggerWarnings,
+  formatTriggerWarnings,
+} from "./lib/doesTheDogDie";
 
 const verdictValues = v.union(
   v.literal("safe"),
@@ -409,6 +413,13 @@ async function runOpenAIAnalysis(
   const openai = new OpenAI();
   const bookContext = buildBookContext(book);
 
+  // Fetch community trigger warnings from DoesTheDogDie (best-effort)
+  const dtddApiKey = process.env.DOES_THE_DOG_DIE_API_KEY;
+  const triggerWarnings = await fetchTriggerWarnings(book.title, dtddApiKey);
+  const triggerContext = triggerWarnings
+    ? `\n\n## Community Content Warnings\n${formatTriggerWarnings(triggerWarnings)}`
+    : "";
+
   const completion = await openai.chat.completions.create({
     model: "gpt-4o",
     response_format: { type: "json_object" },
@@ -419,7 +430,7 @@ async function runOpenAIAnalysis(
       },
       {
         role: "user",
-        content: `## Book Information\n${bookContext}\n\nAnalyze this book and return your content review as JSON.`,
+        content: `## Book Information\n${bookContext}${triggerContext}\n\nAnalyze this book and return your content review as JSON.`,
       },
     ],
   });
@@ -560,7 +571,8 @@ Guidelines:
 - Base your analysis on widely known information about the book, its reviews, and its content
 - If you're unsure about specific content, note your uncertainty in the reasoning and err on the side of caution
 - The age recommendation should reflect general community standards, not any individual family's values
-- If the Google Books maturity rating is "MATURE", the verdict should be at least "caution" — this is a publisher/platform signal that the content is intended for mature audiences`;
+- If the Google Books maturity rating is "MATURE", the verdict should be at least "caution" — this is a publisher/platform signal that the content is intended for mature audiences
+- If community content warnings from DoesTheDogDie.com are provided, use them as additional evidence to validate or supplement your analysis. These are crowdsourced reports from real readers. High vote counts indicate strong community consensus. Do NOT ignore them, but weigh them alongside your own knowledge of the book.`;
 
 const ALTERNATIVES_PROMPT = `You are SafeReads, an AI book recommendation assistant for parents. A parent has just reviewed a book and seen its content flags. Your job is to suggest 3-5 SAFER alternative books that:
 
