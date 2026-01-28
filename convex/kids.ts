@@ -32,14 +32,12 @@ export const create = mutation({
     userId: v.id("users"),
     name: v.string(),
     age: v.optional(v.number()),
-    profileId: v.optional(v.id("profiles")),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("kids", {
       userId: args.userId,
       name: args.name,
       age: args.age,
-      profileId: args.profileId,
     });
   },
 });
@@ -52,7 +50,6 @@ export const update = mutation({
     kidId: v.id("kids"),
     name: v.string(),
     age: v.optional(v.number()),
-    profileId: v.optional(v.id("profiles")),
   },
   handler: async (ctx, args) => {
     const { kidId, ...fields } = args;
