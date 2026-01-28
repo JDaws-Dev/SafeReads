@@ -5,7 +5,7 @@ export function Footer() {
   return (
     <footer className="border-t border-parchment-200 bg-parchment-50">
       <div className="mx-auto max-w-5xl px-4 py-10">
-        <div className="grid gap-8 sm:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-4">
           {/* Product */}
           <div>
             <div className="flex items-center gap-2">
@@ -53,6 +53,41 @@ export function Footer() {
                 >
                   Terms of Service
                 </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Safe Family */}
+          <div>
+            <h4 className="font-serif font-bold text-ink-900">Safe Family</h4>
+            <ul className="mt-3 space-y-2 text-sm text-ink-500">
+              <li>
+                <a
+                  href="https://getsafereads.com"
+                  className="transition-colors hover:text-ink-700"
+                >
+                  SafeReads &middot; Books
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://getsafetunes.com"
+                  className="transition-colors hover:text-ink-700"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  SafeTunes &middot; Music
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://getsafetube.com"
+                  className="transition-colors hover:text-ink-700"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  SafeTube &middot; YouTube
+                </a>
               </li>
             </ul>
           </div>
