@@ -10,25 +10,23 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 49 — SafeReads-ybb: Punch up landing page copy
+
+- H1: "Every parent deserves to know what's inside the book"
+- Sub-copy: specific about 10 categories, real-world use cases
+- Trust: "We give you facts, not opinions" — contrasts with opinion sites
+- Final CTA: "Stop guessing. Start knowing."
+- Build + lint pass clean
+- Files: `src/app/page.tsx` (modified)
+
 ### Iteration 48 — SafeReads-vwi: Horizontal book cover carousel for recent reviews
 
-- Replaced vertical list with horizontal scrollable carousel of book covers
-- Each cover: 112x160px, verdict badge overlay, title + author below
-- CSS scroll-snap for mobile touch UX, scrollbar hidden
-- Fallback for missing covers, skeleton loading state
+- Horizontal CSS scroll-snap carousel of book covers with verdict badges
 - Build + lint pass clean
-- Files: `src/app/dashboard/page.tsx` (modified)
 
 ### Iteration 47 — SafeReads-zai: Rich book cards in chat advisor responses
 
-- Book titles in chat rendered as mini card chips (BookOpen icon + title + Search icon)
-- CSS-only enhancement, no API calls
-- Build + lint pass clean
-
-### Iteration 46 — SafeReads-jw3: Consolidate History into Search tab
-
-- Recent searches as pill buttons on search page, history page deleted
-- Bottom nav: 5 items (Home, Search, Kids, Chat, Settings)
+- Book titles in chat as mini card chips
 - Build + lint pass clean
 
 ---
@@ -100,6 +98,12 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 46 — SafeReads-jw3: Consolidate History into Search tab
+
+- Merged search history into search page, deleted history page
+- Bottom nav: 5 items (Home, Search, Kids, Chat, Settings)
+- Build + lint pass clean
 
 ### Iteration 45 — SafeReads-9yt: Extract first_sentence from Open Library for GPT-4o context
 

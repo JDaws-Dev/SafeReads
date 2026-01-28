@@ -42,15 +42,15 @@ export default function Home() {
         <div className="mx-auto max-w-2xl">
           <BookOpen className="mx-auto h-12 w-12 text-parchment-600 sm:h-16 sm:w-16" />
           <h1 className="mt-6 font-serif text-3xl font-bold text-ink-900 sm:text-5xl">
-            Know what&apos;s in the book
+            Every parent deserves to know
             <br />
-            <span className="text-parchment-700">before your kid reads it</span>
+            <span className="text-parchment-700">what&apos;s inside the book</span>
           </h1>
           <p className="mt-4 text-base text-ink-500 sm:mt-6 sm:text-lg">
-            SafeReads uses AI to review book content so you can make informed
-            decisions about what your children read. Scan a barcode, snap a
-            cover, or search by title — get a detailed content breakdown in
-            seconds.
+            Scan a barcode at the bookstore, snap a cover at the library, or
+            search any title — SafeReads breaks down violence, language, sexual
+            content, and 7 more categories so you can decide what&apos;s right
+            for your family.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <SignInButton mode="modal">
@@ -91,7 +91,7 @@ export default function Home() {
       >
         <div className="mx-auto max-w-5xl px-4">
           <h2 className="text-center font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
-            Three ways to find any book
+            Look up any book in seconds
           </h2>
           <div className="mt-10 grid gap-8 sm:grid-cols-3 sm:gap-6">
             <Step
@@ -117,7 +117,7 @@ export default function Home() {
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-5xl px-4">
           <h2 className="text-center font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
-            Everything you need to feel confident
+            Built for parents who read the fine print
           </h2>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             <Feature
@@ -234,17 +234,17 @@ export default function Home() {
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h2 className="font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
-            Trusted by parents who care
+            We give you facts, not opinions
           </h2>
           <p className="mt-4 text-ink-500">
-            SafeReads doesn&apos;t tell you what to think. It gives you the
-            information you need to make your own decisions about the books your
-            children read.
+            Other sites tell you what to think. SafeReads tells you what&apos;s
+            in the book — violence, language, sexual content, dark themes, and
+            more — and lets you decide what&apos;s right for your family.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-ink-400">
-            <span>AI-powered reviews</span>
+            <span>10 content categories reviewed</span>
             <span className="hidden sm:inline">&middot;</span>
-            <span>No bias, just facts</span>
+            <span>No agenda, just clarity</span>
             <span className="hidden sm:inline">&middot;</span>
             <span>3 free reviews to start</span>
           </div>
@@ -255,10 +255,11 @@ export default function Home() {
       <section className="py-16 text-center sm:py-20">
         <div className="mx-auto max-w-2xl px-4">
           <h2 className="font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
-            Ready to read with confidence?
+            Stop guessing. Start knowing.
           </h2>
           <p className="mt-3 text-ink-500">
-            Sign up in seconds with your Google account. No credit card needed.
+            Sign up in seconds with your Google account. Your first 3 reviews
+            are free — no credit card needed.
           </p>
           <SignInButton mode="modal">
             <button className="mt-6 rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800">
