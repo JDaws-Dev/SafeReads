@@ -68,7 +68,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Promo Video */}
+      {/* App Demo Video */}
       <section className="mx-auto max-w-3xl px-4 pb-16 sm:pb-20">
         <div className="overflow-hidden rounded-xl border border-parchment-200 shadow-lg">
           <video
@@ -79,7 +79,7 @@ export default function Home() {
             playsInline
             preload="none"
           >
-            <source src="/safereads-promo.mp4" type="video/mp4" />
+            <source src="/safereads-app-demo.mp4" type="video/mp4" />
           </video>
         </div>
       </section>
