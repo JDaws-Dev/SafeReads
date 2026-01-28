@@ -58,6 +58,7 @@ export default function SearchPage() {
         // 2. Fallback: ≥50% of results share the same author
         if (bookResults.length >= 2) {
           let detectedAuthor = "";
+          let queryMatchedAuthor = false;
 
           // Strategy 1: check if query matches an author name
           const queryLower = query.toLowerCase().trim();
@@ -70,6 +71,7 @@ export default function SearchPage() {
                 queryLower.includes(authorLower)
               ) {
                 detectedAuthor = authorLower;
+                queryMatchedAuthor = true;
                 break;
               }
             }
@@ -113,11 +115,45 @@ export default function SearchPage() {
                 (a) => a.toLowerCase().trim() === detectedAuthor
               ) ?? detectedAuthor;
 
-            const authorBooks = bookResults.filter((b) =>
-              b.authors.some(
-                (a) => a.toLowerCase().trim() === detectedAuthor
-              )
-            );
+            // Use inauthor: search to get the author's actual catalog,
+            // not just the general results (which may be biographies *about* them)
+            let authorBooks: BookCardBook[];
+            if (queryMatchedAuthor) {
+              try {
+                const catalogResults = await searchByAuthor({
+                  authorName: displayName,
+                  maxResults: 10,
+                });
+                authorBooks = (catalogResults as BookCardBook[]).filter(
+                  (b) =>
+                    b.authors.some(
+                      (a) => a.toLowerCase().trim() === detectedAuthor
+                    )
+                );
+                if (authorBooks.length === 0) {
+                  // Fallback to general results if inauthor: returned nothing useful
+                  authorBooks = bookResults.filter((b) =>
+                    b.authors.some(
+                      (a) => a.toLowerCase().trim() === detectedAuthor
+                    )
+                  );
+                }
+              } catch {
+                // Fallback to general results on error
+                authorBooks = bookResults.filter((b) =>
+                  b.authors.some(
+                    (a) => a.toLowerCase().trim() === detectedAuthor
+                  )
+                );
+              }
+            } else {
+              authorBooks = bookResults.filter((b) =>
+                b.authors.some(
+                  (a) => a.toLowerCase().trim() === detectedAuthor
+                )
+              );
+            }
+
             const allCategories = authorBooks.flatMap(
               (b) => b.categories ?? []
             );
@@ -151,7 +187,7 @@ export default function SearchPage() {
         setLoading(false);
       }
     },
-    [searchBooks, convexUser, recordSearch]
+    [searchBooks, searchByAuthor, convexUser, recordSearch]
   );
 
   // Auto-trigger search from ?q= query param

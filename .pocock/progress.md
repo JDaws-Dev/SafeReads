@@ -13,7 +13,8 @@ This file maintains context between autonomous iterations.
 ### Iteration 53 — SafeReads-y5o: Fix author detection for query-based matching
 
 - Problem: searching "J.K. Rowling" returned biographies/study guides by other authors, so 50% heuristic never triggered AuthorCard
-- Added fast-path detection: check if search query matches any author name in results (exact, substring in either direction) before falling back to majority heuristic
+- Added fast-path detection (Strategy 1): check if search query matches any author name in results (exact, substring in either direction) before falling back to majority heuristic (Strategy 2)
+- When Strategy 1 matches, uses `searchByAuthor` action (`inauthor:` Google Books query) to fetch the author's actual catalog instead of biographies about them — falls back to general results on error
 - Both strategies feed into the same AuthorCard rendering logic — no duplication
 - Build + lint pass clean
 - Files: `src/app/dashboard/search/page.tsx` (modified)
@@ -30,14 +31,6 @@ This file maintains context between autonomous iterations.
   5. **Verify** no "development keys" console warning on getsafereads.com
 - Build + lint pass clean
 - Files: `.env.local.example` (modified)
-
-### Iteration 51 — SafeReads-q4w: Fix 'Search more' overlapping heading on mobile
-
-- Heading already had responsive text (short on mobile). Issue was "Search more" link crowding it.
-- Hid "Search more" text link on mobile (`hidden sm:inline`), kept it on desktop
-- Added "Search more" card tile as last item in the horizontal carousel (`sm:hidden`) — discoverable by scrolling
-- Build + lint pass clean
-- Files: `src/app/dashboard/page.tsx` (modified)
 
 ---
 
@@ -108,6 +101,14 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 51 — SafeReads-q4w: Fix 'Search more' overlapping heading on mobile
+
+- Heading already had responsive text (short on mobile). Issue was "Search more" link crowding it.
+- Hid "Search more" text link on mobile (`hidden sm:inline`), kept it on desktop
+- Added "Search more" card tile as last item in the horizontal carousel (`sm:hidden`) — discoverable by scrolling
+- Build + lint pass clean
+- Files: `src/app/dashboard/page.tsx` (modified)
 
 ### Iteration 50 — SafeReads-b8x: Author profiles — search + detail page
 
