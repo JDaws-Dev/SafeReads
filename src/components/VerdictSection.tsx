@@ -7,6 +7,7 @@ import { Id } from "../../convex/_generated/dataModel";
 import { VerdictCard, VerdictCardAnalysis } from "./VerdictCard";
 import { ContentFlagList, ContentFlag } from "./ContentFlagList";
 import { AnalyzeButton } from "./AnalyzeButton";
+import { RefreshCw } from "lucide-react";
 
 interface VerdictSectionProps {
   bookId: Id<"books">;
@@ -16,7 +17,9 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
   const cachedAnalysis = useQuery(api.analyses.getByBook, { bookId });
 
   const analyzeAction = useAction(api.analyses.analyze);
+  const reanalyzeAction = useAction(api.analyses.reanalyze);
   const [analyzing, setAnalyzing] = useState(false);
+  const [reanalyzing, setReanalyzing] = useState(false);
   const [actionResult, setActionResult] = useState<{
     verdict: string;
     summary: string;
@@ -38,6 +41,21 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
       );
     } finally {
       setAnalyzing(false);
+    }
+  }
+
+  async function handleReanalyze() {
+    setReanalyzing(true);
+    setError(null);
+    try {
+      const result = await reanalyzeAction({ bookId });
+      setActionResult(result as typeof actionResult);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Re-analysis failed. Please try again."
+      );
+    } finally {
+      setReanalyzing(false);
     }
   }
 
@@ -73,6 +91,18 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
         <>
           <VerdictCard analysis={analysis} />
           <ContentFlagList flags={flags} />
+          <div className="flex justify-end">
+            <button
+              onClick={handleReanalyze}
+              disabled={reanalyzing}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-parchment-300 bg-white px-3 py-1.5 text-xs font-medium text-ink-600 transition-colors hover:bg-parchment-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${reanalyzing ? "animate-spin" : ""}`}
+              />
+              {reanalyzing ? "Re-analyzing…" : "Re-analyze"}
+            </button>
+          </div>
         </>
       ) : (
         <div className="rounded-xl border border-parchment-200 bg-white p-6 text-center">

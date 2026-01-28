@@ -10,6 +10,20 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 24 — SafeReads-tpl.6: Add re-analyze button to bypass verdict cache
+
+- Extracted OpenAI analysis logic from `analyze` action into `runOpenAIAnalysis` helper (pure function, no Convex context needed)
+- Added `AnalysisResult` and `BookData` types to reduce duplication
+- Added `deleteByBook` internal mutation — deletes cached analysis by book index
+- Added `reanalyze` public action — deletes cache, fetches book, calls `runOpenAIAnalysis`, stores new result
+- Updated `VerdictSection.tsx` — added "Re-analyze" button (with `RefreshCw` icon) below content flags when verdict exists
+  - Separate `reanalyzing` loading state with spinning icon
+  - Calls `reanalyze` action (not `analyze`) to force fresh OpenAI call
+  - Error state with distinct message for re-analysis failures
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/analyses.ts` (modified), `src/components/VerdictSection.tsx` (modified)
+
 ### Iteration 23 — SafeReads-zve: Build notes and search history pages
 
 - Added `notes` table to schema: `userId`, `bookId`, `content` — indexes `by_user` and `by_user_and_book`
@@ -45,27 +59,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `convex/analyses.ts` (modified), `src/app/dashboard/page.tsx` (rewritten), `src/app/dashboard/search/page.tsx` (new), `src/components/Navbar.tsx` (modified)
-
-### Iteration 21 — SafeReads-tpl.4: Build onboarding flow for new users
-
-- Added `onboardingComplete: v.optional(v.boolean())` to users schema
-- Added `completeOnboarding` mutation to `convex/users.ts`
-- Created `/onboarding` route with 3-step flow:
-  - Step 0: Welcome screen explaining SafeReads
-  - Step 1: Optional kid setup (reuses KidForm component) — collects names/ages locally, bulk-creates on completion
-  - Step 2: Done screen with CTA to start searching
-  - Skipped sensitivity profile step — analyses are now objective (not profile-dependent)
-- Updated `src/app/dashboard/layout.tsx`:
-  - Queries convexUser by clerkId to check `onboardingComplete`
-  - Redirects to `/onboarding` if not complete
-  - Always renders UserSync so user record gets created in Convex
-  - Returns null during loading to prevent flash
-- Onboarding page also renders UserSync and waits for convexUser before showing steps
-- Returning users (onboardingComplete=true) go straight to dashboard
-- `convex/_generated/api.d.ts` reverted to `AnyApi` stub (was overwritten by `npx convex dev`)
-- No new dependencies
-- Build + lint pass clean
-- Files: `convex/schema.ts` (modified), `convex/users.ts` (modified), `src/app/onboarding/page.tsx` (new), `src/app/dashboard/layout.tsx` (rewritten), `convex/_generated/api.d.ts` (reverted)
 
 ---
 
@@ -133,6 +126,19 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 21 — SafeReads-tpl.4: Build onboarding flow for new users
+
+- Added `onboardingComplete: v.optional(v.boolean())` to users schema
+- Added `completeOnboarding` mutation to `convex/users.ts`
+- Created `/onboarding` route with 3-step flow:
+  - Step 0: Welcome screen explaining SafeReads
+  - Step 1: Optional kid setup (reuses KidForm component) — collects names/ages locally, bulk-creates on completion
+  - Step 2: Done screen with CTA to start searching
+  - Skipped sensitivity profile step — analyses are now objective (not profile-dependent)
+- Updated `src/app/dashboard/layout.tsx`
+- Returning users (onboardingComplete=true) go straight to dashboard
+- Build + lint pass clean
 
 ### Iteration 20 — SafeReads-90b: Rewrite AI prompt and analyses backend for objective content review
 

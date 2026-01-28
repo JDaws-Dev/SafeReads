@@ -6,6 +6,7 @@ import {
   query,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 import OpenAI from "openai";
 
 const verdictValues = v.union(
@@ -120,83 +121,10 @@ export const analyze = action({
       return cached;
     }
 
-    // 3. Check if book has enough data for analysis
-    if (!book.description && !book.categories?.length) {
-      const noVerdictResult = {
-        bookId: args.bookId,
-        verdict: "no_verdict" as const,
-        summary:
-          "Insufficient book data available for content analysis. Try searching for this book again or check back later.",
-        contentFlags: [],
-      };
+    // 3. Run analysis (checks data sufficiency, calls OpenAI, returns result)
+    const result = await runOpenAIAnalysis(book, args.bookId);
 
-      await ctx.runMutation(internal.analyses.store, noVerdictResult);
-      return noVerdictResult;
-    }
-
-    // 4. Call OpenAI GPT-4o
-    const openai = new OpenAI();
-    const bookContext = buildBookContext(book);
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: SYSTEM_PROMPT,
-        },
-        {
-          role: "user",
-          content: `## Book Information\n${bookContext}\n\nAnalyze this book and return your content review as JSON.`,
-        },
-      ],
-    });
-
-    const raw = completion.choices[0]?.message?.content;
-    if (!raw) {
-      throw new Error("OpenAI returned an empty response");
-    }
-
-    const parsed = JSON.parse(raw) as OpenAIVerdictResponse;
-
-    // Validate verdict value
-    const validVerdicts = [
-      "safe",
-      "caution",
-      "warning",
-      "no_verdict",
-    ] as const;
-    const verdict = validVerdicts.includes(
-      parsed.verdict as (typeof validVerdicts)[number]
-    )
-      ? (parsed.verdict as (typeof validVerdicts)[number])
-      : ("no_verdict" as const);
-
-    // Validate severity values in content flags
-    const validSeverities = ["none", "mild", "moderate", "heavy"] as const;
-    const contentFlags = (parsed.contentFlags ?? []).map((flag) => ({
-      category: String(flag.category),
-      severity: validSeverities.includes(
-        flag.severity as (typeof validSeverities)[number]
-      )
-        ? (flag.severity as (typeof validSeverities)[number])
-        : ("none" as const),
-      details: String(flag.details),
-    }));
-
-    const result = {
-      bookId: args.bookId,
-      verdict,
-      ageRecommendation: parsed.ageRecommendation
-        ? String(parsed.ageRecommendation)
-        : undefined,
-      summary: String(parsed.summary ?? "No summary provided."),
-      contentFlags,
-      reasoning: parsed.reasoning ? String(parsed.reasoning) : undefined,
-    };
-
-    // 5. Store in cache
+    // 4. Store in cache
     await ctx.runMutation(internal.analyses.store, result);
 
     return result;
@@ -210,6 +138,39 @@ export const getBookById = internalQuery({
   args: { bookId: v.id("books") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.bookId);
+  },
+});
+
+/**
+ * Re-analyze a book, bypassing the cache.
+ *
+ * Deletes the existing cached analysis (if any), then runs a fresh OpenAI call.
+ */
+export const reanalyze = action({
+  args: {
+    bookId: v.id("books"),
+  },
+  handler: async (ctx, args) => {
+    // 1. Delete existing cached analysis
+    await ctx.runMutation(internal.analyses.deleteByBook, {
+      bookId: args.bookId,
+    });
+
+    // 2. Fetch book
+    const book = await ctx.runQuery(internal.analyses.getBookById, {
+      bookId: args.bookId,
+    });
+    if (!book) {
+      throw new Error("Book not found");
+    }
+
+    // 3. Run fresh analysis
+    const result = await runOpenAIAnalysis(book, args.bookId);
+
+    // 4. Store new result
+    await ctx.runMutation(internal.analyses.store, result);
+
+    return result;
   },
 });
 
@@ -228,7 +189,121 @@ export const getCachedAnalysis = internalQuery({
   },
 });
 
+/**
+ * Internal mutation to delete a cached analysis for a book.
+ * Used by the reanalyze action to clear the cache before a fresh analysis.
+ */
+export const deleteByBook = internalMutation({
+  args: {
+    bookId: v.id("books"),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("analyses")
+      .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
+      .unique();
+    if (existing) {
+      await ctx.db.delete(existing._id);
+    }
+  },
+});
+
 // --- Helpers ---
+
+type BookData = {
+  title: string;
+  authors: string[];
+  description?: string;
+  categories?: string[];
+  pageCount?: number;
+  publishedDate?: string;
+};
+
+type AnalysisResult = {
+  bookId: Id<"books">;
+  verdict: "safe" | "caution" | "warning" | "no_verdict";
+  ageRecommendation?: string;
+  summary: string;
+  contentFlags: Array<{
+    category: string;
+    severity: "none" | "mild" | "moderate" | "heavy";
+    details: string;
+  }>;
+  reasoning?: string;
+};
+
+/**
+ * Runs an OpenAI GPT-4o analysis on a book.
+ * Returns "no_verdict" if the book lacks sufficient data.
+ */
+async function runOpenAIAnalysis(
+  book: BookData,
+  bookId: Id<"books">
+): Promise<AnalysisResult> {
+  if (!book.description && !book.categories?.length) {
+    return {
+      bookId,
+      verdict: "no_verdict",
+      summary:
+        "Insufficient book data available for content analysis. Try searching for this book again or check back later.",
+      contentFlags: [],
+    };
+  }
+
+  const openai = new OpenAI();
+  const bookContext = buildBookContext(book);
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o",
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content: SYSTEM_PROMPT,
+      },
+      {
+        role: "user",
+        content: `## Book Information\n${bookContext}\n\nAnalyze this book and return your content review as JSON.`,
+      },
+    ],
+  });
+
+  const raw = completion.choices[0]?.message?.content;
+  if (!raw) {
+    throw new Error("OpenAI returned an empty response");
+  }
+
+  const parsed = JSON.parse(raw) as OpenAIVerdictResponse;
+
+  const validVerdicts = ["safe", "caution", "warning", "no_verdict"] as const;
+  const verdict = validVerdicts.includes(
+    parsed.verdict as (typeof validVerdicts)[number]
+  )
+    ? (parsed.verdict as (typeof validVerdicts)[number])
+    : ("no_verdict" as const);
+
+  const validSeverities = ["none", "mild", "moderate", "heavy"] as const;
+  const contentFlags = (parsed.contentFlags ?? []).map((flag) => ({
+    category: String(flag.category),
+    severity: validSeverities.includes(
+      flag.severity as (typeof validSeverities)[number]
+    )
+      ? (flag.severity as (typeof validSeverities)[number])
+      : ("none" as const),
+    details: String(flag.details),
+  }));
+
+  return {
+    bookId,
+    verdict,
+    ageRecommendation: parsed.ageRecommendation
+      ? String(parsed.ageRecommendation)
+      : undefined,
+    summary: String(parsed.summary ?? "No summary provided."),
+    contentFlags,
+    reasoning: parsed.reasoning ? String(parsed.reasoning) : undefined,
+  };
+}
 
 interface OpenAIVerdictResponse {
   verdict: string;
