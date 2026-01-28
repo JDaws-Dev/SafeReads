@@ -21,7 +21,7 @@ export default function PrivacyPage() {
           <p className="mt-2 text-sm leading-relaxed">
             When you sign in with Google via Clerk, we receive your name, email
             address, and profile photo. We also store the book searches you
-            perform and the AI-generated content analyses associated with those
+            perform and the AI-generated content reviews associated with those
             books.
           </p>
         </section>
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             Your account information is used solely to authenticate you and
             provide a personalized experience (e.g., saved books, wishlists).
             Book metadata — such as title, author, and description — is sent to
-            OpenAI&apos;s GPT-4o model to generate content analyses. No personal
+            OpenAI&apos;s GPT-4o model to generate content reviews. No personal
             data (your name, email, or children&apos;s information) is sent to
             OpenAI.
           </p>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
           </h2>
           <p className="mt-2 text-sm leading-relaxed">
             Your account data is retained as long as your account is active.
-            Book analyses are cached permanently since book content metadata is
+            Book reviews are cached permanently since book content metadata is
             static. You may request deletion of your account and associated data
             at any time by contacting us.
           </p>
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
               <strong>Convex</strong> — database and backend infrastructure
             </li>
             <li>
-              <strong>OpenAI</strong> — AI-powered content analysis (book
+              <strong>OpenAI</strong> — AI-powered content review (book
               metadata only)
             </li>
             <li>

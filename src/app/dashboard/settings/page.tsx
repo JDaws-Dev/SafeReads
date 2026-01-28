@@ -10,7 +10,7 @@ import {
   Sparkles,
   BookOpen,
   Infinity,
-  RefreshCw,
+  HeadphonesIcon,
   Loader2,
 } from "lucide-react";
 
@@ -114,7 +114,7 @@ export default function SettingsPage() {
                 </p>
               )}
               <p>
-                Total analyses:{" "}
+                Total reviews:{" "}
                 <span className="font-medium text-ink-900">
                   {details.analysisCount}
                 </span>
@@ -141,7 +141,7 @@ export default function SettingsPage() {
                 <span className="font-medium text-ink-900">Free</span>
               </p>
               <p>
-                Analyses used:{" "}
+                Reviews used:{" "}
                 <span className="font-medium text-ink-900">
                   {details.analysisCount} of 3
                 </span>
@@ -171,11 +171,11 @@ export default function SettingsPage() {
               <ul className="mb-4 space-y-2 text-sm text-ink-700">
                 <li className="flex items-center gap-2">
                   <Infinity className="h-4 w-4 text-parchment-700" />
-                  Unlimited book analyses
+                  Unlimited book reviews
                 </li>
                 <li className="flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4 text-parchment-700" />
-                  Re-analyze any book anytime
+                  <HeadphonesIcon className="h-4 w-4 text-parchment-700" />
+                  Priority support
                 </li>
                 <li className="flex items-center gap-2">
                   <BookOpen className="h-4 w-4 text-parchment-700" />

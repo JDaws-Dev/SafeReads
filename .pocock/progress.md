@@ -10,6 +10,22 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 39 — SafeReads-71w: Rename 'analyses' to 'reviews' site-wide and remove re-analyze button
+
+- Renamed all user-facing instances of "analysis/analyses/analyze" to "review/reviews/review" across 11 files
+- Removed re-analyze button from VerdictSection (and all related state: reanalyzing, reanalyzeAction, handleReanalyze, RefreshCw import)
+- Updated landing page: "AI Content Analysis" → "AI Content Review", "3 book analyses" → "3 book reviews", "Unlimited book analyses" → "Unlimited book reviews", "Re-analyze any book anytime" → "Priority support", "AI-powered analysis" → "AI-powered reviews"
+- Updated settings page: "Analyses used" → "Reviews used", "Total analyses" → "Total reviews", "Unlimited book analyses" → "Unlimited book reviews", "Re-analyze any book anytime" → "Priority support"
+- Updated VerdictSection: "Content Analysis" → "Content Review", free tier banner text, notification text, error messages
+- Updated dashboard: "No analyses yet" → "No reviews yet"
+- Updated about, terms, privacy pages, layout metadata, opengraph image alt text
+- Updated chat system prompt: "recently analyzed books" → "recently reviewed books"
+- **Scope**: User-facing text only. Backend table names, function names, and code variables unchanged.
+- **Decision**: "Re-analyze" feature replaced with "Priority support" in pricing feature lists (re-analyze backend action kept for admin/dev use)
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/page.tsx`, `src/app/layout.tsx`, `src/app/about/page.tsx`, `src/app/terms/page.tsx`, `src/app/privacy/page.tsx`, `src/app/opengraph-image.tsx`, `src/app/dashboard/page.tsx`, `src/app/dashboard/settings/page.tsx`, `src/components/VerdictSection.tsx`, `convex/chat.ts` (all modified)
+
 ### Iteration 38 — SafeReads-0je: Streamline navbar: remove bell, merge settings into avatar
 
 - Removed NotificationBell from Navbar — analyses complete synchronously, browser notifications from VerdictSection still work (useNotification hook kept)
@@ -32,15 +48,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/components/chat/ChatMessage.tsx` (modified)
-
-### Iteration 36 — SafeReads-397: Fix chat input hidden behind bottom nav on mobile
-
-- Fixed `src/app/dashboard/chat/page.tsx` — chat container height didn't account for bottom nav on mobile
-  - Changed `h-[calc(100vh-8rem)]` to `h-[calc(100vh-12rem)] sm:h-[calc(100vh-8rem)]` on both the main container and loading spinner container
-  - Mobile subtracts 12rem (4rem navbar + 4rem bottom nav + 4rem padding), desktop stays at 8rem (no bottom nav)
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/app/dashboard/chat/page.tsx` (modified)
 
 ---
 
@@ -111,6 +118,11 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 36 — SafeReads-397: Fix chat input hidden behind bottom nav on mobile
+
+- Fixed chat container height for mobile bottom nav
+- Build + lint pass clean
 
 ### Iteration 35 — SafeReads-cm4.9: Update landing page with subscription pricing info
 

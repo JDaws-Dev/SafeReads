@@ -47,7 +47,7 @@ export default function Home() {
             <span className="text-parchment-700">before your kid reads it</span>
           </h1>
           <p className="mt-4 text-base text-ink-500 sm:mt-6 sm:text-lg">
-            SafeReads uses AI to analyze book content so you can make informed
+            SafeReads uses AI to review book content so you can make informed
             decisions about what your children read. Scan a barcode, snap a
             cover, or search by title — get a detailed content breakdown in
             seconds.
@@ -122,7 +122,7 @@ export default function Home() {
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             <Feature
               icon={<Shield className="h-6 w-6 text-verdict-safe" />}
-              title="AI Content Analysis"
+              title="AI Content Review"
               description="Get detailed breakdowns of violence, language, sexual content, substance use, and dark themes — powered by GPT-4o."
             />
             <Feature
@@ -167,7 +167,7 @@ export default function Home() {
               <ul className="mt-5 space-y-3 text-sm text-ink-600">
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
-                  3 book analyses
+                  3 book reviews
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
@@ -205,11 +205,11 @@ export default function Home() {
               <ul className="mt-5 space-y-3 text-sm text-ink-600">
                 <li className="flex items-start gap-2">
                   <Infinity className="mt-0.5 h-4 w-4 shrink-0 text-parchment-700" />
-                  Unlimited book analyses
+                  Unlimited book reviews
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
-                  Re-analyze any book anytime
+                  Priority support
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
@@ -242,11 +242,11 @@ export default function Home() {
             children read.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm text-ink-400">
-            <span>AI-powered analysis</span>
+            <span>AI-powered reviews</span>
             <span className="hidden sm:inline">&middot;</span>
             <span>No bias, just facts</span>
             <span className="hidden sm:inline">&middot;</span>
-            <span>3 free analyses to start</span>
+            <span>3 free reviews to start</span>
           </div>
         </div>
       </section>

@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-export const alt = "SafeReads — AI-powered book content analysis for parents";
+export const alt = "SafeReads — AI-powered book content reviews for parents";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -83,7 +83,7 @@ export default function Image() {
             marginTop: 16,
           }}
         >
-          AI-powered content analysis for parents
+          AI-powered content reviews for parents
         </div>
       </div>
     ),

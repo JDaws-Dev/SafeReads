@@ -11,7 +11,7 @@ import { Flag, X, Check } from "lucide-react";
 const REASONS = [
   { value: "too_lenient", label: "Verdict is too lenient" },
   { value: "too_strict", label: "Verdict is too strict" },
-  { value: "factual_error", label: "Factual error in analysis" },
+  { value: "factual_error", label: "Factual error in review" },
   { value: "missing_content", label: "Missing content concerns" },
   { value: "other", label: "Other" },
 ] as const;
@@ -107,7 +107,7 @@ export function ReportButton({ bookId, analysisId }: ReportButtonProps) {
           <Dialog.Content className="fixed left-1/2 top-1/2 max-h-[85vh] w-full max-w-sm -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl bg-parchment-50 p-6 shadow-xl focus:outline-none data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95">
             <div className="mb-4 flex items-center justify-between">
               <Dialog.Title className="font-serif text-lg font-bold text-ink-900">
-                Report Analysis Issue
+                Report Review Issue
               </Dialog.Title>
               <Dialog.Close asChild>
                 <button
@@ -129,7 +129,7 @@ export function ReportButton({ bookId, analysisId }: ReportButtonProps) {
             ) : (
               <>
                 <p className="mb-4 text-sm text-ink-500">
-                  Help us improve by reporting issues with this analysis.
+                  Help us improve by reporting issues with this review.
                 </p>
 
                 <fieldset className="mb-4 space-y-2">

@@ -16,11 +16,11 @@ export default function TermsPage() {
       <div className="mt-8 space-y-8 text-ink-600">
         <section>
           <h2 className="font-serif text-xl font-bold text-ink-900">
-            AI Analysis Disclaimer
+            AI Review Disclaimer
           </h2>
           <p className="mt-2 text-sm leading-relaxed">
-            SafeReads provides AI-generated content analyses for informational
-            purposes only. These analyses are based on publicly available book
+            SafeReads provides AI-generated content reviews for informational
+            purposes only. These reviews are based on publicly available book
             metadata and AI interpretation. They are not a guarantee of
             completeness or accuracy. We recommend using SafeReads as one of
             several resources when evaluating books for your family.
@@ -33,9 +33,9 @@ export default function TermsPage() {
           </h2>
           <p className="mt-2 text-sm leading-relaxed">
             SafeReads and its creators are not liable for decisions made based on
-            the content analyses provided. The service is offered &ldquo;as
+            the content reviews provided. The service is offered &ldquo;as
             is&rdquo; without warranties of any kind. You acknowledge that AI
-            analysis may not capture every element of a book&apos;s content.
+            reviews may not capture every element of a book&apos;s content.
           </p>
         </section>
 

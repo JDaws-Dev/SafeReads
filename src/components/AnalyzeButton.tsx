@@ -18,12 +18,12 @@ export function AnalyzeButton({ onClick, loading, disabled }: AnalyzeButtonProps
       {loading ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin" />
-          Analyzing…
+          Reviewing…
         </>
       ) : (
         <>
           <Sparkles className="h-4 w-4" />
-          Analyze Content
+          Get Review
         </>
       )}
     </button>

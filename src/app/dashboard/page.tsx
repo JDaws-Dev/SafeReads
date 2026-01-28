@@ -118,7 +118,7 @@ export default function DashboardPage() {
           <div className="mt-4 rounded-lg border border-parchment-200 bg-white p-8 text-center">
             <Shield className="mx-auto h-10 w-10 text-parchment-300" />
             <p className="mt-3 text-sm text-ink-500">
-              No analyses yet. Search for a book to get your first content
+              No reviews yet. Search for a book to get your first content
               review.
             </p>
             <Link

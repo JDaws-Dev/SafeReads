@@ -199,7 +199,7 @@ export const sendMessage = action({
 
     const analysesContext =
       recentAnalyses.length > 0
-        ? `\n\nRecently analyzed books on SafeReads:\n${recentAnalyses
+        ? `\n\nRecently reviewed books on SafeReads:\n${recentAnalyses
             .map(
               (a: {
                 book?: { title: string; authors: string[] } | null;
@@ -281,5 +281,5 @@ Guidelines:
 - If you're unsure about a specific book's content, say so honestly
 - Keep responses concise but helpful
 - Reference the parent's kids by name when relevant (context provided below)
-- Reference recently analyzed books when relevant (context provided below)
+- Reference recently reviewed books when relevant (context provided below)
 - Format responses with markdown for readability (bold, lists, etc.)`;

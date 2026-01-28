@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sparkles, BookOpen, Infinity, RefreshCw } from "lucide-react";
+import { X, Sparkles, BookOpen, Infinity, Heart } from "lucide-react";
 
 interface UpgradePromptProps {
   onDismiss: () => void;
@@ -52,7 +52,7 @@ export function UpgradePrompt({ onDismiss }: UpgradePromptProps) {
         </div>
 
         <p className="mb-5 text-sm text-ink-600">
-          You&apos;ve used all your free analyses. Upgrade to continue
+          You&apos;ve used all your free reviews. Upgrade to continue
           reviewing books for your family.
         </p>
 
@@ -63,11 +63,11 @@ export function UpgradePrompt({ onDismiss }: UpgradePromptProps) {
           <ul className="space-y-2 text-sm text-ink-700">
             <li className="flex items-center gap-2">
               <Infinity className="h-4 w-4 text-parchment-700" />
-              Unlimited book analyses
+              Unlimited book reviews
             </li>
             <li className="flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 text-parchment-700" />
-              Re-analyze any book anytime
+              <Heart className="h-4 w-4 text-parchment-700" />
+              Priority support
             </li>
             <li className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-parchment-700" />

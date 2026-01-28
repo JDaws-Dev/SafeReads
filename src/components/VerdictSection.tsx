@@ -12,7 +12,6 @@ import { ReportButton } from "./ReportButton";
 import { ShareVerdictButton } from "./ShareVerdictButton";
 import { UpgradePrompt } from "./UpgradePrompt";
 import { useNotification } from "@/hooks/useNotification";
-import { RefreshCw } from "lucide-react";
 
 interface VerdictSectionProps {
   bookId: Id<"books">;
@@ -30,9 +29,7 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
   const { notify } = useNotification();
 
   const analyzeAction = useAction(api.analyses.analyze);
-  const reanalyzeAction = useAction(api.analyses.reanalyze);
   const [analyzing, setAnalyzing] = useState(false);
-  const [reanalyzing, setReanalyzing] = useState(false);
   const [actionResult, setActionResult] = useState<{
     verdict: string;
     summary: string;
@@ -50,42 +47,19 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
       const result = await analyzeAction({ bookId, clerkId });
       setActionResult(result as typeof actionResult);
       notify(`SafeReads: ${bookTitle}`, {
-        body: `Analysis complete — ${(result as { verdict: string }).verdict.replace("_", " ")}`,
-        tag: `analysis-${bookId as string}`,
+        body: `Review complete \u2014 ${(result as { verdict: string }).verdict.replace("_", " ")}`,
+        tag: `review-${bookId as string}`,
       });
     } catch (err) {
       if (err instanceof Error && err.message.includes("UPGRADE_REQUIRED")) {
         setShowUpgrade(true);
       } else {
         setError(
-          err instanceof Error ? err.message : "Analysis failed. Please try again."
+          err instanceof Error ? err.message : "Review failed. Please try again."
         );
       }
     } finally {
       setAnalyzing(false);
-    }
-  }
-
-  async function handleReanalyze() {
-    setReanalyzing(true);
-    setError(null);
-    try {
-      const result = await reanalyzeAction({ bookId, clerkId });
-      setActionResult(result as typeof actionResult);
-      notify(`SafeReads: ${bookTitle}`, {
-        body: `Re-analysis complete — ${(result as { verdict: string }).verdict.replace("_", " ")}`,
-        tag: `analysis-${bookId as string}`,
-      });
-    } catch (err) {
-      if (err instanceof Error && err.message.includes("UPGRADE_REQUIRED")) {
-        setShowUpgrade(true);
-      } else {
-        setError(
-          err instanceof Error ? err.message : "Re-analysis failed. Please try again."
-        );
-      }
-    } finally {
-      setReanalyzing(false);
     }
   }
 
@@ -117,14 +91,14 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
   return (
     <div className="space-y-4">
       <h2 className="font-serif text-xl font-bold text-ink-900">
-        Content Analysis
+        Content Review
       </h2>
 
       {showFreeBanner && (
         <div className="rounded-lg border border-parchment-300 bg-parchment-50 px-4 py-2.5 text-sm text-ink-600">
           {access.freeRemaining > 0
-            ? `${access.freeRemaining} of 3 free analyses remaining`
-            : "You\u2019ve used all 3 free analyses"}
+            ? `${access.freeRemaining} of 3 free reviews remaining`
+            : "You\u2019ve used all 3 free reviews"}
         </div>
       )}
 
@@ -148,16 +122,6 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
                 analysisId={cachedAnalysis._id}
               />
             )}
-            <button
-              onClick={handleReanalyze}
-              disabled={reanalyzing}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-parchment-300 bg-white px-3 py-1.5 text-xs font-medium text-ink-600 transition-colors hover:bg-parchment-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${reanalyzing ? "animate-spin" : ""}`}
-              />
-              {reanalyzing ? "Re-analyzing\u2026" : "Re-analyze"}
-            </button>
           </div>
         </>
       ) : (
@@ -175,7 +139,7 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
               onClick={() => setShowUpgrade(true)}
               className="mt-3 text-sm font-medium text-parchment-700 underline underline-offset-2 hover:text-parchment-800"
             >
-              Upgrade to unlock more analyses
+              Upgrade to unlock more reviews
             </button>
           )}
         </div>

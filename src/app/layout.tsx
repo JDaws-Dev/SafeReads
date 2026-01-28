@@ -26,14 +26,14 @@ export const metadata: Metadata = {
     template: "%s — SafeReads",
   },
   description:
-    "AI-powered book content analysis for parents. Search books, get objective content reviews to make informed decisions.",
+    "AI-powered book content reviews for parents. Search books, get objective content reviews to make informed decisions.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "SafeReads",
     description:
-      "Know what's in the book before your kid reads it. AI-powered content analysis for parents.",
+      "Know what's in the book before your kid reads it. AI-powered content reviews for parents.",
     url: "https://getsafereads.com",
     siteName: "SafeReads",
     type: "website",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "SafeReads",
     description:
-      "Know what's in the book before your kid reads it. AI-powered content analysis for parents.",
+      "Know what's in the book before your kid reads it. AI-powered content reviews for parents.",
   },
 };
 

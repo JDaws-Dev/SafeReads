@@ -4,7 +4,7 @@ import { BookOpen, Brain, Heart } from "lucide-react";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Learn about SafeReads — AI-powered book content analysis built by a parent, for parents.",
+    "Learn about SafeReads — AI-powered book content reviews built by a parent, for parents.",
 };
 
 export default function AboutPage() {
@@ -23,7 +23,7 @@ export default function AboutPage() {
             </h2>
           </div>
           <p className="mt-2 text-sm leading-relaxed">
-            SafeReads is an AI-powered tool that analyzes book content so
+            SafeReads is an AI-powered tool that reviews book content so
             parents can make informed decisions about what their children read.
             Search by title, scan a barcode, or snap a photo of a book cover —
             and get a detailed content breakdown in seconds.
@@ -57,12 +57,12 @@ export default function AboutPage() {
             When you look up a book, SafeReads pulls metadata from Google Books
             and Open Library — including the title, author, description, and
             subject categories. This metadata is then sent to OpenAI&apos;s
-            GPT-4o model, which generates a structured content analysis covering
+            GPT-4o model, which generates a structured content review covering
             areas like violence, language, sexual content, substance use, and
             dark themes.
           </p>
           <p className="mt-2 text-sm leading-relaxed">
-            No personal information is ever sent to the AI. The analysis is
+            No personal information is ever sent to the AI. The review is
             based solely on publicly available book data. We&apos;re transparent
             about this because we believe you deserve to know exactly how the
             tool works.
