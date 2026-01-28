@@ -10,6 +10,19 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 52 — SafeReads-fk6: Switch Clerk to production keys
+
+- Ops/config task — no code changes needed. All Clerk config reads from env vars already.
+- Updated `.env.local.example` with comments distinguishing prod vs dev key prefixes and issuer domain formats
+- **What the developer needs to do manually:**
+  1. **Clerk Dashboard**: Create production instance (or switch to existing one) at clerk.com
+  2. **Vercel env vars**: Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` to `pk_live_...` and `CLERK_SECRET_KEY` to `sk_live_...`
+  3. **Convex prod env var**: Set `CLERK_JWT_ISSUER_DOMAIN` to production issuer (e.g. `https://clerk.getsafereads.com` or production Clerk domain)
+  4. **Redeploy** Vercel + Convex after updating vars
+  5. **Verify** no "development keys" console warning on getsafereads.com
+- Build + lint pass clean
+- Files: `.env.local.example` (modified)
+
 ### Iteration 51 — SafeReads-q4w: Fix 'Search more' overlapping heading on mobile
 
 - Heading already had responsive text (short on mobile). Issue was "Search more" link crowding it.
@@ -27,15 +40,6 @@ This file maintains context between autonomous iterations.
 - New schema table: `authorOverviews` with `by_author_name` index — cached author AI summaries
 - Build + lint pass clean
 - Files: `convex/books.ts` (modified), `convex/analyses.ts` (modified), `convex/schema.ts` (modified), `src/components/AuthorCard.tsx` (new), `src/app/dashboard/author/[name]/page.tsx` (new), `src/app/dashboard/search/page.tsx` (modified)
-
-### Iteration 49 — SafeReads-ybb: Punch up landing page copy
-
-- H1: "Every parent deserves to know what's inside the book"
-- Sub-copy: specific about 10 categories, real-world use cases
-- Trust: "We give you facts, not opinions" — contrasts with opinion sites
-- Final CTA: "Stop guessing. Start knowing."
-- Build + lint pass clean
-- Files: `src/app/page.tsx` (modified)
 
 ---
 
@@ -106,6 +110,15 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 49 — SafeReads-ybb: Punch up landing page copy
+
+- H1: "Every parent deserves to know what's inside the book"
+- Sub-copy: specific about 10 categories, real-world use cases
+- Trust: "We give you facts, not opinions" — contrasts with opinion sites
+- Final CTA: "Stop guessing. Start knowing."
+- Build + lint pass clean
+- Files: `src/app/page.tsx` (modified)
 
 ### Iteration 48 — SafeReads-vwi: Horizontal book cover carousel for recent reviews
 
