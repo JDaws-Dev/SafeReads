@@ -20,6 +20,7 @@ type BookResult = {
   maturityRating?: string;
   averageRating?: number;
   ratingsCount?: number;
+  firstSentence?: string;
 };
 
 // --- Public queries ---
@@ -55,6 +56,7 @@ export const upsert = internalMutation({
     maturityRating: v.optional(v.string()),
     averageRating: v.optional(v.number()),
     ratingsCount: v.optional(v.number()),
+    firstSentence: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     if (args.googleBooksId) {
@@ -77,6 +79,7 @@ export const upsert = internalMutation({
           maturityRating: args.maturityRating ?? existing.maturityRating,
           averageRating: args.averageRating ?? existing.averageRating,
           ratingsCount: args.ratingsCount ?? existing.ratingsCount,
+          firstSentence: args.firstSentence ?? existing.firstSentence,
         });
         return existing._id;
       }
@@ -122,6 +125,8 @@ export const search = action({
                 : enrichment.subjects;
             parsed.openLibraryKey = enrichment.key;
             parsed.coverUrl = parsed.coverUrl || enrichment.coverUrl;
+            parsed.firstSentence =
+              parsed.firstSentence || enrichment.firstSentence;
           }
         }
 
@@ -224,6 +229,7 @@ interface ParsedBook {
   maturityRating?: string;
   averageRating?: number;
   ratingsCount?: number;
+  firstSentence?: string;
 }
 
 function parseGoogleBooksItem(item: GoogleBooksItem): ParsedBook {
@@ -287,11 +293,13 @@ async function fetchOpenLibraryData(
   subjects?: string[];
   key?: string;
   coverUrl?: string;
+  firstSentence?: string;
 } | null> {
   try {
     let workKey: string | undefined;
     let subjects: string[] | undefined;
     let coverUrl: string | undefined;
+    let firstSentence: string | undefined;
 
     // Strategy 1: Look up by ISBN if available
     if (isbn) {
@@ -316,7 +324,7 @@ async function fetchOpenLibraryData(
       const params = new URLSearchParams({
         q: searchQuery,
         limit: "1",
-        fields: "key,title,cover_i,subject",
+        fields: "key,title,cover_i,subject,first_sentence",
       });
       const searchResponse = await fetch(
         `https://openlibrary.org/search.json?${params.toString()}`
@@ -328,6 +336,7 @@ async function fetchOpenLibraryData(
         if (doc) {
           workKey = doc.key;
           subjects = doc.subject?.slice(0, 5);
+          firstSentence = doc.first_sentence?.[0];
           if (doc.cover_i) {
             coverUrl =
               coverUrl ??
@@ -356,13 +365,14 @@ async function fetchOpenLibraryData(
           subjects,
           key: workKey,
           coverUrl,
+          firstSentence,
         };
       }
     }
 
     // Return partial data if we found anything
-    if (subjects?.length || coverUrl) {
-      return { subjects, coverUrl, key: workKey };
+    if (subjects?.length || coverUrl || firstSentence) {
+      return { subjects, coverUrl, key: workKey, firstSentence };
     }
 
     return null;
@@ -455,6 +465,8 @@ export const identifyCover = action({
               : enrichment.subjects;
             parsedBook.openLibraryKey = enrichment.key;
             parsedBook.coverUrl = parsedBook.coverUrl || enrichment.coverUrl;
+            parsedBook.firstSentence =
+              parsedBook.firstSentence || enrichment.firstSentence;
           }
         }
 

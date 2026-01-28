@@ -51,6 +51,7 @@ export default defineSchema({
     maturityRating: v.optional(v.string()),
     averageRating: v.optional(v.number()),
     ratingsCount: v.optional(v.number()),
+    firstSentence: v.optional(v.string()),
   })
     .index("by_google_books_id", ["googleBooksId"])
     .index("by_isbn13", ["isbn13"]),

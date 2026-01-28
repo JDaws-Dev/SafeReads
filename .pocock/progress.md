@@ -24,6 +24,20 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `convex/lib/doesTheDogDie.ts` (new), `convex/analyses.ts` (modified), `.env.local.example` (modified)
 
+### Iteration 45 — SafeReads-9yt: Extract first_sentence from Open Library for GPT-4o context
+
+- Added `firstSentence: v.optional(v.string())` to books schema
+- Updated `BookResult`, `ParsedBook` types and `upsert` mutation args + patch logic
+- Updated Open Library search `fields` to include `first_sentence`
+- Extracted `first_sentence` from `OpenLibrarySearchDoc` (already typed, just never used)
+- Passed `firstSentence` through enrichment in both `search` and `identifyCover` actions
+- Updated `buildBookContext` in `convex/analyses.ts` to include first sentence as quoted text
+- Updated `BookData` type in analyses.ts
+- **Decision**: First sentence placed before description in prompt context — gives GPT-4o actual writing sample to assess tone/reading level
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `convex/books.ts` (modified), `convex/analyses.ts` (modified)
+
 ### Iteration 44 — SafeReads-3xw: Improve body text contrast for accessibility
 
 - Audited ink color scale against parchment-50 background (#fdf8f0)
@@ -42,21 +56,6 @@ This file maintains context between autonomous iterations.
 - Both normal view (line 53) and not-found state (line 40) links corrected
 - Build + lint pass clean
 - Files: `src/app/dashboard/book/[id]/page.tsx` (modified)
-
-### Iteration 41 — SafeReads-whc: Capture maturityRating from Google Books API
-
-- Added 3 new optional fields to books schema: `maturityRating` (string), `averageRating` (number), `ratingsCount` (number)
-- Updated `GoogleBooksItem` interface to include `maturityRating`, `averageRating`, `ratingsCount` from `volumeInfo`
-- Updated `ParsedBook`, `BookResult` types and `parseGoogleBooksItem` to extract new fields
-- Updated `upsert` mutation args + patch logic to store new fields
-- Updated `buildBookContext` in `convex/analyses.ts` to include maturityRating in GPT-4o prompt context
-- Added system prompt guidance: MATURE rating biases verdict to at least "caution"
-- Updated `BookHeaderBook` interface + `BookHeader` component to display:
-  - Star rating with count (amber star icon)
-  - "Mature" badge (warning-colored) when maturityRating === "MATURE"
-- No new dependencies
-- Build + lint pass clean
-- Files: `convex/schema.ts` (modified), `convex/books.ts` (modified), `convex/analyses.ts` (modified), `src/components/BookHeader.tsx` (modified)
 
 ---
 
@@ -127,6 +126,12 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 41 — SafeReads-whc: Capture maturityRating from Google Books API
+
+- Added maturityRating, averageRating, ratingsCount fields to books schema + types
+- Updated GPT-4o prompt context with maturityRating, BookHeader with star rating + Mature badge
+- Build + lint pass clean
 
 ### Iteration 40 — SafeReads-zqk: Make chat UX more intuitive for parents
 

@@ -377,6 +377,7 @@ type BookData = {
   pageCount?: number;
   publishedDate?: string;
   maturityRating?: string;
+  firstSentence?: string;
 };
 
 type AnalysisResult = {
@@ -492,6 +493,7 @@ function buildBookContext(book: {
   pageCount?: number;
   publishedDate?: string;
   maturityRating?: string;
+  firstSentence?: string;
 }): string {
   const lines = [
     `Title: ${book.title}`,
@@ -503,6 +505,8 @@ function buildBookContext(book: {
     lines.push(`Categories: ${book.categories.join(", ")}`);
   if (book.maturityRating)
     lines.push(`Google Books maturity rating: ${book.maturityRating}`);
+  if (book.firstSentence)
+    lines.push(`First sentence: "${book.firstSentence}"`);
   if (book.description) lines.push(`\nDescription:\n${book.description}`);
   return lines.join("\n");
 }
