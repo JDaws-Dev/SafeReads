@@ -27,9 +27,12 @@ export default function Home() {
     }
   }, [isLoaded, isSignedIn, router]);
 
-  // Don't render landing page while checking auth or if signed in
-  if (!isLoaded || isSignedIn) {
-    return null;
+  // Show nothing while redirecting signed-in users
+  if (!isLoaded) {
+    return <div className="min-h-[calc(100vh-4rem)]" />;
+  }
+  if (isSignedIn) {
+    return <div className="min-h-[calc(100vh-4rem)]" />;
   }
 
   return (
