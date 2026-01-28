@@ -48,116 +48,113 @@ export default function SearchPage() {
       setError(null);
       setAuthorMatch(null);
       try {
-        const books = await searchBooks({ query });
+        // Run general search and inauthor: search in parallel.
+        // The inauthor: search detects if the query is an author name.
+        const [books, authorCatalogRaw] = await Promise.all([
+          searchBooks({ query }),
+          searchByAuthor({ authorName: query, maxResults: 10 }).catch(
+            () => [] as BookCardBook[]
+          ),
+        ]);
         const bookResults = books as BookCardBook[];
+        const authorCatalog = authorCatalogRaw as BookCardBook[];
         setResults(bookResults);
         setSearched(true);
 
-        // Detect author match via two strategies:
-        // 1. Fast path: query matches an author name in results
-        // 2. Fallback: ≥50% of results share the same author
-        if (bookResults.length >= 2) {
-          let detectedAuthor = "";
-          let queryMatchedAuthor = false;
-
-          // Strategy 1: check if query matches an author name
+        // Author detection: if inauthor: search returned results, this is an author
+        if (authorCatalog.length >= 2) {
+          // Use the most common author name from inauthor: results
+          const authorCounts = new Map<string, { count: number; display: string }>();
+          for (const book of authorCatalog) {
+            for (const author of book.authors) {
+              const key = author.toLowerCase().trim();
+              const existing = authorCounts.get(key);
+              if (existing) {
+                existing.count++;
+              } else {
+                authorCounts.set(key, { count: 1, display: author });
+              }
+            }
+          }
+          let bestMatch = { count: 0, display: "", key: "" };
+          // Prefer the author whose name matches the query
           const queryLower = query.toLowerCase().trim();
+          for (const [key, val] of authorCounts) {
+            if (
+              key === queryLower ||
+              key.includes(queryLower) ||
+              queryLower.includes(key)
+            ) {
+              if (val.count > bestMatch.count) {
+                bestMatch = { ...val, key };
+              }
+            }
+          }
+          // Fallback: most common author in results
+          if (bestMatch.count === 0) {
+            for (const [key, val] of authorCounts) {
+              if (val.count > bestMatch.count) {
+                bestMatch = { ...val, key };
+              }
+            }
+          }
+
+          const authorBooks = authorCatalog.filter((b) =>
+            b.authors.some(
+              (a) => a.toLowerCase().trim() === bestMatch.key
+            )
+          );
+          const allCategories = authorBooks.flatMap(
+            (b) => b.categories ?? []
+          );
+
+          setAuthorMatch({
+            name: bestMatch.display,
+            bookCount: authorBooks.length,
+            topBooks: authorBooks.slice(0, 4).map((b) => ({
+              title: b.title,
+              coverUrl: b.coverUrl,
+            })),
+            categories: [...new Set(allCategories)].slice(0, 5),
+          });
+        } else if (bookResults.length >= 2) {
+          // Fallback: ≥50% of general results share the same author
+          const authorCounts = new Map<string, number>();
           for (const book of bookResults) {
             for (const author of book.authors) {
-              const authorLower = author.toLowerCase().trim();
-              if (
-                authorLower === queryLower ||
-                authorLower.includes(queryLower) ||
-                queryLower.includes(authorLower)
-              ) {
-                detectedAuthor = authorLower;
-                queryMatchedAuthor = true;
-                break;
-              }
-            }
-            if (detectedAuthor) break;
-          }
-
-          // Strategy 2: fallback to majority heuristic
-          if (!detectedAuthor) {
-            const authorCounts = new Map<string, number>();
-            for (const book of bookResults) {
-              for (const author of book.authors) {
-                const normalized = author.toLowerCase().trim();
-                authorCounts.set(
-                  normalized,
-                  (authorCounts.get(normalized) ?? 0) + 1
-                );
-              }
-            }
-            let topAuthor = "";
-            let topCount = 0;
-            for (const [author, count] of authorCounts) {
-              if (count > topCount) {
-                topAuthor = author;
-                topCount = count;
-              }
-            }
-            if (topCount >= Math.ceil(bookResults.length / 2)) {
-              detectedAuthor = topAuthor;
+              const normalized = author.toLowerCase().trim();
+              authorCounts.set(
+                normalized,
+                (authorCounts.get(normalized) ?? 0) + 1
+              );
             }
           }
-
-          if (detectedAuthor) {
-            // Get the properly-cased author name from the first matching book
+          let topAuthor = "";
+          let topCount = 0;
+          for (const [author, count] of authorCounts) {
+            if (count > topCount) {
+              topAuthor = author;
+              topCount = count;
+            }
+          }
+          if (topCount >= Math.ceil(bookResults.length / 2)) {
             const matchingBook = bookResults.find((b) =>
               b.authors.some(
-                (a) => a.toLowerCase().trim() === detectedAuthor
+                (a) => a.toLowerCase().trim() === topAuthor
               )
             );
             const displayName =
               matchingBook?.authors.find(
-                (a) => a.toLowerCase().trim() === detectedAuthor
-              ) ?? detectedAuthor;
-
-            // Use inauthor: search to get the author's actual catalog,
-            // not just the general results (which may be biographies *about* them)
-            let authorBooks: BookCardBook[];
-            if (queryMatchedAuthor) {
-              try {
-                const catalogResults = await searchByAuthor({
-                  authorName: displayName,
-                  maxResults: 10,
-                });
-                authorBooks = (catalogResults as BookCardBook[]).filter(
-                  (b) =>
-                    b.authors.some(
-                      (a) => a.toLowerCase().trim() === detectedAuthor
-                    )
-                );
-                if (authorBooks.length === 0) {
-                  // Fallback to general results if inauthor: returned nothing useful
-                  authorBooks = bookResults.filter((b) =>
-                    b.authors.some(
-                      (a) => a.toLowerCase().trim() === detectedAuthor
-                    )
-                  );
-                }
-              } catch {
-                // Fallback to general results on error
-                authorBooks = bookResults.filter((b) =>
-                  b.authors.some(
-                    (a) => a.toLowerCase().trim() === detectedAuthor
-                  )
-                );
-              }
-            } else {
-              authorBooks = bookResults.filter((b) =>
-                b.authors.some(
-                  (a) => a.toLowerCase().trim() === detectedAuthor
-                )
-              );
-            }
-
+                (a) => a.toLowerCase().trim() === topAuthor
+              ) ?? topAuthor;
+            const authorBooks = bookResults.filter((b) =>
+              b.authors.some(
+                (a) => a.toLowerCase().trim() === topAuthor
+              )
+            );
             const allCategories = authorBooks.flatMap(
               (b) => b.categories ?? []
             );
-            const uniqueCategories = [...new Set(allCategories)];
 
             setAuthorMatch({
               name: displayName,
@@ -166,7 +163,7 @@ export default function SearchPage() {
                 title: b.title,
                 coverUrl: b.coverUrl,
               })),
-              categories: uniqueCategories.slice(0, 5),
+              categories: [...new Set(allCategories)].slice(0, 5),
             });
           }
         }
