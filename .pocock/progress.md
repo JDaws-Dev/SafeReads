@@ -24,6 +24,18 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `convex/lib/doesTheDogDie.ts` (new), `convex/analyses.ts` (modified), `.env.local.example` (modified)
 
+### Iteration 44 — SafeReads-3xw: Improve body text contrast for accessibility
+
+- Audited ink color scale against parchment-50 background (#fdf8f0)
+- ink-400 (#968e84) had 3.06:1 contrast — FAIL WCAG AA
+- ink-500 (#7b7269) had 4.46:1 contrast — FAIL WCAG AA (barely)
+- **Fix**: Darkened ink-400 to #78706a (4.59:1 — PASS), ink-500 to #6e665c (5.34:1 — PASS)
+- Changes in Tailwind theme (globals.css), not individual components
+- Warm brown undertone preserved, scale still progresses naturally 400→500→600
+- Placeholder text (ink-300, ink-400) not required to meet 4.5:1 per WCAG, but new ink-400 now passes anyway
+- Build + lint pass clean
+- Files: `src/app/globals.css` (modified)
+
 ### Iteration 42 — SafeReads-c4h: Fix back-to-search button navigating to dashboard
 
 - Fixed both "Back to search" Link hrefs from `/dashboard` to `/dashboard/search` on book detail page
@@ -45,20 +57,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `convex/schema.ts` (modified), `convex/books.ts` (modified), `convex/analyses.ts` (modified), `src/components/BookHeader.tsx` (modified)
-
-### Iteration 40 — SafeReads-zqk: Make chat UX more intuitive for parents
-
-- Updated chat welcome screen (`src/app/dashboard/chat/page.tsx`):
-  - Changed heading "SafeReads Advisor" → "Your Book Advisor"
-  - Rewrote description to be specific: "Ask me anything about kids' books — I can recommend titles, check if a book is right for your child, or find safer alternatives."
-  - Added 3 tappable suggested prompt buttons: "What should my 8-year-old read next?", "Is Hunger Games ok for a 12-year-old?", "Books like Harry Potter but less scary"
-  - Prompts call `handleWelcomeSend` — auto-create conversation and send
-- Updated ChatWindow empty state heading to match ("Your Book Advisor")
-- Updated dashboard CTA card (`src/app/dashboard/page.tsx`):
-  - Description now shows example questions: "What should my 8-year-old read?" · "Is this book ok for my kid?" · "Find safer alternatives"
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/app/dashboard/chat/page.tsx` (modified), `src/components/chat/ChatWindow.tsx` (modified), `src/app/dashboard/page.tsx` (modified)
 
 ---
 
@@ -129,6 +127,11 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 40 — SafeReads-zqk: Make chat UX more intuitive for parents
+
+- Added suggested prompt buttons to chat, updated welcome copy
+- Build + lint pass clean
 
 ### Iteration 39 — SafeReads-71w: Rename 'analyses' to 'reviews' site-wide and remove re-analyze button
 
