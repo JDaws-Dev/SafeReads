@@ -10,6 +10,20 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 34 — SafeReads-cm4.6: Create settings page with subscription management
+
+- Created `src/app/dashboard/settings/page.tsx` — settings page with subscription management
+  - Free users: analyses used/remaining count, pricing card ($2.99/mo) with feature list, Upgrade button → Stripe checkout
+  - Subscribed users: Premium badge, status (active/canceled), renewal/access-until date, total analyses count, Manage Subscription button → Stripe portal
+  - Loading state with spinner while subscription details load
+- Updated `src/components/Navbar.tsx` — added Settings gear icon link between Chat and NotificationBell (desktop)
+- Updated `src/components/BottomNav.tsx` — added Settings item to mobile bottom navigation (6 items total)
+- **Decision**: Settings in Navbar uses icon-only (gear) to save horizontal space, consistent with NotificationBell pattern. BottomNav uses icon+label like other items.
+- **Decision**: Canceled subscriptions show "Access until: <date>" instead of "Renews: <date>"
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/dashboard/settings/page.tsx` (new), `src/components/Navbar.tsx` (modified), `src/components/BottomNav.tsx` (modified)
+
 ### Iteration 33 — SafeReads-cm4.5: Add upgrade prompt and paywall UI to VerdictSection
 
 - Created `src/components/UpgradePrompt.tsx` — modal with pricing ($2.99/mo), feature list, Upgrade button
@@ -43,20 +57,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/app/api/stripe/checkout/route.ts` (new), `src/app/api/stripe/portal/route.ts` (new), `src/app/api/webhooks/stripe/route.ts` (new), `convex/subscriptions.ts` (modified), `convex/_generated/api.d.ts` (modified)
-
-### Iteration 31 — SafeReads-cm4.2: Create Convex subscription queries and mutations
-
-- Created `convex/subscriptions.ts` with 5 functions:
-  - `checkAccess` query — returns `{ hasAccess, freeRemaining, isSubscribed }`. Free users get 3 analyses (FREE_ANALYSIS_LIMIT const), subscribed users unlimited.
-  - `getDetails` query — returns subscription info for settings UI (status, periodEnd, analysisCount, freeRemaining)
-  - `incrementAnalysisCount` mutation — bumps `analysisCount` by 1, looks up user by clerkId
-  - `updateSubscription` internalMutation — updates subscription fields by stripeCustomerId (for webhook)
-  - `setStripeCustomerId` internalMutation — stores stripeCustomerId on user by clerkId (for checkout)
-- Updated `convex/_generated/api.d.ts` — added subscriptions module import
-- **Decision**: FREE_ANALYSIS_LIMIT = 3, extracted as module-level const. `analysisCount ?? 0` handles existing users with undefined field.
-- No new dependencies
-- Build + lint pass clean
-- Files: `convex/subscriptions.ts` (new), `convex/_generated/api.d.ts` (modified)
 
 ---
 
@@ -127,6 +127,20 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 31 — SafeReads-cm4.2: Create Convex subscription queries and mutations
+
+- Created `convex/subscriptions.ts` with 5 functions:
+  - `checkAccess` query — returns `{ hasAccess, freeRemaining, isSubscribed }`. Free users get 3 analyses (FREE_ANALYSIS_LIMIT const), subscribed users unlimited.
+  - `getDetails` query — returns subscription info for settings UI (status, periodEnd, analysisCount, freeRemaining)
+  - `incrementAnalysisCount` mutation — bumps `analysisCount` by 1, looks up user by clerkId
+  - `updateSubscription` internalMutation — updates subscription fields by stripeCustomerId (for webhook)
+  - `setStripeCustomerId` internalMutation — stores stripeCustomerId on user by clerkId (for checkout)
+- Updated `convex/_generated/api.d.ts` — added subscriptions module import
+- **Decision**: FREE_ANALYSIS_LIMIT = 3, extracted as module-level const. `analysisCount ?? 0` handles existing users with undefined field.
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/subscriptions.ts` (new), `convex/_generated/api.d.ts` (modified)
 
 ### Iteration 30 — SafeReads-cm4.1: Install Stripe SDK and update Convex schema
 
