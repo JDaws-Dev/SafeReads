@@ -12,6 +12,7 @@ import { ReportButton } from "./ReportButton";
 import { ShareVerdictButton } from "./ShareVerdictButton";
 import { UpgradePrompt } from "./UpgradePrompt";
 import { useNotification } from "@/hooks/useNotification";
+import { Sparkles } from "lucide-react";
 
 interface VerdictSectionProps {
   bookId: Id<"books">;
@@ -85,22 +86,11 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
     actionResult?.contentFlags ??
     [];
 
-  // Free tier banner: show remaining count for non-subscribed users without a cached analysis
-  const showFreeBanner = access && !access.isSubscribed && !analysis;
-
   return (
     <div className="space-y-4">
       <h2 className="font-serif text-xl font-bold text-ink-900">
         Content Review
       </h2>
-
-      {showFreeBanner && (
-        <div className="rounded-lg border border-parchment-300 bg-parchment-50 px-4 py-2.5 text-sm text-ink-600">
-          {access.freeRemaining > 0
-            ? `${access.freeRemaining} of 3 free reviews remaining`
-            : "You\u2019ve used all 3 free reviews"}
-        </div>
-      )}
 
       {analysis ? (
         <>
@@ -124,23 +114,32 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
             )}
           </div>
         </>
+      ) : access && !access.hasAccess ? (
+        <div className="rounded-xl border border-parchment-200 bg-white p-6 text-center">
+          <Sparkles className="mx-auto h-8 w-8 text-parchment-400" />
+          <p className="mt-3 font-serif text-lg font-bold text-ink-900">
+            You&apos;ve used all 3 free reviews
+          </p>
+          <p className="mt-1 text-sm text-ink-500">
+            Upgrade to SafeReads Pro for unlimited book reviews.
+          </p>
+          <button
+            onClick={() => setShowUpgrade(true)}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-parchment-700 px-5 py-2.5 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800"
+          >
+            Upgrade — $2.99/mo
+          </button>
+        </div>
       ) : (
         <div className="rounded-xl border border-parchment-200 bg-white p-6 text-center">
           <p className="mb-4 text-sm text-ink-600">
             Get an objective content review of this book.
           </p>
-          <AnalyzeButton
-            onClick={handleAnalyze}
-            loading={analyzing}
-            disabled={access !== undefined && !access.hasAccess}
-          />
-          {access && !access.hasAccess && (
-            <button
-              onClick={() => setShowUpgrade(true)}
-              className="mt-3 text-sm font-medium text-parchment-700 underline underline-offset-2 hover:text-parchment-800"
-            >
-              Upgrade to unlock more reviews
-            </button>
+          <AnalyzeButton onClick={handleAnalyze} loading={analyzing} />
+          {access && !access.isSubscribed && access.freeRemaining > 0 && (
+            <p className="mt-3 text-xs text-ink-400">
+              {access.freeRemaining} of 3 free reviews remaining
+            </p>
           )}
         </div>
       )}
