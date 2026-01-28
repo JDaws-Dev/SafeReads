@@ -5,7 +5,7 @@ import {
   internalQuery,
   query,
 } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 import OpenAI from "openai";
 
@@ -116,6 +116,7 @@ export const store = internalMutation({
 export const analyze = action({
   args: {
     bookId: v.id("books"),
+    clerkId: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<AnalysisResult> => {
     // 1. Fetch book
@@ -126,7 +127,7 @@ export const analyze = action({
       throw new Error("Book not found");
     }
 
-    // 2. Check cache
+    // 2. Check cache — cached results are free for everyone
     const cached = await ctx.runQuery(internal.analyses.getCachedAnalysis, {
       bookId: args.bookId,
     });
@@ -134,11 +135,28 @@ export const analyze = action({
       return cached as AnalysisResult;
     }
 
-    // 3. Run analysis (checks data sufficiency, calls OpenAI, returns result)
+    // 3. Paywall check — only for new (non-cached) analyses
+    if (args.clerkId) {
+      const access = await ctx.runQuery(api.subscriptions.checkAccess, {
+        clerkId: args.clerkId,
+      });
+      if (!access.hasAccess) {
+        throw new Error("UPGRADE_REQUIRED");
+      }
+    }
+
+    // 4. Run analysis (checks data sufficiency, calls OpenAI, returns result)
     const result = await runOpenAIAnalysis(book, args.bookId);
 
-    // 4. Store in cache
+    // 5. Store in cache
     await ctx.runMutation(internal.analyses.store, result);
+
+    // 6. Increment analysis count
+    if (args.clerkId) {
+      await ctx.runMutation(api.subscriptions.incrementAnalysisCount, {
+        clerkId: args.clerkId,
+      });
+    }
 
     return result;
   },
@@ -162,14 +180,25 @@ export const getBookById = internalQuery({
 export const reanalyze = action({
   args: {
     bookId: v.id("books"),
+    clerkId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // 1. Delete existing cached analysis
+    // 1. Paywall check — re-analysis always counts as new
+    if (args.clerkId) {
+      const access = await ctx.runQuery(api.subscriptions.checkAccess, {
+        clerkId: args.clerkId,
+      });
+      if (!access.hasAccess) {
+        throw new Error("UPGRADE_REQUIRED");
+      }
+    }
+
+    // 2. Delete existing cached analysis
     await ctx.runMutation(internal.analyses.deleteByBook, {
       bookId: args.bookId,
     });
 
-    // 2. Fetch book
+    // 3. Fetch book
     const book = await ctx.runQuery(internal.analyses.getBookById, {
       bookId: args.bookId,
     });
@@ -177,11 +206,18 @@ export const reanalyze = action({
       throw new Error("Book not found");
     }
 
-    // 3. Run fresh analysis
+    // 4. Run fresh analysis
     const result = await runOpenAIAnalysis(book, args.bookId);
 
-    // 4. Store new result
+    // 5. Store new result
     await ctx.runMutation(internal.analyses.store, result);
+
+    // 6. Increment analysis count
+    if (args.clerkId) {
+      await ctx.runMutation(api.subscriptions.incrementAnalysisCount, {
+        clerkId: args.clerkId,
+      });
+    }
 
     return result;
   },
