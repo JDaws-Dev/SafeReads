@@ -32,6 +32,7 @@ export const metadata: Metadata = {
     title: "SafeReads",
     description:
       "Know what's in the book before your kid reads it. AI-powered content analysis for parents.",
+    url: "https://getsafereads.com",
     siteName: "SafeReads",
     type: "website",
   },
