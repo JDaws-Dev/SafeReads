@@ -24,6 +24,21 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `convex/lib/doesTheDogDie.ts` (new), `convex/analyses.ts` (modified), `.env.local.example` (modified)
 
+### Iteration 46 — SafeReads-jw3: Consolidate History into Search tab
+
+- Merged search history into search page as "Recent Searches" pill buttons
+  - Shows when idle (no active search performed yet)
+  - Each pill re-runs that search query on click
+  - Clear button to wipe search history
+- Removed History from Navbar (desktop) and BottomNav (mobile)
+- Deleted `/dashboard/history` page entirely
+- **Notes remain accessible** via BookNotes component on book detail pages — no change needed
+- Bottom nav now has 5 items: Home, Search, Kids, Chat, Settings
+- **Decision**: Used tappable pill/chip UI for recent searches — more compact and actionable than the list format of the old history page. Notes tab was dropped from the consolidated view since notes are per-book (accessed from book detail page).
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/dashboard/search/page.tsx` (modified), `src/components/Navbar.tsx` (modified), `src/components/BottomNav.tsx` (modified), `src/app/dashboard/history/page.tsx` (deleted)
+
 ### Iteration 45 — SafeReads-9yt: Extract first_sentence from Open Library for GPT-4o context
 
 - Added `firstSentence: v.optional(v.string())` to books schema
@@ -49,13 +64,6 @@ This file maintains context between autonomous iterations.
 - Placeholder text (ink-300, ink-400) not required to meet 4.5:1 per WCAG, but new ink-400 now passes anyway
 - Build + lint pass clean
 - Files: `src/app/globals.css` (modified)
-
-### Iteration 42 — SafeReads-c4h: Fix back-to-search button navigating to dashboard
-
-- Fixed both "Back to search" Link hrefs from `/dashboard` to `/dashboard/search` on book detail page
-- Both normal view (line 53) and not-found state (line 40) links corrected
-- Build + lint pass clean
-- Files: `src/app/dashboard/book/[id]/page.tsx` (modified)
 
 ---
 
@@ -126,6 +134,11 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 42 — SafeReads-c4h: Fix back-to-search button navigating to dashboard
+
+- Fixed both "Back to search" Link hrefs to /dashboard/search
+- Build + lint pass clean
 
 ### Iteration 41 — SafeReads-whc: Capture maturityRating from Google Books API
 
