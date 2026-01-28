@@ -71,7 +71,7 @@ export default function Home() {
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="none"
           >
             <source src="/safereads-promo.mp4" type="video/mp4" />
           </video>

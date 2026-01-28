@@ -12,7 +12,6 @@ import type * as analyses from "../analyses.js";
 import type * as books from "../books.js";
 import type * as kids from "../kids.js";
 import type * as notes from "../notes.js";
-import type * as profiles from "../profiles.js";
 import type * as reports from "../reports.js";
 import type * as searchHistory from "../searchHistory.js";
 import type * as users from "../users.js";
@@ -29,7 +28,6 @@ declare const fullApi: ApiFromModules<{
   books: typeof books;
   kids: typeof kids;
   notes: typeof notes;
-  profiles: typeof profiles;
   reports: typeof reports;
   searchHistory: typeof searchHistory;
   users: typeof users;

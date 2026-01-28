@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://safereads.app/sitemap.xml",
+    sitemap: "https://getsafereads.com/sitemap.xml",
   };
 }
