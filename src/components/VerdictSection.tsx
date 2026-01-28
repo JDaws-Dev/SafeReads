@@ -8,13 +8,15 @@ import { VerdictCard, VerdictCardAnalysis } from "./VerdictCard";
 import { ContentFlagList, ContentFlag } from "./ContentFlagList";
 import { AnalyzeButton } from "./AnalyzeButton";
 import { ReportButton } from "./ReportButton";
+import { ShareVerdictButton } from "./ShareVerdictButton";
 import { RefreshCw } from "lucide-react";
 
 interface VerdictSectionProps {
   bookId: Id<"books">;
+  bookTitle: string;
 }
 
-export function VerdictSection({ bookId }: VerdictSectionProps) {
+export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
   const cachedAnalysis = useQuery(api.analyses.getByBook, { bookId });
 
   const analyzeAction = useAction(api.analyses.analyze);
@@ -93,6 +95,15 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
           <VerdictCard analysis={analysis} />
           <ContentFlagList flags={flags} />
           <div className="flex items-center justify-end gap-2">
+            {analysis && (
+              <ShareVerdictButton
+                bookTitle={bookTitle}
+                verdict={analysis.verdict}
+                summary={analysis.summary}
+                ageRecommendation={analysis.ageRecommendation}
+                bookUrl={typeof window !== "undefined" ? window.location.href : ""}
+              />
+            )}
             {cachedAnalysis?._id && (
               <ReportButton
                 bookId={bookId}

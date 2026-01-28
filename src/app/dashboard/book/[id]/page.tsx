@@ -75,7 +75,7 @@ export default function BookDetailPage({
       </div>
 
       <div className="mt-8">
-        <VerdictSection bookId={book._id} />
+        <VerdictSection bookId={book._id} bookTitle={book.title} />
       </div>
 
       <div className="mt-8">

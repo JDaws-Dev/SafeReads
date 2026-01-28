@@ -42,27 +42,18 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `convex/analyses.ts` (modified), `src/components/VerdictSection.tsx` (modified)
 
-### Iteration 23 — SafeReads-zve: Build notes and search history pages
+### Iteration 26 — SafeReads-i3n: Share verdict with co-parent
 
-- Added `notes` table to schema: `userId`, `bookId`, `content` — indexes `by_user` and `by_user_and_book`
-- Added `searchHistory` table to schema: `userId`, `query`, `resultCount` — index `by_user`
-- Created `convex/notes.ts`: `getByUserAndBook`, `listByUser` (with book data), `upsert` (create-or-update), `remove`
-- Created `convex/searchHistory.ts`: `listByUser`, `record`, `clearAll`
-- Created `/dashboard/history` page with tabbed UI (Searches / Notes):
-  - Searches tab: list with query, result count, relative timestamp, link to re-run search, "Clear all" button
-  - Notes tab: list with book cover thumbnail, title, note content preview, link to book detail
-  - Loading skeletons and empty states for both tabs
-- Created `src/components/BookNotes.tsx` — inline note editor on book detail page:
-  - Shows "Add a note" dashed button when no note exists
-  - Displays note with edit/delete controls when note exists
-  - Editing mode with textarea, save/cancel/delete buttons
-  - Uses upsert pattern (one note per user per book)
-- Updated `src/app/dashboard/search/page.tsx` — records searches to history (best-effort, non-blocking)
-- Updated `src/app/dashboard/book/[id]/page.tsx` — added BookNotes component above VerdictSection
-- Updated `src/components/Navbar.tsx` — added "History" link between Search and Kids
+- Created `src/components/ShareVerdictButton.tsx` — share button for verdict results
+  - Web Share API on mobile (native share sheet — text/WhatsApp/email/etc.)
+  - Clipboard fallback on desktop with "Copied!" feedback
+  - Formatted share text: emoji verdict badge, book title, verdict label, age recommendation, summary, link
+- Updated `VerdictSection.tsx` — added `bookTitle` prop, ShareVerdictButton in action bar next to Report and Re-analyze
+- Updated book detail page — passes `bookTitle` to VerdictSection
+- No backend changes needed — analyses are global per-book, not per-user private data
 - No new dependencies
 - Build + lint pass clean
-- Files: `convex/schema.ts` (modified), `convex/notes.ts` (new), `convex/searchHistory.ts` (new), `src/app/dashboard/history/page.tsx` (new), `src/components/BookNotes.tsx` (new), `src/app/dashboard/search/page.tsx` (modified), `src/app/dashboard/book/[id]/page.tsx` (modified), `src/components/Navbar.tsx` (modified)
+- Files: `src/components/ShareVerdictButton.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/app/dashboard/book/[id]/page.tsx` (modified)
 
 ---
 
@@ -130,6 +121,17 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 23 — SafeReads-zve: Build notes and search history pages
+
+- Added `notes` table to schema: `userId`, `bookId`, `content` — indexes `by_user` and `by_user_and_book`
+- Added `searchHistory` table to schema: `userId`, `query`, `resultCount` — index `by_user`
+- Created `convex/notes.ts`: `getByUserAndBook`, `listByUser` (with book data), `upsert` (create-or-update), `remove`
+- Created `convex/searchHistory.ts`: `listByUser`, `record`, `clearAll`
+- Created `/dashboard/history` page with tabbed UI (Searches / Notes)
+- Created `src/components/BookNotes.tsx` — inline note editor on book detail page
+- No new dependencies
+- Build + lint pass clean
 
 ### Iteration 22 — SafeReads-0xq: Build dashboard home and polish UI
 
