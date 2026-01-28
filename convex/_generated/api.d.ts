@@ -15,6 +15,7 @@ import type * as kids from "../kids.js";
 import type * as notes from "../notes.js";
 import type * as reports from "../reports.js";
 import type * as searchHistory from "../searchHistory.js";
+import type * as subscriptions from "../subscriptions.js";
 import type * as users from "../users.js";
 import type * as wishlists from "../wishlists.js";
 
@@ -32,6 +33,7 @@ declare const fullApi: ApiFromModules<{
   notes: typeof notes;
   reports: typeof reports;
   searchHistory: typeof searchHistory;
+  subscriptions: typeof subscriptions;
   users: typeof users;
   wishlists: typeof wishlists;
 }>;

@@ -10,6 +10,20 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 31 — SafeReads-cm4.2: Create Convex subscription queries and mutations
+
+- Created `convex/subscriptions.ts` with 5 functions:
+  - `checkAccess` query — returns `{ hasAccess, freeRemaining, isSubscribed }`. Free users get 3 analyses (FREE_ANALYSIS_LIMIT const), subscribed users unlimited.
+  - `getDetails` query — returns subscription info for settings UI (status, periodEnd, analysisCount, freeRemaining)
+  - `incrementAnalysisCount` mutation — bumps `analysisCount` by 1, looks up user by clerkId
+  - `updateSubscription` internalMutation — updates subscription fields by stripeCustomerId (for webhook)
+  - `setStripeCustomerId` internalMutation — stores stripeCustomerId on user by clerkId (for checkout)
+- Updated `convex/_generated/api.d.ts` — added subscriptions module import
+- **Decision**: FREE_ANALYSIS_LIMIT = 3, extracted as module-level const. `analysisCount ?? 0` handles existing users with undefined field.
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/subscriptions.ts` (new), `convex/_generated/api.d.ts` (modified)
+
 ### Iteration 30 — SafeReads-cm4.1: Install Stripe SDK and update Convex schema
 
 - Installed `stripe` npm package
@@ -39,21 +53,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `convex/schema.ts` (modified), `convex/analyses.ts` (modified), `convex/chat.ts` (new), `convex/_generated/api.d.ts` (modified), `src/components/ChatMessage.tsx` (new), `src/components/ChatInput.tsx` (new), `src/components/ConversationList.tsx` (new), `src/components/ChatWindow.tsx` (new), `src/app/dashboard/chat/page.tsx` (new), `src/components/Navbar.tsx` (modified), `src/components/BottomNav.tsx` (modified)
-
-### Iteration 28 — SafeReads-3xr: Push notifications for analysis completion
-
-- Created `src/hooks/useNotification.ts` — browser Notifications API hook
-  - `permission` state (default/granted/denied/unsupported), lazy initialized
-  - `requestPermission()` — requests browser notification permission
-  - `notify()` — fires notification only when page is not visible (user tabbed away)
-- Created `src/components/NotificationBell.tsx` — bell icon in Navbar
-  - Click to request permission (default state), shows active bell (granted), disabled bell-off (denied), hidden (unsupported)
-- Updated `VerdictSection.tsx` — fires browser notification on analysis/re-analysis completion with verdict result
-- Updated `Navbar.tsx` — added NotificationBell next to UserButton
-- **Decision**: Used browser Notifications API (not full Web Push with service workers/VAPID) — analyses complete synchronously while user waits, so notifications only help when user has tabbed away. No backend changes needed.
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/hooks/useNotification.ts` (new), `src/components/NotificationBell.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/components/Navbar.tsx` (modified)
 
 ---
 
@@ -124,6 +123,21 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 28 — SafeReads-3xr: Push notifications for analysis completion
+
+- Created `src/hooks/useNotification.ts` — browser Notifications API hook
+  - `permission` state (default/granted/denied/unsupported), lazy initialized
+  - `requestPermission()` — requests browser notification permission
+  - `notify()` — fires notification only when page is not visible (user tabbed away)
+- Created `src/components/NotificationBell.tsx` — bell icon in Navbar
+  - Click to request permission (default state), shows active bell (granted), disabled bell-off (denied), hidden (unsupported)
+- Updated `VerdictSection.tsx` — fires browser notification on analysis/re-analysis completion with verdict result
+- Updated `Navbar.tsx` — added NotificationBell next to UserButton
+- **Decision**: Used browser Notifications API (not full Web Push with service workers/VAPID) — analyses complete synchronously while user waits, so notifications only help when user has tabbed away. No backend changes needed.
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/hooks/useNotification.ts` (new), `src/components/NotificationBell.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/components/Navbar.tsx` (modified)
 
 ### Iteration 27 — SafeReads-tpl.2: Add Amazon affiliate tag support
 
