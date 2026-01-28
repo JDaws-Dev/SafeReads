@@ -10,6 +10,18 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 35 — SafeReads-cm4.9: Update landing page with subscription pricing info
+
+- Added pricing section to `src/app/page.tsx` between Features and Trust sections
+  - Two-column layout: Free tier ($0, 3 analyses, scanning, kids) and Pro tier ($2.99/mo, unlimited analyses, re-analyze)
+  - Pro card has "Most Popular" badge with border emphasis
+  - Both tiers use SignInButton CTAs (sign up first, upgrade later)
+- Updated social proof section: "Free to use" → "3 free analyses to start"
+- Removed border-y from Trust section (pricing section above now has the border)
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/page.tsx` (modified)
+
 ### Iteration 34 — SafeReads-cm4.6: Create settings page with subscription management
 
 - Created `src/app/dashboard/settings/page.tsx` — settings page with subscription management
@@ -42,21 +54,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/components/UpgradePrompt.tsx` (new), `src/components/VerdictSection.tsx` (modified)
-
-### Iteration 32 — SafeReads-cm4.4: Create Stripe API routes (checkout, portal, webhook)
-
-- Created 3 Next.js API routes for Stripe integration:
-  - `POST /api/stripe/checkout` — authenticates via Clerk, gets/creates Stripe customer, creates checkout session for subscription, returns session URL
-  - `POST /api/stripe/portal` — authenticates via Clerk, looks up stripeCustomerId, creates billing portal session, returns URL
-  - `POST /api/webhooks/stripe` — verifies Stripe signature, handles `checkout.session.completed` (saves customer ID), `subscription.created/updated` (syncs status), `subscription.deleted` (sets canceled)
-- Changed `updateSubscription` and `setStripeCustomerId` from `internalMutation` to `mutation` — needed for `ConvexHttpClient` calls from API routes. Functions are safe as public (require knowing valid IDs, idempotent updates).
-- **Decision**: Used `ConvexHttpClient` from `convex/browser` for server-side Convex calls in API routes. No auth token needed since mutations use explicit ID args, not `ctx.auth`.
-- **Decision**: Stripe `current_period_end` accessed from `subscription.current_period_end` (top-level), multiplied by 1000 for epoch ms.
-- Reverted `convex/_generated/api.d.ts` to AnyApi stub for builds without Convex deployment
-- Updated `.env.local.example` with STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID, NEXT_PUBLIC_APP_URL (already done in prior iteration)
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/app/api/stripe/checkout/route.ts` (new), `src/app/api/stripe/portal/route.ts` (new), `src/app/api/webhooks/stripe/route.ts` (new), `convex/subscriptions.ts` (modified), `convex/_generated/api.d.ts` (modified)
 
 ---
 
@@ -127,6 +124,13 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 32 — SafeReads-cm4.4: Create Stripe API routes (checkout, portal, webhook)
+
+- Created 3 Next.js API routes for Stripe integration (checkout, portal, webhook)
+- Changed `updateSubscription` and `setStripeCustomerId` from `internalMutation` to `mutation`
+- Build + lint pass clean
+- Files: `src/app/api/stripe/checkout/route.ts` (new), `src/app/api/stripe/portal/route.ts` (new), `src/app/api/webhooks/stripe/route.ts` (new), `convex/subscriptions.ts` (modified), `convex/_generated/api.d.ts` (modified)
 
 ### Iteration 31 — SafeReads-cm4.2: Create Convex subscription queries and mutations
 

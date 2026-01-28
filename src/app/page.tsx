@@ -11,6 +11,9 @@ import {
   Users,
   Heart,
   Camera,
+  Sparkles,
+  Infinity,
+  Check,
 } from "lucide-react";
 import { Footer } from "@/components/Footer";
 
@@ -138,8 +141,94 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section
+        id="pricing"
+        className="border-y border-parchment-200 bg-parchment-100/50 py-16 sm:py-20"
+      >
+        <div className="mx-auto max-w-5xl px-4">
+          <h2 className="text-center font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
+            Simple, honest pricing
+          </h2>
+          <p className="mt-3 text-center text-ink-500">
+            Start free. Upgrade when you need more.
+          </p>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 sm:gap-8 mx-auto max-w-3xl">
+            {/* Free tier */}
+            <div className="rounded-xl border border-parchment-200 bg-white p-6">
+              <h3 className="font-serif text-lg font-bold text-ink-900">Free</h3>
+              <p className="mt-1 text-3xl font-bold text-ink-900">
+                $0
+                <span className="text-sm font-normal text-ink-500">/forever</span>
+              </p>
+              <ul className="mt-5 space-y-3 text-sm text-ink-600">
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
+                  3 book analyses
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
+                  Full content breakdowns
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
+                  Barcode &amp; cover scanning
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
+                  Kids &amp; wishlists
+                </li>
+              </ul>
+              <SignInButton mode="modal">
+                <button className="mt-6 w-full rounded-lg border border-parchment-300 bg-white px-4 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:bg-parchment-50">
+                  Get Started
+                </button>
+              </SignInButton>
+            </div>
+
+            {/* Pro tier */}
+            <div className="relative rounded-xl border-2 border-parchment-600 bg-white p-6">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-parchment-700 px-3 py-0.5 text-xs font-semibold text-parchment-50">
+                  <Sparkles className="h-3 w-3" />
+                  Most Popular
+                </span>
+              </div>
+              <h3 className="font-serif text-lg font-bold text-ink-900">Pro</h3>
+              <p className="mt-1 text-3xl font-bold text-ink-900">
+                $2.99
+                <span className="text-sm font-normal text-ink-500">/month</span>
+              </p>
+              <ul className="mt-5 space-y-3 text-sm text-ink-600">
+                <li className="flex items-start gap-2">
+                  <Infinity className="mt-0.5 h-4 w-4 shrink-0 text-parchment-700" />
+                  Unlimited book analyses
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
+                  Re-analyze any book anytime
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
+                  Everything in Free
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
+                  Cancel anytime
+                </li>
+              </ul>
+              <SignInButton mode="modal">
+                <button className="mt-6 w-full rounded-lg bg-parchment-700 px-4 py-2.5 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800">
+                  Start Free, Upgrade Later
+                </button>
+              </SignInButton>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Trust / Social Proof */}
-      <section className="border-y border-parchment-200 bg-parchment-100/50 py-16 sm:py-20">
+      <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h2 className="font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
             Trusted by parents who care
@@ -154,7 +243,7 @@ export default function Home() {
             <span className="hidden sm:inline">&middot;</span>
             <span>No bias, just facts</span>
             <span className="hidden sm:inline">&middot;</span>
-            <span>Free to use</span>
+            <span>3 free analyses to start</span>
           </div>
         </div>
       </section>
