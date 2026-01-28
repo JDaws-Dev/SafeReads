@@ -42,6 +42,16 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `convex/analyses.ts` (modified), `src/components/VerdictSection.tsx` (modified)
 
+### Iteration 27 — SafeReads-tpl.2: Add Amazon affiliate tag support
+
+- Updated `AmazonButton` to read `NEXT_PUBLIC_AMAZON_AFFILIATE_TAG` env var
+- When set, appends `tag=<value>` to Amazon search URL params
+- When unset, button works exactly as before (no change in behavior)
+- Added env var to `.env.local.example` with comment
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/components/AmazonButton.tsx` (modified), `.env.local.example` (modified)
+
 ### Iteration 26 — SafeReads-i3n: Share verdict with co-parent
 
 - Created `src/components/ShareVerdictButton.tsx` — share button for verdict results

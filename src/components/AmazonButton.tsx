@@ -15,6 +15,10 @@ function buildAmazonSearchUrl(title: string, authors: string[], isbn?: string): 
     k: query,
     i: "stripbooks",
   });
+  const affiliateTag = process.env.NEXT_PUBLIC_AMAZON_AFFILIATE_TAG;
+  if (affiliateTag) {
+    params.set("tag", affiliateTag);
+  }
   return `https://www.amazon.com/s?${params.toString()}`;
 }
 
