@@ -418,7 +418,7 @@ Respond with a JSON object containing:
   "summary": "A 2-3 sentence plain-language summary of the book's content, highlighting what parents should know.",
   "contentFlags": [
     {
-      "category": "string (e.g., 'Violence', 'Language', 'Sexual Content', 'Substance Use', 'Dark Themes', 'Religious Content')",
+      "category": "one of the 10 categories listed below",
       "severity": "none" | "mild" | "moderate" | "heavy",
       "details": "Brief, objective description of specific content in this category"
     }
@@ -426,14 +426,46 @@ Respond with a JSON object containing:
   "reasoning": "Your detailed reasoning for the verdict and age recommendation."
 }
 
+## Content Categories (provide a flag for ALL 10)
+
+1. **Violence** — Physical conflict, fighting, weapons, war, gore, threat of harm, murder, torture, abuse.
+   - none: No physical conflict | mild: Schoolyard scuffles, minor peril | moderate: Battle scenes, injuries, real danger | heavy: Graphic injuries, torture, realistic war violence
+
+2. **Language** — Profanity, slurs, crude humor, vulgar language, name-calling, hate speech.
+   - none: Clean language | mild: Occasional "damn"/"hell", mild name-calling | moderate: Regular moderate profanity (s-word, b-word) | heavy: Frequent f-bombs, slurs, pervasive vulgarity
+
+3. **Sexual Content & Nudity** — Explicit sexual acts, sexual references, innuendo, nudity, sexual humor. (Romantic relationships without sexual content belong in Romance. LGBTQ+ identity themes belong in Identity & Gender.)
+   - none: No sexual content | mild: Brief kissing, vague references to sex | moderate: Making out, implied sex ("fade to black") | heavy: Explicit sex scenes, graphic descriptions, sexual assault depicted
+
+4. **Substance Use** — Alcohol, drugs (illegal and prescription misuse), tobacco, vaping, intoxication.
+   - none: No substance use | mild: Background alcohol at meals, historical tobacco | moderate: Teen drinking, drug references | heavy: Addiction depicted, drug culture central to plot
+
+5. **Dark Themes & Mental Health** — Death and grief, abuse (emotional/physical), trauma, depression, anxiety, suicide, self-harm, eating disorders, mental illness, trafficking, slavery.
+   - none: No dark themes | mild: Pet death, mild sadness | moderate: Parent death, bullying, depression, divorce | heavy: Suicide depicted, self-harm, severe abuse, eating disorders central to plot
+
+6. **Supernatural & Occult** — Magic systems, witchcraft, sorcery, divination, demons, ghosts, séances, paranormal activity, pagan rituals. (Distinct from religious worldview content.)
+   - none: No supernatural elements | mild: Fairy-tale magic, whimsical fantasy | moderate: Structured magic systems, witches/wizards, ghosts as plot devices | heavy: Occult rituals in detail, demon summoning, dark spiritual practices
+
+7. **Religious & Worldview Content** — Explicit religious themes (Christianity, Islam, Judaism, etc.), atheism/agnosticism as worldview, secular humanism, nihilism, moral relativism, anti-religious messaging, evangelism, spiritual searching.
+   - none: No notable religious/worldview content | mild: Characters attend services, casual religious references | moderate: Faith as significant theme, character questions belief, specific worldview presented | heavy: Overt evangelism or anti-religious argument, worldview is central thesis
+
+8. **Romance** — Romantic relationships, crushes, dating, love triangles, heartbreak, romantic tension (all orientations). About the romantic relationship content, not sexual content (cat 3) or identity of people involved (cat 9).
+   - none: No romantic content | mild: First crush, hand-holding | moderate: Dating central to plot, kissing, heartbreak, love triangle | heavy: Intense/obsessive romantic relationships, co-dependency, romance is dominant focus
+
+9. **Identity & Gender** — LGBTQ+ characters and themes, gender identity exploration, sexual orientation as a theme, transgender experiences, non-binary identity, coming out narratives, same-sex relationships, gender role questioning. Describe what is present neutrally — do not judge whether it is positive or negative.
+   - none: No identity/gender themes | mild: Minor LGBTQ+ side character, brief mention of diverse family structures | moderate: Coming-out narrative as significant subplot, gender identity exploration by main character | heavy: Identity/gender is central theme, detailed transition exploration, sexuality as primary narrative arc
+
+10. **Social & Political Themes** — Racism and racial justice, political ideology/messaging, activism, social class/inequality, immigration, environmentalism as advocacy, anti-authority/rebellion, propaganda, censorship themes. Describe what is present neutrally — do not judge the political direction.
+    - none: No notable social/political themes | mild: Background awareness of social differences, historical context | moderate: Racism/injustice as significant theme, political systems explored, activism depicted | heavy: Overt political advocacy, heavy ideological messaging, graphic depictions of systemic oppression
+
 Guidelines:
 - "safe" = content is generally appropriate for most young readers (roughly ages 8+), with no significant mature themes
 - "caution" = content contains some mature elements that parents may want to be aware of (roughly ages 12+)
 - "warning" = content contains significant mature themes and is best suited for older teens or adults (roughly ages 16+)
 - "no_verdict" = insufficient information to make a determination
-- Always provide content flags for ALL 6 categories (Violence, Language, Sexual Content, Substance Use, Dark Themes, Religious Content), even if severity is "none"
-- Be specific and factual about content (e.g., "battlefield violence with graphic injuries" vs just "violence")
-- Be objective — describe what the content IS, not whether it's good or bad
+- Always provide content flags for ALL 10 categories, even if severity is "none"
+- Be specific and factual in details (e.g., "battlefield violence with graphic injuries" not just "violence")
+- Be objective — describe what the content IS, not whether it's good or bad. Parents decide that.
 - Base your analysis on widely known information about the book, its reviews, and its content
 - If you're unsure about specific content, note your uncertainty in the reasoning and err on the side of caution
 - The age recommendation should reflect general community standards, not any individual family's values`;
