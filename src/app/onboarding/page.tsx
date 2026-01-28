@@ -105,7 +105,7 @@ export default function OnboardingPage() {
             Search by title, scan a barcode, or snap a photo of the cover.
           </p>
           <p className="mt-3 text-sm text-ink-400">
-            Our AI analyzes books for violence, language, sexual content, and
+            Our AI reviews books for violence, language, sexual content, and
             more — so you can make informed decisions.
           </p>
           <button

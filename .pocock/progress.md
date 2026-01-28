@@ -24,7 +24,11 @@ This file maintains context between autonomous iterations.
 - **Decision**: "Re-analyze" feature replaced with "Priority support" in pricing feature lists (re-analyze backend action kept for admin/dev use)
 - No new dependencies
 - Build + lint pass clean
-- Files: `src/app/page.tsx`, `src/app/layout.tsx`, `src/app/about/page.tsx`, `src/app/terms/page.tsx`, `src/app/privacy/page.tsx`, `src/app/opengraph-image.tsx`, `src/app/dashboard/page.tsx`, `src/app/dashboard/settings/page.tsx`, `src/components/VerdictSection.tsx`, `convex/chat.ts` (all modified)
+- Updated AnalyzeButton: "Analyze Content" → "Get Review", "Analyzing…" → "Reviewing…"
+- Updated UpgradePrompt: "free analyses" → "free reviews", "Re-analyze" → "Priority support", RefreshCw icon → Heart icon
+- Updated ReportButton: "Factual error in analysis" → "in review", "Report Analysis Issue" → "Report Review Issue"
+- Updated onboarding: "analyzes books" → "reviews books"
+- Files: `src/app/page.tsx`, `src/app/layout.tsx`, `src/app/about/page.tsx`, `src/app/terms/page.tsx`, `src/app/privacy/page.tsx`, `src/app/opengraph-image.tsx`, `src/app/onboarding/page.tsx`, `src/app/dashboard/page.tsx`, `src/app/dashboard/settings/page.tsx`, `src/components/VerdictSection.tsx`, `src/components/AnalyzeButton.tsx`, `src/components/UpgradePrompt.tsx`, `src/components/ReportButton.tsx`, `convex/chat.ts` (all modified)
 
 ### Iteration 38 — SafeReads-0je: Streamline navbar: remove bell, merge settings into avatar
 
