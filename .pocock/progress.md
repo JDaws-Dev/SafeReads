@@ -10,6 +10,18 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 38 — SafeReads-0je: Streamline navbar: remove bell, merge settings into avatar
+
+- Removed NotificationBell from Navbar — analyses complete synchronously, browser notifications from VerdictSection still work (useNotification hook kept)
+- Removed Settings gear icon from Navbar
+- Added "Settings" link inside Clerk UserButton dropdown via `<UserButton.MenuItems>` + `<UserButton.Link>` — navigates to /dashboard/settings
+- Deleted `src/components/NotificationBell.tsx` (orphaned, no longer imported)
+- Used inline SVG gear icon for `labelIcon` (Clerk requires React element, not Lucide component directly)
+- **Decision**: Keep `useNotification` hook — VerdictSection still uses it for browser notifications when user tabs away during analysis
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/components/Navbar.tsx` (modified), `src/components/NotificationBell.tsx` (deleted)
+
 ### Iteration 37 — SafeReads-6pk: Fix clickable book links in chat not finding books
 
 - Fixed `src/components/chat/ChatMessage.tsx` — `strong` renderer couldn't extract text from ReactMarkdown children
@@ -29,18 +41,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/app/dashboard/chat/page.tsx` (modified)
-
-### Iteration 35 — SafeReads-cm4.9: Update landing page with subscription pricing info
-
-- Added pricing section to `src/app/page.tsx` between Features and Trust sections
-  - Two-column layout: Free tier ($0, 3 analyses, scanning, kids) and Pro tier ($2.99/mo, unlimited analyses, re-analyze)
-  - Pro card has "Most Popular" badge with border emphasis
-  - Both tiers use SignInButton CTAs (sign up first, upgrade later)
-- Updated social proof section: "Free to use" → "3 free analyses to start"
-- Removed border-y from Trust section (pricing section above now has the border)
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/app/page.tsx` (modified)
 
 ---
 
@@ -111,6 +111,11 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 35 — SafeReads-cm4.9: Update landing page with subscription pricing info
+
+- Added pricing section with Free and Pro tiers to landing page
+- Build + lint pass clean
 
 ### Iteration 34 — SafeReads-cm4.6: Create settings page with subscription management
 
