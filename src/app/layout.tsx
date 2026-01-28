@@ -18,7 +18,7 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://safereads.app"),
+  metadataBase: new URL("https://getsafereads.com"),
   title: {
     default: "SafeReads",
     template: "%s — SafeReads",
