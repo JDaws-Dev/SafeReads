@@ -20,6 +20,8 @@ bd update <issue-id> --status in_progress
 bd show <issue-id>
 ```
 
+**IMPORTANT**: Every issue returned by `bd ready` has NO blocking dependencies. If `bd ready` lists it, you MUST work on it. Do NOT skip issues or claim they are blocked — Beads already resolved all dependency checks. Pick one and start.
+
 **YOU choose the highest priority task** - not necessarily first in the list.
 
 **Priority ranking:**
@@ -148,7 +150,11 @@ bd close <issue-id>
 - All acceptance criteria are checked off with verification notes
 - Implementation notes are added to the issue
 
-If the ready list is empty, output:
+After closing the issue, run `bd ready` to check if more work exists.
+
+If `bd ready` returns NO issues (empty list), output:
 <promise>COMPLETE</promise>
 
-Otherwise, stop after completing ONE issue. The loop will restart you.
+If `bd ready` returns issues, stop. The loop will restart you.
+
+**NEVER output COMPLETE if `bd ready` still shows issues.** Always check by running the command.

@@ -1,7 +1,23 @@
 import { v } from "convex/values";
 import { action, internalMutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 import OpenAI from "openai";
+
+type BookResult = {
+  _id: Id<"books">;
+  googleBooksId?: string;
+  openLibraryKey?: string;
+  title: string;
+  authors: string[];
+  description?: string;
+  coverUrl?: string;
+  pageCount?: number;
+  publishedDate?: string;
+  categories?: string[];
+  isbn10?: string;
+  isbn13?: string;
+};
 
 // --- Public queries ---
 
@@ -74,11 +90,11 @@ export const search = action({
     query: v.string(),
     maxResults: v.optional(v.number()),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<BookResult[]> => {
     const maxResults = args.maxResults ?? 10;
     const googleResults = await searchGoogleBooks(args.query, maxResults);
 
-    const books = await Promise.all(
+    const books: BookResult[] = await Promise.all(
       googleResults.map(async (item) => {
         const parsed = parseGoogleBooksItem(item);
 
@@ -156,18 +172,29 @@ async function searchGoogleBooks(
     params.set("key", apiKey);
   }
 
-  const response = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?${params.toString()}`
-  );
+  const url = `https://www.googleapis.com/books/v1/volumes?${params.toString()}`;
 
-  if (!response.ok) {
-    throw new Error(
-      `Google Books API error: ${response.status} ${response.statusText}`
-    );
+  // Retry with exponential backoff on rate limiting
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const response = await fetch(url);
+
+    if (response.status === 429) {
+      const delay = 1000 * Math.pow(2, attempt); // 1s, 2s, 4s
+      await new Promise((r) => setTimeout(r, delay));
+      continue;
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        `Google Books API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = (await response.json()) as GoogleBooksResponse;
+    return data.items ?? [];
   }
 
-  const data = (await response.json()) as GoogleBooksResponse;
-  return data.items ?? [];
+  throw new Error("Google Books API rate limited after 3 retries. Try again in a moment.");
 }
 
 interface ParsedBook {
@@ -339,7 +366,7 @@ export const identifyCover = action({
   args: {
     imageBase64: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<BookResult[]> => {
     const openai = new OpenAI();
 
     const completion = await openai.chat.completions.create({
@@ -392,7 +419,7 @@ export const identifyCover = action({
     // Reuse the existing Google Books search + enrichment + upsert flow
     const googleResults = await searchGoogleBooks(query, 5);
 
-    const books = await Promise.all(
+    const books: BookResult[] = await Promise.all(
       googleResults.map(async (item) => {
         const parsedBook = parseGoogleBooksItem(item);
 

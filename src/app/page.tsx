@@ -12,6 +12,7 @@ import {
   Heart,
   Camera,
 } from "lucide-react";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -58,6 +59,22 @@ export default function Home() {
               See how it works &darr;
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* Promo Video */}
+      <section className="mx-auto max-w-3xl px-4 pb-16 sm:pb-20">
+        <div className="overflow-hidden rounded-xl border border-parchment-200 shadow-lg">
+          <video
+            className="w-full"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          >
+            <source src="/safereads-promo.mp4" type="video/mp4" />
+          </video>
         </div>
       </section>
 
@@ -159,12 +176,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-parchment-200 py-8">
-        <div className="mx-auto max-w-5xl px-4 text-center text-sm text-ink-400">
-          <p>&copy; {new Date().getFullYear()} SafeReads. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

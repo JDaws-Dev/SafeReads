@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useAction } from "convex/react";
+import { useRouter } from "next/navigation";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
-import { BookOpen, Loader2, Sparkles } from "lucide-react";
+import { BookOpen, ChevronRight, Loader2, Sparkles } from "lucide-react";
 
 interface Alternative {
   title: string;
@@ -21,8 +22,11 @@ export function AlternativesSuggestions({
   bookId,
 }: AlternativesSuggestionsProps) {
   const suggestAction = useAction(api.analyses.suggestAlternatives);
+  const searchAction = useAction(api.books.search);
+  const router = useRouter();
   const [alternatives, setAlternatives] = useState<Alternative[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [navigatingIdx, setNavigatingIdx] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSuggest() {
@@ -39,6 +43,25 @@ export function AlternativesSuggestions({
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleNavigate(alt: Alternative, idx: number) {
+    setNavigatingIdx(idx);
+    try {
+      const results = await searchAction({
+        query: `${alt.title} ${alt.author}`,
+        maxResults: 1,
+      });
+      if (results.length > 0) {
+        router.push(`/dashboard/book/${results[0]._id}`);
+      } else {
+        setError(`Could not find "${alt.title}" — try searching manually.`);
+      }
+    } catch {
+      setError(`Could not find "${alt.title}" — try searching manually.`);
+    } finally {
+      setNavigatingIdx(null);
     }
   }
 
@@ -75,13 +98,19 @@ export function AlternativesSuggestions({
       ) : (
         <div className="space-y-2">
           {alternatives.map((alt, i) => (
-            <div
+            <button
               key={`${alt.title}-${i}`}
-              className="rounded-lg border border-parchment-200 bg-white p-4"
+              onClick={() => handleNavigate(alt, i)}
+              disabled={navigatingIdx !== null}
+              className="w-full rounded-lg border border-parchment-200 bg-white p-4 text-left transition-colors hover:border-parchment-400 hover:bg-parchment-50 disabled:opacity-60"
             >
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-parchment-100">
-                  <BookOpen className="h-4 w-4 text-parchment-600" />
+                  {navigatingIdx === i ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-parchment-600" />
+                  ) : (
+                    <BookOpen className="h-4 w-4 text-parchment-600" />
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
@@ -95,8 +124,9 @@ export function AlternativesSuggestions({
                   <p className="text-sm text-ink-500">{alt.author}</p>
                   <p className="mt-1 text-sm text-ink-600">{alt.reason}</p>
                 </div>
+                <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-ink-300" />
               </div>
-            </div>
+            </button>
           ))}
 
           <button

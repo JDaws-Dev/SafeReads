@@ -17,9 +17,25 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  title: "SafeReads",
+  title: {
+    default: "SafeReads",
+    template: "%s — SafeReads",
+  },
   description:
-    "AI-powered book content analysis for parents. Search books, get safety verdicts based on your family's values profile.",
+    "AI-powered book content analysis for parents. Search books, get objective content reviews to make informed decisions.",
+  openGraph: {
+    title: "SafeReads",
+    description:
+      "Know what's in the book before your kid reads it. AI-powered content analysis for parents.",
+    siteName: "SafeReads",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "SafeReads",
+    description:
+      "Know what's in the book before your kid reads it. AI-powered content analysis for parents.",
+  },
 };
 
 export default function RootLayout({

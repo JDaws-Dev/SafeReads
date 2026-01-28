@@ -58,10 +58,12 @@ export const getByBook = query({
     bookId: v.id("books"),
   },
   handler: async (ctx, args) => {
+    // Return the most recent analysis for this book
     return await ctx.db
       .query("analyses")
       .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
-      .unique();
+      .order("desc")
+      .first();
   },
 });
 
@@ -104,7 +106,7 @@ export const analyze = action({
   args: {
     bookId: v.id("books"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<AnalysisResult> => {
     // 1. Fetch book
     const book = await ctx.runQuery(internal.analyses.getBookById, {
       bookId: args.bookId,
@@ -118,7 +120,7 @@ export const analyze = action({
       bookId: args.bookId,
     });
     if (cached) {
-      return cached;
+      return cached as AnalysisResult;
     }
 
     // 3. Run analysis (checks data sufficiency, calls OpenAI, returns result)
@@ -185,7 +187,8 @@ export const getCachedAnalysis = internalQuery({
     return await ctx.db
       .query("analyses")
       .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
-      .unique();
+      .order("desc")
+      .first();
   },
 });
 
@@ -198,12 +201,13 @@ export const deleteByBook = internalMutation({
     bookId: v.id("books"),
   },
   handler: async (ctx, args) => {
+    // Delete all analyses for this book (handles duplicates)
     const existing = await ctx.db
       .query("analyses")
       .withIndex("by_book", (q) => q.eq("bookId", args.bookId))
-      .unique();
-    if (existing) {
-      await ctx.db.delete(existing._id);
+      .collect();
+    for (const record of existing) {
+      await ctx.db.delete(record._id);
     }
   },
 });
@@ -470,11 +474,13 @@ Guidelines:
 - If you're unsure about specific content, note your uncertainty in the reasoning and err on the side of caution
 - The age recommendation should reflect general community standards, not any individual family's values`;
 
-const ALTERNATIVES_PROMPT = `You are SafeReads, an AI book recommendation assistant for parents. Given a book and its content analysis, suggest 3-5 alternative books that:
+const ALTERNATIVES_PROMPT = `You are SafeReads, an AI book recommendation assistant for parents. A parent has just reviewed a book and seen its content flags. Your job is to suggest 3-5 SAFER alternative books that:
 
-1. Cover similar themes, genres, or topics
-2. Are appropriate for younger or more sensitive readers
+1. Cover similar themes, genres, or topics (same appeal — adventure, friendship, coming-of-age, etc.)
+2. Have LESS mature content across all categories — lower severity in violence, language, sexual content, substance use, dark themes, supernatural/occult, identity/gender, romance, social/political themes
 3. Are well-known, widely available, and highly regarded
+
+The alternatives should be books a parent would feel MORE comfortable giving to their child. If the original book was flagged "warning", suggest books that would be "caution" or "safe". If "caution", suggest books that would be "safe".
 
 Respond with a JSON object:
 
@@ -483,15 +489,16 @@ Respond with a JSON object:
     {
       "title": "Full book title",
       "author": "Author name",
-      "reason": "One sentence explaining why this is a good alternative (what it shares with the original and why it's more appropriate)",
+      "reason": "One sentence explaining what it shares with the original AND specifically why it's safer/more appropriate",
       "ageRange": "Suggested age range (e.g., '8+', '10+', '12+')"
     }
   ]
 }
 
 Guidelines:
-- Focus on books that preserve the appeal of the original (same genre, similar themes) while being less mature in content
-- Include a mix of age ranges when possible
+- CRITICAL: Alternatives must have LESS intense content than the original. Look at the content flags provided and recommend books that cover similar ground with lower severity ratings.
+- Focus on the same genre and appeal — a kid who wanted to read the original should find these interesting too
+- Include a mix of age ranges, skewing younger than the original
 - Only recommend books you are confident exist and are accurately described
-- If the original book is already rated "safe", suggest books with similar themes that the reader might also enjoy
+- If the original book is already rated "safe" with no significant flags, suggest books with similar themes the reader might also enjoy (no need to be "safer" in this case)
 - Keep recommendations diverse — different authors, different perspectives`;
