@@ -10,6 +10,14 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 53 — SafeReads-y5o: Fix author detection for query-based matching
+
+- Problem: searching "J.K. Rowling" returned biographies/study guides by other authors, so 50% heuristic never triggered AuthorCard
+- Added fast-path detection: check if search query matches any author name in results (exact, substring in either direction) before falling back to majority heuristic
+- Both strategies feed into the same AuthorCard rendering logic — no duplication
+- Build + lint pass clean
+- Files: `src/app/dashboard/search/page.tsx` (modified)
+
 ### Iteration 52 — SafeReads-fk6: Switch Clerk to production keys
 
 - Ops/config task — no code changes needed. All Clerk config reads from env vars already.
@@ -30,16 +38,6 @@ This file maintains context between autonomous iterations.
 - Added "Search more" card tile as last item in the horizontal carousel (`sm:hidden`) — discoverable by scrolling
 - Build + lint pass clean
 - Files: `src/app/dashboard/page.tsx` (modified)
-
-### Iteration 50 — SafeReads-b8x: Author profiles — search + detail page
-
-- Author detection in search: when ≥50% of results share same author, shows AuthorCard at top of results
-- AuthorCard links to `/dashboard/author/[name]` detail page
-- Author detail page: header, AI overview (cached in `authorOverviews` table), verdict aggregate badges, full book catalog with BookCards + verdict badges
-- Backend: `searchByAuthor` action uses `inauthor:` Google Books query, `authorOverview` action generates GPT-4o summary of author's writing patterns, `getByBooks` batch query for aggregate verdicts
-- New schema table: `authorOverviews` with `by_author_name` index — cached author AI summaries
-- Build + lint pass clean
-- Files: `convex/books.ts` (modified), `convex/analyses.ts` (modified), `convex/schema.ts` (modified), `src/components/AuthorCard.tsx` (new), `src/app/dashboard/author/[name]/page.tsx` (new), `src/app/dashboard/search/page.tsx` (modified)
 
 ---
 
@@ -110,6 +108,16 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 50 — SafeReads-b8x: Author profiles — search + detail page
+
+- Author detection in search: when ≥50% of results share same author, shows AuthorCard at top of results
+- AuthorCard links to `/dashboard/author/[name]` detail page
+- Author detail page: header, AI overview (cached in `authorOverviews` table), verdict aggregate badges, full book catalog with BookCards + verdict badges
+- Backend: `searchByAuthor` action uses `inauthor:` Google Books query, `authorOverview` action generates GPT-4o summary of author's writing patterns, `getByBooks` batch query for aggregate verdicts
+- New schema table: `authorOverviews` with `by_author_name` index — cached author AI summaries
+- Build + lint pass clean
+- Files: `convex/books.ts` (modified), `convex/analyses.ts` (modified), `convex/schema.ts` (modified), `src/components/AuthorCard.tsx` (new), `src/app/dashboard/author/[name]/page.tsx` (new), `src/app/dashboard/search/page.tsx` (modified)
 
 ### Iteration 49 — SafeReads-ybb: Punch up landing page copy
 
