@@ -10,6 +10,15 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 36 — SafeReads-397: Fix chat input hidden behind bottom nav on mobile
+
+- Fixed `src/app/dashboard/chat/page.tsx` — chat container height didn't account for bottom nav on mobile
+  - Changed `h-[calc(100vh-8rem)]` to `h-[calc(100vh-12rem)] sm:h-[calc(100vh-8rem)]` on both the main container and loading spinner container
+  - Mobile subtracts 12rem (4rem navbar + 4rem bottom nav + 4rem padding), desktop stays at 8rem (no bottom nav)
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/dashboard/chat/page.tsx` (modified)
+
 ### Iteration 35 — SafeReads-cm4.9: Update landing page with subscription pricing info
 
 - Added pricing section to `src/app/page.tsx` between Features and Trust sections
@@ -53,8 +62,6 @@ This file maintains context between autonomous iterations.
 - **Decision**: Duplicate "Maybe later" buttons (one `sm:hidden`, one `hidden sm:block`) kept identical — simpler than conditional classes for same behavior.
 - No new dependencies
 - Build + lint pass clean
-- Files: `src/components/UpgradePrompt.tsx` (new), `src/components/VerdictSection.tsx` (modified)
-
 ---
 
 ## Active Roadblocks

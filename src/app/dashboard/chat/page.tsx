@@ -96,14 +96,14 @@ export default function ChatPage() {
 
   if (!convexUser) {
     return (
-      <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
+      <div className="flex h-[calc(100vh-12rem)] items-center justify-center sm:h-[calc(100vh-8rem)]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-parchment-300 border-t-parchment-700" />
       </div>
     );
   }
 
   return (
-    <div className="mx-auto h-[calc(100vh-8rem)] max-w-5xl px-4 py-4">
+    <div className="mx-auto h-[calc(100vh-12rem)] max-w-5xl px-4 py-4 sm:h-[calc(100vh-8rem)]">
       <div className="flex h-full overflow-hidden rounded-xl border border-parchment-200 bg-white">
         {/* Desktop sidebar — always visible on sm+ */}
         <div className="hidden shrink-0 border-r border-parchment-200 sm:block sm:w-72">
