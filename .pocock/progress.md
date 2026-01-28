@@ -10,28 +10,25 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 48 — SafeReads-vwi: Horizontal book cover carousel for recent reviews
+
+- Replaced vertical list with horizontal scrollable carousel of book covers
+- Each cover: 112x160px, verdict badge overlay, title + author below
+- CSS scroll-snap for mobile touch UX, scrollbar hidden
+- Fallback for missing covers, skeleton loading state
+- Build + lint pass clean
+- Files: `src/app/dashboard/page.tsx` (modified)
+
 ### Iteration 47 — SafeReads-zai: Rich book cards in chat advisor responses
 
-- Updated ChatMessage `strong` renderer to render book titles as mini card chips instead of plain underlined links
-- Card shows: BookOpen icon + title text + Search icon, with border, shadow, rounded corners
-- Styled with `inline-flex` to work within flowing text in message bubbles
-- No API calls — uses existing pattern of detecting bold capitalized text as book titles
-- **Decision**: Kept the lightweight approach (CSS-only visual enhancement) rather than adding API enrichment. Avoids extra network calls and latency in chat responses.
-- No new dependencies
+- Book titles in chat rendered as mini card chips (BookOpen icon + title + Search icon)
+- CSS-only enhancement, no API calls
 - Build + lint pass clean
-- Files: `src/components/chat/ChatMessage.tsx` (modified)
 
 ### Iteration 46 — SafeReads-jw3: Consolidate History into Search tab
 
-- Merged search history into search page as "Recent Searches" pill buttons
-- Removed History from Navbar and BottomNav, deleted history page
-- Notes remain accessible via BookNotes on book detail pages
+- Recent searches as pill buttons on search page, history page deleted
 - Bottom nav: 5 items (Home, Search, Kids, Chat, Settings)
-- Build + lint pass clean
-
-### Iteration 45 — SafeReads-9yt: Extract first_sentence from Open Library for GPT-4o context
-
-- Added `firstSentence` to books schema, types, upsert, OL extraction, GPT-4o context
 - Build + lint pass clean
 
 ---
@@ -103,6 +100,11 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 45 — SafeReads-9yt: Extract first_sentence from Open Library for GPT-4o context
+
+- Added firstSentence to books schema, types, upsert, OL extraction, GPT-4o context
+- Build + lint pass clean
 
 ### Iteration 44 — SafeReads-3xw: Improve body text contrast for accessibility
 

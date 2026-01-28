@@ -106,11 +106,11 @@ export default function DashboardPage() {
         </div>
 
         {recentAnalyses === undefined ? (
-          <div className="mt-4 space-y-3">
-            {[1, 2, 3].map((i) => (
+          <div className="mt-4 flex gap-3 overflow-hidden">
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-20 animate-pulse rounded-lg bg-parchment-100"
+                className="h-40 w-28 flex-shrink-0 animate-pulse rounded-lg bg-parchment-100"
               />
             ))}
           </div>
@@ -129,51 +129,45 @@ export default function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 -mx-4 px-4 flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 scrollbar-none">
             {recentAnalyses.map((analysis: AnalysisWithBook) => {
               const style = VERDICT_STYLES[analysis.verdict] ?? VERDICT_STYLES.no_verdict;
               return (
                 <Link
                   key={analysis._id}
                   href={`/dashboard/book/${analysis.bookId}`}
-                  className="group flex items-center gap-3 rounded-lg border border-parchment-200 bg-white p-3 transition-colors hover:border-parchment-300 hover:shadow-sm"
+                  className="group relative flex-shrink-0 snap-start"
                 >
-                  <div className="relative h-14 w-10 flex-shrink-0 overflow-hidden rounded bg-parchment-100">
+                  <div className="relative h-40 w-28 overflow-hidden rounded-lg bg-parchment-100 shadow-sm transition-shadow group-hover:shadow-md">
                     {analysis.book?.coverUrl ? (
                       <Image
                         src={analysis.book.coverUrl}
                         alt={analysis.book.title}
                         fill
-                        sizes="40px"
+                        sizes="112px"
                         className="object-cover"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <BookOpen className="h-4 w-4 text-parchment-300" />
+                      <div className="flex h-full flex-col items-center justify-center gap-1 p-2">
+                        <BookOpen className="h-6 w-6 text-parchment-300" />
+                        <p className="text-center text-[10px] leading-tight text-ink-400">
+                          {analysis.book?.title ?? "Unknown"}
+                        </p>
                       </div>
                     )}
+                    {/* Verdict badge overlay */}
+                    <span
+                      className={`absolute bottom-1.5 left-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold shadow-sm ${style.bg} ${style.text} backdrop-blur-sm`}
+                    >
+                      {style.label}
+                    </span>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-ink-900 group-hover:text-parchment-700">
-                      {analysis.book?.title ?? "Unknown Book"}
-                    </p>
-                    <p className="truncate text-xs text-ink-400">
-                      {analysis.book?.authors?.join(", ") ?? ""}
-                    </p>
-                    {analysis.summary && (
-                      <p className="mt-0.5 truncate text-xs text-ink-400">
-                        {analysis.summary.length > 80
-                          ? `${analysis.summary.slice(0, 80)}…`
-                          : analysis.summary}
-                      </p>
-                    )}
-                  </div>
-                  <span
-                    className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${style.bg} ${style.text}`}
-                  >
-                    {style.label}
-                  </span>
-                  <ChevronRight className="h-4 w-4 flex-shrink-0 text-ink-300" />
+                  <p className="mt-1.5 w-28 truncate text-xs font-medium text-ink-800 group-hover:text-parchment-700">
+                    {analysis.book?.title ?? "Unknown"}
+                  </p>
+                  <p className="w-28 truncate text-[10px] text-ink-400">
+                    {analysis.book?.authors?.join(", ") ?? ""}
+                  </p>
                 </Link>
               );
             })}
