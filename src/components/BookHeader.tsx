@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Star } from "lucide-react";
 
 export interface BookHeaderBook {
   title: string;
@@ -13,6 +13,9 @@ export interface BookHeaderBook {
   categories?: string[];
   isbn13?: string;
   isbn10?: string;
+  maturityRating?: string;
+  averageRating?: number;
+  ratingsCount?: number;
 }
 
 interface BookHeaderProps {
@@ -50,11 +53,27 @@ export function BookHeader({ book, actions }: BookHeaderProps) {
           {book.authors.join(", ")}
         </p>
 
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-500">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-500">
           {year && <span>{year}</span>}
           {book.pageCount && <span>{book.pageCount} pages</span>}
           {book.isbn13 && <span>ISBN {book.isbn13}</span>}
           {!book.isbn13 && book.isbn10 && <span>ISBN {book.isbn10}</span>}
+          {book.averageRating != null && (
+            <span className="inline-flex items-center gap-1">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              {book.averageRating.toFixed(1)}
+              {book.ratingsCount != null && (
+                <span className="text-ink-400">
+                  ({book.ratingsCount.toLocaleString()})
+                </span>
+              )}
+            </span>
+          )}
+          {book.maturityRating === "MATURE" && (
+            <span className="rounded bg-verdict-warning/10 px-1.5 py-0.5 text-xs font-medium text-verdict-warning">
+              Mature
+            </span>
+          )}
         </div>
 
         {book.categories && book.categories.length > 0 && (

@@ -10,6 +10,21 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 41 — SafeReads-whc: Capture maturityRating from Google Books API
+
+- Added 3 new optional fields to books schema: `maturityRating` (string), `averageRating` (number), `ratingsCount` (number)
+- Updated `GoogleBooksItem` interface to include `maturityRating`, `averageRating`, `ratingsCount` from `volumeInfo`
+- Updated `ParsedBook`, `BookResult` types and `parseGoogleBooksItem` to extract new fields
+- Updated `upsert` mutation args + patch logic to store new fields
+- Updated `buildBookContext` in `convex/analyses.ts` to include maturityRating in GPT-4o prompt context
+- Added system prompt guidance: MATURE rating biases verdict to at least "caution"
+- Updated `BookHeaderBook` interface + `BookHeader` component to display:
+  - Star rating with count (amber star icon)
+  - "Mature" badge (warning-colored) when maturityRating === "MATURE"
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `convex/books.ts` (modified), `convex/analyses.ts` (modified), `src/components/BookHeader.tsx` (modified)
+
 ### Iteration 40 — SafeReads-zqk: Make chat UX more intuitive for parents
 
 - Updated chat welcome screen (`src/app/dashboard/chat/page.tsx`):
@@ -43,18 +58,6 @@ This file maintains context between autonomous iterations.
 - Updated ReportButton: "Factual error in analysis" → "in review", "Report Analysis Issue" → "Report Review Issue"
 - Updated onboarding: "analyzes books" → "reviews books"
 - Files: `src/app/page.tsx`, `src/app/layout.tsx`, `src/app/about/page.tsx`, `src/app/terms/page.tsx`, `src/app/privacy/page.tsx`, `src/app/opengraph-image.tsx`, `src/app/onboarding/page.tsx`, `src/app/dashboard/page.tsx`, `src/app/dashboard/settings/page.tsx`, `src/components/VerdictSection.tsx`, `src/components/AnalyzeButton.tsx`, `src/components/UpgradePrompt.tsx`, `src/components/ReportButton.tsx`, `convex/chat.ts` (all modified)
-
-### Iteration 38 — SafeReads-0je: Streamline navbar: remove bell, merge settings into avatar
-
-- Removed NotificationBell from Navbar — analyses complete synchronously, browser notifications from VerdictSection still work (useNotification hook kept)
-- Removed Settings gear icon from Navbar
-- Added "Settings" link inside Clerk UserButton dropdown via `<UserButton.MenuItems>` + `<UserButton.Link>` — navigates to /dashboard/settings
-- Deleted `src/components/NotificationBell.tsx` (orphaned, no longer imported)
-- Used inline SVG gear icon for `labelIcon` (Clerk requires React element, not Lucide component directly)
-- **Decision**: Keep `useNotification` hook — VerdictSection still uses it for browser notifications when user tabs away during analysis
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/components/Navbar.tsx` (modified), `src/components/NotificationBell.tsx` (deleted)
 
 ---
 
@@ -125,6 +128,18 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 38 — SafeReads-0je: Streamline navbar: remove bell, merge settings into avatar
+
+- Removed NotificationBell from Navbar — analyses complete synchronously, browser notifications from VerdictSection still work (useNotification hook kept)
+- Removed Settings gear icon from Navbar
+- Added "Settings" link inside Clerk UserButton dropdown via `<UserButton.MenuItems>` + `<UserButton.Link>` — navigates to /dashboard/settings
+- Deleted `src/components/NotificationBell.tsx` (orphaned, no longer imported)
+- Used inline SVG gear icon for `labelIcon` (Clerk requires React element, not Lucide component directly)
+- **Decision**: Keep `useNotification` hook — VerdictSection still uses it for browser notifications when user tabs away during analysis
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/components/Navbar.tsx` (modified), `src/components/NotificationBell.tsx` (deleted)
 
 ### Iteration 37 — SafeReads-6pk: Fix clickable book links in chat not finding books
 

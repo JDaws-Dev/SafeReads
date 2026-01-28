@@ -48,6 +48,9 @@ export default defineSchema({
     categories: v.optional(v.array(v.string())),
     isbn10: v.optional(v.string()),
     isbn13: v.optional(v.string()),
+    maturityRating: v.optional(v.string()),
+    averageRating: v.optional(v.number()),
+    ratingsCount: v.optional(v.number()),
   })
     .index("by_google_books_id", ["googleBooksId"])
     .index("by_isbn13", ["isbn13"]),

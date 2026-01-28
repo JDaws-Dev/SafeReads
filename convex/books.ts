@@ -17,6 +17,9 @@ type BookResult = {
   categories?: string[];
   isbn10?: string;
   isbn13?: string;
+  maturityRating?: string;
+  averageRating?: number;
+  ratingsCount?: number;
 };
 
 // --- Public queries ---
@@ -49,6 +52,9 @@ export const upsert = internalMutation({
     categories: v.optional(v.array(v.string())),
     isbn10: v.optional(v.string()),
     isbn13: v.optional(v.string()),
+    maturityRating: v.optional(v.string()),
+    averageRating: v.optional(v.number()),
+    ratingsCount: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     if (args.googleBooksId) {
@@ -68,6 +74,9 @@ export const upsert = internalMutation({
           categories: args.categories ?? existing.categories,
           isbn10: args.isbn10 ?? existing.isbn10,
           isbn13: args.isbn13 ?? existing.isbn13,
+          maturityRating: args.maturityRating ?? existing.maturityRating,
+          averageRating: args.averageRating ?? existing.averageRating,
+          ratingsCount: args.ratingsCount ?? existing.ratingsCount,
         });
         return existing._id;
       }
@@ -153,6 +162,9 @@ interface GoogleBooksItem {
       type: string;
       identifier: string;
     }>;
+    maturityRating?: string;
+    averageRating?: number;
+    ratingsCount?: number;
   };
 }
 
@@ -209,6 +221,9 @@ interface ParsedBook {
   categories?: string[];
   isbn10?: string;
   isbn13?: string;
+  maturityRating?: string;
+  averageRating?: number;
+  ratingsCount?: number;
 }
 
 function parseGoogleBooksItem(item: GoogleBooksItem): ParsedBook {
@@ -235,6 +250,9 @@ function parseGoogleBooksItem(item: GoogleBooksItem): ParsedBook {
     categories: info.categories,
     isbn10,
     isbn13,
+    maturityRating: info.maturityRating,
+    averageRating: info.averageRating,
+    ratingsCount: info.ratingsCount,
   };
 }
 

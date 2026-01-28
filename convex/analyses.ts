@@ -372,6 +372,7 @@ type BookData = {
   categories?: string[];
   pageCount?: number;
   publishedDate?: string;
+  maturityRating?: string;
 };
 
 type AnalysisResult = {
@@ -479,6 +480,7 @@ function buildBookContext(book: {
   categories?: string[];
   pageCount?: number;
   publishedDate?: string;
+  maturityRating?: string;
 }): string {
   const lines = [
     `Title: ${book.title}`,
@@ -488,6 +490,8 @@ function buildBookContext(book: {
   if (book.pageCount) lines.push(`Page count: ${book.pageCount}`);
   if (book.categories?.length)
     lines.push(`Categories: ${book.categories.join(", ")}`);
+  if (book.maturityRating)
+    lines.push(`Google Books maturity rating: ${book.maturityRating}`);
   if (book.description) lines.push(`\nDescription:\n${book.description}`);
   return lines.join("\n");
 }
@@ -555,7 +559,8 @@ Guidelines:
 - Be objective — describe what the content IS, not whether it's good or bad. Parents decide that.
 - Base your analysis on widely known information about the book, its reviews, and its content
 - If you're unsure about specific content, note your uncertainty in the reasoning and err on the side of caution
-- The age recommendation should reflect general community standards, not any individual family's values`;
+- The age recommendation should reflect general community standards, not any individual family's values
+- If the Google Books maturity rating is "MATURE", the verdict should be at least "caution" — this is a publisher/platform signal that the content is intended for mature audiences`;
 
 const ALTERNATIVES_PROMPT = `You are SafeReads, an AI book recommendation assistant for parents. A parent has just reviewed a book and seen its content flags. Your job is to suggest 3-5 SAFER alternative books that:
 
