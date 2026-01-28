@@ -12,6 +12,7 @@ import type * as analyses from "../analyses.js";
 import type * as books from "../books.js";
 import type * as chat from "../chat.js";
 import type * as kids from "../kids.js";
+import type * as lib_doesTheDogDie from "../lib/doesTheDogDie.js";
 import type * as notes from "../notes.js";
 import type * as reports from "../reports.js";
 import type * as searchHistory from "../searchHistory.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   books: typeof books;
   chat: typeof chat;
   kids: typeof kids;
+  "lib/doesTheDogDie": typeof lib_doesTheDogDie;
   notes: typeof notes;
   reports: typeof reports;
   searchHistory: typeof searchHistory;
