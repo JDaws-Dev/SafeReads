@@ -92,4 +92,21 @@ export default defineSchema({
     query: v.string(),
     resultCount: v.number(),
   }).index("by_user", ["userId"]),
+
+  reports: defineTable({
+    userId: v.id("users"),
+    bookId: v.id("books"),
+    analysisId: v.id("analyses"),
+    reason: v.union(
+      v.literal("too_lenient"),
+      v.literal("too_strict"),
+      v.literal("factual_error"),
+      v.literal("missing_content"),
+      v.literal("other")
+    ),
+    details: v.optional(v.string()),
+  })
+    .index("by_book", ["bookId"])
+    .index("by_user", ["userId"])
+    .index("by_user_and_analysis", ["userId", "analysisId"]),
 });

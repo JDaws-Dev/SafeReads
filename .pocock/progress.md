@@ -10,6 +10,24 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 25 — SafeReads-0uf: Build alternatives suggestions and reports system
+
+- Added `reports` table to schema: `userId`, `bookId`, `analysisId`, `reason` (union of 5 types), `details` — indexes `by_book`, `by_user`, `by_user_and_analysis`
+- Created `convex/reports.ts`: `submit` (upsert per user+analysis), `getByUserAndAnalysis`, `countByBook`, `remove`
+- Added `suggestAlternatives` public action to `convex/analyses.ts` — OpenAI GPT-4o generates 3-5 similar but more age-appropriate books
+- Created `src/components/ReportButton.tsx` — Radix Dialog with radio buttons for report reason, optional details textarea, submit/remove flow
+  - Shows "Reported" state with warning color when user has existing report
+  - One report per user per analysis (upsert pattern)
+- Created `src/components/AlternativesSuggestions.tsx` — on-demand AI-powered book suggestions
+  - "Suggest Alternatives" CTA triggers OpenAI action
+  - Cards with book icon, title, author, age range badge, reasoning
+  - "Get new suggestions" refresh button
+- Updated `VerdictSection.tsx` — added ReportButton next to Re-analyze button
+- Updated book detail page — added AlternativesSuggestions section below VerdictSection
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `convex/reports.ts` (new), `convex/analyses.ts` (modified), `src/components/ReportButton.tsx` (new), `src/components/AlternativesSuggestions.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/app/dashboard/book/[id]/page.tsx` (modified)
+
 ### Iteration 24 — SafeReads-tpl.6: Add re-analyze button to bypass verdict cache
 
 - Extracted OpenAI analysis logic from `analyze` action into `runOpenAIAnalysis` helper (pure function, no Convex context needed)
@@ -45,20 +63,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `convex/schema.ts` (modified), `convex/notes.ts` (new), `convex/searchHistory.ts` (new), `src/app/dashboard/history/page.tsx` (new), `src/components/BookNotes.tsx` (new), `src/app/dashboard/search/page.tsx` (modified), `src/app/dashboard/book/[id]/page.tsx` (modified), `src/components/Navbar.tsx` (modified)
-
-### Iteration 22 — SafeReads-0xq: Build dashboard home and polish UI
-
-- Split dashboard into two routes: `/dashboard` (home) and `/dashboard/search` (search)
-- Dashboard home shows: welcome greeting, 3 quick action cards, recent analyses list, kids overview
-- Added `listRecent` query to `convex/analyses.ts` — fetches recent analyses with book data (newest first, configurable count)
-- Recent analyses show book cover thumbnail, title, author, verdict badge (color-coded), and link to book detail
-- Kids overview shows avatar initial, name, age, links to wishlist — empty state prompts adding kids
-- Quick action cards link to search page (Search, Scan Barcode, Snap Cover)
-- Loading skeleton for analyses, empty states for both sections
-- Updated Navbar: added "Home" link to `/dashboard`, "Search" now points to `/dashboard/search`
-- No new dependencies
-- Build + lint pass clean
-- Files: `convex/analyses.ts` (modified), `src/app/dashboard/page.tsx` (rewritten), `src/app/dashboard/search/page.tsx` (new), `src/components/Navbar.tsx` (modified)
 
 ---
 
@@ -126,6 +130,20 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 22 — SafeReads-0xq: Build dashboard home and polish UI
+
+- Split dashboard into two routes: `/dashboard` (home) and `/dashboard/search` (search)
+- Dashboard home shows: welcome greeting, 3 quick action cards, recent analyses list, kids overview
+- Added `listRecent` query to `convex/analyses.ts` — fetches recent analyses with book data (newest first, configurable count)
+- Recent analyses show book cover thumbnail, title, author, verdict badge (color-coded), and link to book detail
+- Kids overview shows avatar initial, name, age, links to wishlist — empty state prompts adding kids
+- Quick action cards link to search page (Search, Scan Barcode, Snap Cover)
+- Loading skeleton for analyses, empty states for both sections
+- Updated Navbar: added "Home" link to `/dashboard`, "Search" now points to `/dashboard/search`
+- No new dependencies
+- Build + lint pass clean
+- Files: `convex/analyses.ts` (modified), `src/app/dashboard/page.tsx` (rewritten), `src/app/dashboard/search/page.tsx` (new), `src/components/Navbar.tsx` (modified)
 
 ### Iteration 21 — SafeReads-tpl.4: Build onboarding flow for new users
 

@@ -208,6 +208,75 @@ export const deleteByBook = internalMutation({
   },
 });
 
+/**
+ * Suggest alternative books that cover similar themes but with less mature content.
+ * Uses OpenAI to generate recommendations based on the analyzed book.
+ */
+export const suggestAlternatives = action({
+  args: {
+    bookId: v.id("books"),
+  },
+  handler: async (ctx, args) => {
+    const book = await ctx.runQuery(internal.analyses.getBookById, {
+      bookId: args.bookId,
+    });
+    if (!book) {
+      throw new Error("Book not found");
+    }
+
+    const analysis = await ctx.runQuery(internal.analyses.getCachedAnalysis, {
+      bookId: args.bookId,
+    });
+
+    const openai = new OpenAI();
+    const bookContext = buildBookContext(book);
+
+    const analysisContext = analysis
+      ? `\nCurrent verdict: ${analysis.verdict}\nAge recommendation: ${analysis.ageRecommendation ?? "N/A"}\nSummary: ${analysis.summary}\nContent flags: ${analysis.contentFlags
+          .filter(
+            (f: { severity: string; category: string; details: string }) =>
+              f.severity !== "none"
+          )
+          .map(
+            (f: { severity: string; category: string; details: string }) =>
+              `${f.category} (${f.severity}): ${f.details}`
+          )
+          .join("; ")}`
+      : "";
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: ALTERNATIVES_PROMPT,
+        },
+        {
+          role: "user",
+          content: `## Book Information\n${bookContext}${analysisContext}\n\nSuggest alternative books and return as JSON.`,
+        },
+      ],
+    });
+
+    const raw = completion.choices[0]?.message?.content;
+    if (!raw) {
+      throw new Error("OpenAI returned an empty response");
+    }
+
+    const parsed = JSON.parse(raw) as {
+      alternatives: Array<{
+        title: string;
+        author: string;
+        reason: string;
+        ageRange: string;
+      }>;
+    };
+
+    return parsed.alternatives ?? [];
+  },
+});
+
 // --- Helpers ---
 
 type BookData = {
@@ -368,3 +437,29 @@ Guidelines:
 - Base your analysis on widely known information about the book, its reviews, and its content
 - If you're unsure about specific content, note your uncertainty in the reasoning and err on the side of caution
 - The age recommendation should reflect general community standards, not any individual family's values`;
+
+const ALTERNATIVES_PROMPT = `You are SafeReads, an AI book recommendation assistant for parents. Given a book and its content analysis, suggest 3-5 alternative books that:
+
+1. Cover similar themes, genres, or topics
+2. Are appropriate for younger or more sensitive readers
+3. Are well-known, widely available, and highly regarded
+
+Respond with a JSON object:
+
+{
+  "alternatives": [
+    {
+      "title": "Full book title",
+      "author": "Author name",
+      "reason": "One sentence explaining why this is a good alternative (what it shares with the original and why it's more appropriate)",
+      "ageRange": "Suggested age range (e.g., '8+', '10+', '12+')"
+    }
+  ]
+}
+
+Guidelines:
+- Focus on books that preserve the appeal of the original (same genre, similar themes) while being less mature in content
+- Include a mix of age ranges when possible
+- Only recommend books you are confident exist and are accurately described
+- If the original book is already rated "safe", suggest books with similar themes that the reader might also enjoy
+- Keep recommendations diverse — different authors, different perspectives`;

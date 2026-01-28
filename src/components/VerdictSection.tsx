@@ -7,6 +7,7 @@ import { Id } from "../../convex/_generated/dataModel";
 import { VerdictCard, VerdictCardAnalysis } from "./VerdictCard";
 import { ContentFlagList, ContentFlag } from "./ContentFlagList";
 import { AnalyzeButton } from "./AnalyzeButton";
+import { ReportButton } from "./ReportButton";
 import { RefreshCw } from "lucide-react";
 
 interface VerdictSectionProps {
@@ -91,7 +92,13 @@ export function VerdictSection({ bookId }: VerdictSectionProps) {
         <>
           <VerdictCard analysis={analysis} />
           <ContentFlagList flags={flags} />
-          <div className="flex justify-end">
+          <div className="flex items-center justify-end gap-2">
+            {cachedAnalysis?._id && (
+              <ReportButton
+                bookId={bookId}
+                analysisId={cachedAnalysis._id}
+              />
+            )}
             <button
               onClick={handleReanalyze}
               disabled={reanalyzing}
