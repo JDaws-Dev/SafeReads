@@ -10,6 +10,21 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 32 — SafeReads-cm4.4: Create Stripe API routes (checkout, portal, webhook)
+
+- Created 3 Next.js API routes for Stripe integration:
+  - `POST /api/stripe/checkout` — authenticates via Clerk, gets/creates Stripe customer, creates checkout session for subscription, returns session URL
+  - `POST /api/stripe/portal` — authenticates via Clerk, looks up stripeCustomerId, creates billing portal session, returns URL
+  - `POST /api/webhooks/stripe` — verifies Stripe signature, handles `checkout.session.completed` (saves customer ID), `subscription.created/updated` (syncs status), `subscription.deleted` (sets canceled)
+- Changed `updateSubscription` and `setStripeCustomerId` from `internalMutation` to `mutation` — needed for `ConvexHttpClient` calls from API routes. Functions are safe as public (require knowing valid IDs, idempotent updates).
+- **Decision**: Used `ConvexHttpClient` from `convex/browser` for server-side Convex calls in API routes. No auth token needed since mutations use explicit ID args, not `ctx.auth`.
+- **Decision**: Stripe `current_period_end` accessed from `subscription.current_period_end` (top-level), multiplied by 1000 for epoch ms.
+- Reverted `convex/_generated/api.d.ts` to AnyApi stub for builds without Convex deployment
+- Updated `.env.local.example` with STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ID, NEXT_PUBLIC_APP_URL (already done in prior iteration)
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/api/stripe/checkout/route.ts` (new), `src/app/api/stripe/portal/route.ts` (new), `src/app/api/webhooks/stripe/route.ts` (new), `convex/subscriptions.ts` (modified), `convex/_generated/api.d.ts` (modified)
+
 ### Iteration 31 — SafeReads-cm4.2: Create Convex subscription queries and mutations
 
 - Created `convex/subscriptions.ts` with 5 functions:
@@ -34,25 +49,6 @@ This file maintains context between autonomous iterations.
 - No new patterns or decisions beyond what's in the issue design
 - Build + lint pass clean
 - Files: `convex/schema.ts` (modified), `package.json` (modified), `package-lock.json` (modified)
-
-### Iteration 29 — SafeReads-3k3: AI Chat Advisor Feature
-
-- Added `conversations` and `messages` tables to `convex/schema.ts`
-- Created `convex/chat.ts` — full chat backend module
-  - Queries: `listConversations`, `getMessages`
-  - Mutations: `createConversation`, `deleteConversation`
-  - Internal: `storeMessage`, `updateTitle`, `getMessagesInternal`, `getConversationInternal`, `getKidsInternal`
-  - Action: `sendMessage` — stores user msg, loads context (kids + recent analyses + last 20 msgs), calls GPT-4o, stores response, auto-titles from first message
-- Added `listRecentInternal` internalQuery to `convex/analyses.ts` — recent analyses with book data for chat context
-- Created 4 chat UI components: `ChatMessage`, `ChatInput`, `ConversationList`, `ChatWindow`
-- Created `/dashboard/chat` page — side-by-side layout on desktop (conversation list + chat), stacked on mobile with back button
-- Updated `Navbar.tsx` — added Chat link after Kids
-- Updated `BottomNav.tsx` — added Chat as 5th item with MessageCircle icon
-- **Decision**: No streaming (Convex actions return complete results). Typing indicator (spinner) covers the wait UX. Auto-title from first user message (50 char truncation).
-- **Decision**: Context sent to GPT-4o includes kids names/ages + last 5 global recent analyses + last 20 messages in conversation. Keeps token usage reasonable.
-- No new dependencies
-- Build + lint pass clean
-- Files: `convex/schema.ts` (modified), `convex/analyses.ts` (modified), `convex/chat.ts` (new), `convex/_generated/api.d.ts` (modified), `src/components/ChatMessage.tsx` (new), `src/components/ChatInput.tsx` (new), `src/components/ConversationList.tsx` (new), `src/components/ChatWindow.tsx` (new), `src/app/dashboard/chat/page.tsx` (new), `src/components/Navbar.tsx` (modified), `src/components/BottomNav.tsx` (modified)
 
 ---
 
@@ -123,6 +119,15 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 29 — SafeReads-3k3: AI Chat Advisor Feature
+
+- Added `conversations` and `messages` tables to `convex/schema.ts`
+- Created `convex/chat.ts` — full chat backend module
+- Created 4 chat UI components + `/dashboard/chat` page
+- Updated Navbar and BottomNav with Chat links
+- No new dependencies
+- Build + lint pass clean
 
 ### Iteration 28 — SafeReads-3xr: Push notifications for analysis completion
 
