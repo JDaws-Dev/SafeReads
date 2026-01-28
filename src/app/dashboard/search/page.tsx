@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
+import { useSearchParams } from "next/navigation";
 import { api } from "../../../../convex/_generated/api";
 import { SearchBar } from "@/components/SearchBar";
 import { BarcodeScanner } from "@/components/BarcodeScanner";
@@ -18,6 +19,9 @@ export default function SearchPage() {
     clerkId ? { clerkId } : "skip"
   );
 
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") ?? "";
+
   const searchBooks = useAction(api.books.search);
   const identifyCover = useAction(api.books.identifyCover);
   const recordSearch = useMutation(api.searchHistory.record);
@@ -26,30 +30,42 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const autoSearched = useRef(false);
 
-  async function handleSearch(query: string) {
-    setLoading(true);
-    setError(null);
-    try {
-      const books = await searchBooks({ query });
-      setResults(books as BookCardBook[]);
-      setSearched(true);
-      // Record search in history
-      if (convexUser?._id) {
-        recordSearch({
-          userId: convexUser._id,
-          query,
-          resultCount: books.length,
-        }).catch(() => {
-          // Best-effort — don't break search if history recording fails
-        });
+  const handleSearch = useCallback(
+    async (query: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const books = await searchBooks({ query });
+        setResults(books as BookCardBook[]);
+        setSearched(true);
+        // Record search in history
+        if (convexUser?._id) {
+          recordSearch({
+            userId: convexUser._id,
+            query,
+            resultCount: books.length,
+          }).catch(() => {
+            // Best-effort — don't break search if history recording fails
+          });
+        }
+      } catch {
+        setError("Something went wrong while searching. Please try again.");
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      setError("Something went wrong while searching. Please try again.");
-    } finally {
-      setLoading(false);
+    },
+    [searchBooks, convexUser, recordSearch]
+  );
+
+  // Auto-trigger search from ?q= query param
+  useEffect(() => {
+    if (initialQuery && !autoSearched.current) {
+      autoSearched.current = true;
+      handleSearch(initialQuery);
     }
-  }
+  }, [initialQuery, handleSearch]);
 
   async function handleCoverCapture(imageBase64: string) {
     setLoading(true);
@@ -77,7 +93,11 @@ export default function SearchPage() {
       </p>
 
       <div className="mt-6 space-y-3">
-        <SearchBar onSearch={handleSearch} loading={loading} />
+        <SearchBar
+          onSearch={handleSearch}
+          loading={loading}
+          initialQuery={initialQuery}
+        />
         <div className="flex gap-2">
           <BarcodeScanner onScan={handleSearch} disabled={loading} />
           <CoverScanner onCapture={handleCoverCapture} disabled={loading} />

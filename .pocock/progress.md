@@ -10,6 +10,18 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 37 — SafeReads-6pk: Fix clickable book links in chat not finding books
+
+- Fixed `src/app/dashboard/search/page.tsx` — search page didn't read `?q=` query param, so chat links to `/dashboard/search?q=...` never triggered a search
+  - Added `useSearchParams()` to read `q` param
+  - Added `useEffect` with ref guard to auto-trigger search on mount when `?q=` is present
+  - Wrapped `handleSearch` in `useCallback` for effect dependency
+  - Pass `initialQuery` to SearchBar so input is pre-filled
+- Updated `src/components/SearchBar.tsx` — added optional `initialQuery` prop to pre-fill the search input
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/app/dashboard/search/page.tsx` (modified), `src/components/SearchBar.tsx` (modified)
+
 ### Iteration 36 — SafeReads-397: Fix chat input hidden behind bottom nav on mobile
 
 - Fixed `src/app/dashboard/chat/page.tsx` — chat container height didn't account for bottom nav on mobile
@@ -30,20 +42,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/app/page.tsx` (modified)
-
-### Iteration 34 — SafeReads-cm4.6: Create settings page with subscription management
-
-- Created `src/app/dashboard/settings/page.tsx` — settings page with subscription management
-  - Free users: analyses used/remaining count, pricing card ($2.99/mo) with feature list, Upgrade button → Stripe checkout
-  - Subscribed users: Premium badge, status (active/canceled), renewal/access-until date, total analyses count, Manage Subscription button → Stripe portal
-  - Loading state with spinner while subscription details load
-- Updated `src/components/Navbar.tsx` — added Settings gear icon link between Chat and NotificationBell (desktop)
-- Updated `src/components/BottomNav.tsx` — added Settings item to mobile bottom navigation (6 items total)
-- **Decision**: Settings in Navbar uses icon-only (gear) to save horizontal space, consistent with NotificationBell pattern. BottomNav uses icon+label like other items.
-- **Decision**: Canceled subscriptions show "Access until: <date>" instead of "Renews: <date>"
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/app/dashboard/settings/page.tsx` (new), `src/components/Navbar.tsx` (modified), `src/components/BottomNav.tsx` (modified)
 
 ---
 
@@ -114,6 +112,11 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 34 — SafeReads-cm4.6: Create settings page with subscription management
+
+- Created settings page, added Settings links to Navbar and BottomNav
+- Build + lint pass clean
 
 ### Iteration 33 — SafeReads-cm4.5: Add upgrade prompt and paywall UI to VerdictSection
 

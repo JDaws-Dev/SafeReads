@@ -6,10 +6,11 @@ import { Search, Loader2 } from "lucide-react";
 interface SearchBarProps {
   onSearch: (query: string) => void;
   loading?: boolean;
+  initialQuery?: string;
 }
 
-export function SearchBar({ onSearch, loading }: SearchBarProps) {
-  const [query, setQuery] = useState("");
+export function SearchBar({ onSearch, loading, initialQuery = "" }: SearchBarProps) {
+  const [query, setQuery] = useState(initialQuery);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
