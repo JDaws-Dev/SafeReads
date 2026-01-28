@@ -8,7 +8,21 @@ export default defineSchema({
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     onboardingComplete: v.optional(v.boolean()),
-  }).index("by_clerk_id", ["clerkId"]),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    subscriptionStatus: v.optional(
+      v.union(
+        v.literal("active"),
+        v.literal("canceled"),
+        v.literal("past_due"),
+        v.literal("incomplete")
+      )
+    ),
+    subscriptionCurrentPeriodEnd: v.optional(v.number()),
+    analysisCount: v.optional(v.number()),
+  })
+    .index("by_clerk_id", ["clerkId"])
+    .index("by_stripe_customer_id", ["stripeCustomerId"]),
 
   profiles: defineTable({
     userId: v.id("users"),

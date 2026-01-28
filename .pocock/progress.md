@@ -10,6 +10,17 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 30 — SafeReads-cm4.1: Install Stripe SDK and update Convex schema
+
+- Installed `stripe` npm package
+- Added 5 subscription fields to users table in `convex/schema.ts`:
+  - `stripeCustomerId`, `stripeSubscriptionId`, `subscriptionStatus` (union of active/canceled/past_due/incomplete), `subscriptionCurrentPeriodEnd` (epoch number), `analysisCount`
+  - All fields `v.optional()` — existing users get `undefined`, treated as free tier
+- Added `by_stripe_customer_id` index on users table
+- No new patterns or decisions beyond what's in the issue design
+- Build + lint pass clean
+- Files: `convex/schema.ts` (modified), `package.json` (modified), `package-lock.json` (modified)
+
 ### Iteration 29 — SafeReads-3k3: AI Chat Advisor Feature
 
 - Added `conversations` and `messages` tables to `convex/schema.ts`
@@ -43,16 +54,6 @@ This file maintains context between autonomous iterations.
 - No new dependencies
 - Build + lint pass clean
 - Files: `src/hooks/useNotification.ts` (new), `src/components/NotificationBell.tsx` (new), `src/components/VerdictSection.tsx` (modified), `src/components/Navbar.tsx` (modified)
-
-### Iteration 27 — SafeReads-tpl.2: Add Amazon affiliate tag support
-
-- Updated `AmazonButton` to read `NEXT_PUBLIC_AMAZON_AFFILIATE_TAG` env var
-- When set, appends `tag=<value>` to Amazon search URL params
-- When unset, button works exactly as before (no change in behavior)
-- Added env var to `.env.local.example` with comment
-- No new dependencies
-- Build + lint pass clean
-- Files: `src/components/AmazonButton.tsx` (modified), `.env.local.example` (modified)
 
 ---
 
@@ -123,6 +124,16 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 27 — SafeReads-tpl.2: Add Amazon affiliate tag support
+
+- Updated `AmazonButton` to read `NEXT_PUBLIC_AMAZON_AFFILIATE_TAG` env var
+- When set, appends `tag=<value>` to Amazon search URL params
+- When unset, button works exactly as before (no change in behavior)
+- Added env var to `.env.local.example` with comment
+- No new dependencies
+- Build + lint pass clean
+- Files: `src/components/AmazonButton.tsx` (modified), `.env.local.example` (modified)
 
 ### Iteration 26 — SafeReads-i3n: Share verdict with co-parent
 
