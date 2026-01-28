@@ -15,6 +15,7 @@ type ConversationListProps = {
   onSelect: (id: Id<"conversations">) => void;
   onNew: () => void;
   onDelete: (id: Id<"conversations">) => void;
+  hideHeader?: boolean;
 };
 
 export function ConversationList({
@@ -23,18 +24,21 @@ export function ConversationList({
   onSelect,
   onNew,
   onDelete,
+  hideHeader,
 }: ConversationListProps) {
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-parchment-200 p-3">
-        <h2 className="font-serif text-lg font-bold text-ink-900">Chats</h2>
-        <button
-          onClick={onNew}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-500 transition-colors hover:bg-parchment-100 hover:text-ink-700"
-        >
-          <Plus className="h-5 w-5" />
-        </button>
-      </div>
+      {!hideHeader && (
+        <div className="flex items-center justify-between border-b border-parchment-200 p-3">
+          <h2 className="font-serif text-lg font-bold text-ink-900">Chats</h2>
+          <button
+            onClick={onNew}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-500 transition-colors hover:bg-parchment-100 hover:text-ink-700"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto">
         {conversations.length === 0 ? (
           <div className="p-4 text-center text-sm text-ink-400">

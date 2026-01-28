@@ -7,7 +7,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { ConversationList } from "@/components/chat/ConversationList";
 import { ChatWindow } from "@/components/chat/ChatWindow";
-import { ArrowLeft, Bot } from "lucide-react";
+import { ArrowLeft, Bot, History } from "lucide-react";
 import { ChatInput } from "@/components/chat/ChatInput";
 
 export default function ChatPage() {
@@ -29,23 +29,13 @@ export default function ChatPage() {
   const [activeConversationId, setActiveConversationId] =
     useState<Id<"conversations"> | null>(null);
   const [isSending, setIsSending] = useState(false);
-  const [showChat, setShowChat] = useState(false);
-
-  const handleNewConversation = useCallback(async () => {
-    if (!convexUser?._id) return;
-    const id = await createConversation({
-      userId: convexUser._id,
-      title: "New conversation",
-    });
-    setActiveConversationId(id);
-    setShowChat(true);
-    return id;
-  }, [convexUser?._id, createConversation]);
+  // Mobile: show history list (false = show chat/welcome, true = show history)
+  const [showHistory, setShowHistory] = useState(false);
 
   const handleSelectConversation = useCallback(
     (id: Id<"conversations">) => {
       setActiveConversationId(id);
-      setShowChat(true);
+      setShowHistory(false);
     },
     []
   );
@@ -55,11 +45,15 @@ export default function ChatPage() {
       await deleteConversation({ conversationId: id });
       if (activeConversationId === id) {
         setActiveConversationId(null);
-        setShowChat(false);
       }
     },
     [deleteConversation, activeConversationId]
   );
+
+  const handleNewChat = useCallback(() => {
+    setActiveConversationId(null);
+    setShowHistory(false);
+  }, []);
 
   const handleSend = useCallback(
     async (content: string) => {
@@ -90,7 +84,6 @@ export default function ChatPage() {
           title: "New conversation",
         });
         setActiveConversationId(id);
-        setShowChat(true);
         await sendMessage({ conversationId: id, content });
       } catch (err) {
         console.error("Failed to send message:", err);
@@ -112,12 +105,8 @@ export default function ChatPage() {
   return (
     <div className="mx-auto h-[calc(100vh-8rem)] max-w-5xl px-4 py-4">
       <div className="flex h-full overflow-hidden rounded-xl border border-parchment-200 bg-white">
-        {/* Conversation sidebar — hidden on mobile when viewing chat */}
-        <div
-          className={`w-full shrink-0 border-r border-parchment-200 sm:block sm:w-72 ${
-            showChat ? "hidden" : "block"
-          }`}
-        >
+        {/* Desktop sidebar — always visible on sm+ */}
+        <div className="hidden shrink-0 border-r border-parchment-200 sm:block sm:w-72">
           <ConversationList
             conversations={(conversations ?? []) as Array<{
               _id: Id<"conversations">;
@@ -126,33 +115,62 @@ export default function ChatPage() {
             }>}
             activeId={activeConversationId}
             onSelect={handleSelectConversation}
-            onNew={handleNewConversation}
+            onNew={handleNewChat}
             onDelete={handleDeleteConversation}
           />
         </div>
 
-        {/* Chat window — hidden on mobile when viewing list */}
+        {/* Mobile: history list (only shown when user taps history button) */}
+        {showHistory && (
+          <div className="flex w-full flex-col sm:hidden">
+            <div className="flex items-center gap-2 border-b border-parchment-200 p-3">
+              <button
+                onClick={() => setShowHistory(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-500 hover:bg-parchment-100"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <span className="text-sm font-medium text-ink-700">
+                Past Chats
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <ConversationList
+                conversations={(conversations ?? []) as Array<{
+                  _id: Id<"conversations">;
+                  title: string;
+                  lastMessageAt: number;
+                }>}
+                activeId={activeConversationId}
+                onSelect={handleSelectConversation}
+                onNew={handleNewChat}
+                onDelete={handleDeleteConversation}
+                hideHeader
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Main chat area — always visible on desktop, visible on mobile when not showing history */}
         <div
-          className={`flex flex-1 flex-col sm:flex ${
-            showChat ? "flex" : "hidden"
-          }`}
+          className={`flex flex-1 flex-col ${showHistory ? "hidden sm:flex" : "flex"}`}
         >
           {activeConversationId ? (
             <div className="flex h-full flex-col">
-              {/* Mobile back button */}
-              <div className="flex items-center gap-2 border-b border-parchment-200 p-3 sm:hidden">
-                <button
-                  onClick={() => setShowChat(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-500 hover:bg-parchment-100"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </button>
+              {/* Mobile header with history button */}
+              <div className="flex items-center justify-between border-b border-parchment-200 p-3 sm:hidden">
                 <span className="truncate text-sm font-medium text-ink-700">
                   {(conversations ?? []).find(
                     (c: { _id: Id<"conversations"> }) =>
                       c._id === activeConversationId
                   )?.title ?? "Chat"}
                 </span>
+                <button
+                  onClick={() => setShowHistory(true)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-500 hover:bg-parchment-100"
+                >
+                  <History className="h-5 w-5" />
+                </button>
               </div>
               <div className="flex-1 overflow-hidden">
                 <ChatWindow
@@ -164,7 +182,19 @@ export default function ChatPage() {
             </div>
           ) : (
             <div className="flex h-full flex-col">
-              <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+              {/* Mobile history button on welcome screen */}
+              {(conversations ?? []).length > 0 && (
+                <div className="flex items-center justify-end p-3 sm:hidden">
+                  <button
+                    onClick={() => setShowHistory(true)}
+                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-ink-500 hover:bg-parchment-100"
+                  >
+                    <History className="h-4 w-4" />
+                    Past chats
+                  </button>
+                </div>
+              )}
+              <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
                 <Bot className="h-16 w-16 text-parchment-200" />
                 <div>
                   <p className="font-serif text-xl font-bold text-ink-700">

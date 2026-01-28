@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Settings } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 
 export function Navbar() {
@@ -48,6 +48,13 @@ export function Navbar() {
                 className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
               >
                 Chat
+              </Link>
+              <Link
+                href="/dashboard/settings"
+                className="text-ink-400 transition-colors hover:text-ink-600"
+                aria-label="Settings"
+              >
+                <Settings className="h-5 w-5" />
               </Link>
             </div>
             <NotificationBell />
