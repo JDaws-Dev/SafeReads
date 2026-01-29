@@ -26,6 +26,7 @@ function handleClerkProxy(req: NextRequest) {
   // Create headers for the proxy request
   const headers = new Headers(req.headers);
   headers.set("Clerk-Proxy-Url", "https://getsafereads.com/__clerk");
+  headers.set("Clerk-Secret-Key", process.env.CLERK_SECRET_KEY || "");
   headers.set("X-Forwarded-Host", "clerk.getsafereads.com");
   headers.set("X-Forwarded-Proto", "https");
 
