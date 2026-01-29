@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, Sparkles, BookOpen, Infinity, Heart } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { X, Sparkles, BookOpen, Infinity, Heart, Tag, Check, AlertCircle } from "lucide-react";
 
 interface UpgradePromptProps {
   onDismiss: () => void;
@@ -9,6 +11,12 @@ interface UpgradePromptProps {
 
 export function UpgradePrompt({ onDismiss }: UpgradePromptProps) {
   const [loading, setLoading] = useState(false);
+  const [showCoupon, setShowCoupon] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponResult, setCouponResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const redeemCoupon = useMutation(api.coupons.redeemCoupon);
 
   async function handleUpgrade() {
     setLoading(true);
@@ -22,6 +30,26 @@ export function UpgradePrompt({ onDismiss }: UpgradePromptProps) {
       }
     } catch {
       setLoading(false);
+    }
+  }
+
+  async function handleRedeemCoupon() {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponResult(null);
+    try {
+      const result = await redeemCoupon({ code: couponCode });
+      setCouponResult(result);
+      if (result.success) {
+        // Reload after short delay to show success message
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch {
+      setCouponResult({ success: false, message: "Something went wrong. Please try again." });
+    } finally {
+      setCouponLoading(false);
     }
   }
 
@@ -84,15 +112,55 @@ export function UpgradePrompt({ onDismiss }: UpgradePromptProps) {
           >
             {loading ? "Redirecting to checkout…" : "Upgrade Now"}
           </button>
+
+          {/* Coupon section */}
+          {!showCoupon ? (
+            <button
+              onClick={() => setShowCoupon(true)}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-parchment-700 transition-colors hover:bg-parchment-50"
+            >
+              <Tag className="h-4 w-4" />
+              Have a coupon code?
+            </button>
+          ) : (
+            <div className="mt-2 rounded-lg border border-parchment-200 bg-parchment-50 p-3">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  placeholder="Enter code"
+                  className="flex-1 rounded-md border border-parchment-300 px-3 py-1.5 text-sm uppercase placeholder:normal-case focus:border-parchment-500 focus:outline-none focus:ring-1 focus:ring-parchment-500"
+                  disabled={couponLoading || couponResult?.success}
+                />
+                <button
+                  onClick={handleRedeemCoupon}
+                  disabled={!couponCode.trim() || couponLoading || couponResult?.success}
+                  className="rounded-md bg-parchment-700 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-parchment-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {couponLoading ? "…" : "Apply"}
+                </button>
+              </div>
+              {couponResult && (
+                <div
+                  className={`mt-2 flex items-center gap-1.5 text-sm ${
+                    couponResult.success ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {couponResult.success ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                  {couponResult.message}
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             onClick={onDismiss}
-            className="w-full rounded-lg px-4 py-2 text-sm font-medium text-ink-500 transition-colors hover:bg-parchment-50 sm:hidden"
-          >
-            Maybe later
-          </button>
-          <button
-            onClick={onDismiss}
-            className="hidden w-full rounded-lg px-4 py-2 text-sm font-medium text-ink-500 transition-colors hover:bg-parchment-50 sm:block"
+            className="w-full rounded-lg px-4 py-2 text-sm font-medium text-ink-500 transition-colors hover:bg-parchment-50"
           >
             Maybe later
           </button>
