@@ -10,6 +10,15 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 54 — SafeReads-jv0: Fix Stripe checkout 500 error
+
+- Problem: Stripe API calls failing with `StripeConnectionError: An error occurred with our connection to Stripe. Request was retried 2 times.`
+- Root cause: Stripe SDK default HTTP client (Node.js `http` module) incompatible with Vercel serverless functions — known issue in containerized/serverless environments
+- Fix: Configure Stripe SDK to use Fetch HTTP client: `new Stripe(key, { httpClient: Stripe.createFetchHttpClient() })`
+- Applied to all 3 Stripe routes: checkout, portal, webhook
+- Build + lint pass clean
+- Files: `src/app/api/stripe/checkout/route.ts`, `src/app/api/stripe/portal/route.ts`, `src/app/api/webhooks/stripe/route.ts` (all modified)
+
 ### Iteration 53 — SafeReads-y5o: Fix author detection for query-based matching
 
 - Problem: searching "J.K. Rowling" returned biographies/study guides by other authors, so 50% heuristic never triggered AuthorCard
@@ -18,19 +27,6 @@ This file maintains context between autonomous iterations.
 - Both strategies feed into the same AuthorCard rendering logic — no duplication
 - Build + lint pass clean
 - Files: `src/app/dashboard/search/page.tsx` (modified)
-
-### Iteration 52 — SafeReads-fk6: Switch Clerk to production keys
-
-- Ops/config task — no code changes needed. All Clerk config reads from env vars already.
-- Updated `.env.local.example` with comments distinguishing prod vs dev key prefixes and issuer domain formats
-- **What the developer needs to do manually:**
-  1. **Clerk Dashboard**: Create production instance (or switch to existing one) at clerk.com
-  2. **Vercel env vars**: Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` to `pk_live_...` and `CLERK_SECRET_KEY` to `sk_live_...`
-  3. **Convex prod env var**: Set `CLERK_JWT_ISSUER_DOMAIN` to production issuer (e.g. `https://clerk.getsafereads.com` or production Clerk domain)
-  4. **Redeploy** Vercel + Convex after updating vars
-  5. **Verify** no "development keys" console warning on getsafereads.com
-- Build + lint pass clean
-- Files: `.env.local.example` (modified)
 
 ---
 
@@ -93,6 +89,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Browser Notifications API (`new Notification()`) for in-page notifications — no service worker needed. Use lazy `useState` initializer (not `useEffect` + `setState`) to read `Notification.permission` to avoid React lint error `react-hooks/set-state-in-effect`. Only fire notification when `document.visibilityState !== "visible"` (user tabbed away).
 - Web Share API (`navigator.share()`) for mobile native sharing — clipboard fallback for desktop. Check `navigator.share` exists before calling. Catch `AbortError` (user cancelled) silently.
 - Convex chat pattern: action `sendMessage` stores user msg via internalMutation, loads context (kids, analyses, last 20 msgs) via internalQueries, calls GPT-4o, stores assistant msg. No streaming — Convex actions return complete results. `useQuery(api.chat.getMessages)` auto-updates reactively when new messages are stored, so the UI picks up both user and assistant messages without manual state management. Typing indicator shown via local `isSending` state during the action call.
+- **Stripe SDK on Vercel**: Must use Fetch HTTP client for serverless compatibility. Default Node.js `http` module causes `StripeConnectionError` on Vercel. Fix: `new Stripe(key, { httpClient: Stripe.createFetchHttpClient() })`.
 
 ### Testing
 
@@ -101,6 +98,19 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 52 — SafeReads-fk6: Switch Clerk to production keys
+
+- Ops/config task — no code changes needed. All Clerk config reads from env vars already.
+- Updated `.env.local.example` with comments distinguishing prod vs dev key prefixes and issuer domain formats
+- **What the developer needs to do manually:**
+  1. **Clerk Dashboard**: Create production instance (or switch to existing one) at clerk.com
+  2. **Vercel env vars**: Set `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` to `pk_live_...` and `CLERK_SECRET_KEY` to `sk_live_...`
+  3. **Convex prod env var**: Set `CLERK_JWT_ISSUER_DOMAIN` to production issuer (e.g. `https://clerk.getsafereads.com` or production Clerk domain)
+  4. **Redeploy** Vercel + Convex after updating vars
+  5. **Verify** no "development keys" console warning on getsafereads.com
+- Build + lint pass clean
+- Files: `.env.local.example` (modified)
 
 ### Iteration 51 — SafeReads-q4w: Fix 'Search more' overlapping heading on mobile
 
