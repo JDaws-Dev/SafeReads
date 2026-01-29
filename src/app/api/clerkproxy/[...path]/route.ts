@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const CLERK_FAPI = "https://frontend-api.clerk.services";
+const CLERK_FAPI = "https://frontend-api.clerk.dev";
 
 export async function GET(
   request: NextRequest,
