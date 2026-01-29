@@ -57,7 +57,7 @@ async function proxyRequest(
 
   // Set Clerk-specific headers for proxy mode
   headers.set("Host", "clerk.getsafereads.com");
-  headers.set("Clerk-Proxy-Url", "https://getsafereads.com/__clerk");
+  headers.set("Clerk-Proxy-Url", "https://getsafereads.com/api/clerkproxy");
   headers.set("Clerk-Secret-Key", process.env.CLERK_SECRET_KEY || "");
   headers.set("Clerk-Frontend-Api", "clerk.getsafereads.com");
   headers.set("X-Forwarded-Host", "getsafereads.com");
