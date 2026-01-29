@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
  * https://clerk.com/docs/advanced-usage/using-proxies
  */
 
-const CLERK_FRONTEND_API = "https://frontend-api.clerk.services";
+const CLERK_FRONTEND_API = "https://frontend-api.clerk.dev";
 
 async function handler(
   req: NextRequest,
@@ -92,8 +92,9 @@ async function handler(
     });
   } catch (error) {
     console.error("Clerk proxy error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to proxy request to Clerk" },
+      { error: "Failed to proxy request to Clerk", details: errorMessage },
       { status: 502 }
     );
   }
