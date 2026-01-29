@@ -29,19 +29,8 @@ export async function POST(req: Request) {
 
   switch (event.type) {
     case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
-      const clerkId = session.metadata?.clerkId;
-      const customerId =
-        typeof session.customer === "string"
-          ? session.customer
-          : session.customer?.id;
-
-      if (clerkId && customerId) {
-        await convex.mutation(api.subscriptions.setStripeCustomerId, {
-          clerkId,
-          stripeCustomerId: customerId,
-        });
-      }
+      // Customer ID is already set in the checkout route before creating the session,
+      // so we don't need to do anything here. The subscription events handle the rest.
       break;
     }
 

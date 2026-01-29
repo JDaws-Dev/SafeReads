@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
-import { useUser } from "@clerk/nextjs";
 import { useSearchParams } from "next/navigation";
 import { api } from "../../../../convex/_generated/api";
 import { SearchBar } from "@/components/SearchBar";
@@ -13,12 +12,7 @@ import { AuthorCard, AuthorCardData } from "@/components/AuthorCard";
 import { BookOpen, Search, Trash2 } from "lucide-react";
 
 export default function SearchPage() {
-  const { user } = useUser();
-  const clerkId = user?.id;
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    clerkId ? { clerkId } : "skip"
-  );
+  const currentUser = useQuery(api.users.currentUser);
 
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
@@ -31,7 +25,7 @@ export default function SearchPage() {
 
   const searches = useQuery(
     api.searchHistory.listByUser,
-    convexUser?._id ? { userId: convexUser._id, count: 10 } : "skip"
+    currentUser?._id ? { userId: currentUser._id, count: 10 } : "skip"
   );
 
   const [results, setResults] = useState<BookCardBook[]>([]);
@@ -169,9 +163,9 @@ export default function SearchPage() {
         }
 
         // Record search in history
-        if (convexUser?._id) {
+        if (currentUser?._id) {
           recordSearch({
-            userId: convexUser._id,
+            userId: currentUser._id,
             query,
             resultCount: books.length,
           }).catch(() => {
@@ -184,7 +178,7 @@ export default function SearchPage() {
         setLoading(false);
       }
     },
-    [searchBooks, searchByAuthor, convexUser, recordSearch]
+    [searchBooks, searchByAuthor, currentUser, recordSearch]
   );
 
   // Auto-trigger search from ?q= query param
@@ -212,10 +206,10 @@ export default function SearchPage() {
   }
 
   async function handleClearHistory() {
-    if (!convexUser?._id) return;
+    if (!currentUser?._id) return;
     setClearing(true);
     try {
-      await clearAllHistory({ userId: convexUser._id });
+      await clearAllHistory({ userId: currentUser._id });
     } finally {
       setClearing(false);
     }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -17,15 +16,11 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export default function ChatPage() {
-  const { user: clerkUser } = useUser();
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
-  );
+  const currentUser = useQuery(api.users.currentUser);
 
   const conversations = useQuery(
     api.chat.listConversations,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    currentUser?._id ? { userId: currentUser._id } : "skip"
   );
 
   const createConversation = useMutation(api.chat.createConversation);
@@ -82,11 +77,11 @@ export default function ChatPage() {
   // Send from the welcome screen — auto-create conversation first
   const handleWelcomeSend = useCallback(
     async (content: string) => {
-      if (!convexUser?._id) return;
+      if (!currentUser?._id) return;
       setIsSending(true);
       try {
         const id = await createConversation({
-          userId: convexUser._id,
+          userId: currentUser._id,
           title: "New conversation",
         });
         setActiveConversationId(id);
@@ -97,10 +92,10 @@ export default function ChatPage() {
         setIsSending(false);
       }
     },
-    [convexUser?._id, createConversation, sendMessage]
+    [currentUser?._id, createConversation, sendMessage]
   );
 
-  if (!convexUser) {
+  if (!currentUser) {
     return (
       <div className="flex h-[calc(100vh-12rem)] items-center justify-center sm:h-[calc(100vh-8rem)]">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-parchment-300 border-t-parchment-700" />

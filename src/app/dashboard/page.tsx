@@ -1,6 +1,5 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -24,25 +23,23 @@ const VERDICT_STYLES: Record<string, { bg: string; text: string; label: string }
 };
 
 export default function DashboardPage() {
-  const { user } = useUser();
-  const clerkId = user?.id;
-
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    clerkId ? { clerkId } : "skip"
-  );
+  const convexUser = useQuery(api.users.currentUser);
+  const userId = useQuery(api.users.currentUserId);
 
   const kids = useQuery(
     api.kids.listByUser,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    userId ? { userId } : "skip"
   );
 
   const recentAnalyses = useQuery(api.analyses.listRecent, { count: 5 });
 
+  // Extract first name from user name
+  const firstName = convexUser?.name?.split(" ")[0];
+
   return (
     <div>
       <h1 className="font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
-        Welcome{user?.firstName ? `, ${user.firstName}` : ""}
+        Welcome{firstName ? `, ${firstName}` : ""}
       </h1>
       <p className="mt-2 text-sm text-ink-500 sm:text-base">
         What would you like to do today?

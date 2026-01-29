@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -17,14 +16,10 @@ type Kid = {
 };
 
 export default function KidsPage() {
-  const { user: clerkUser } = useUser();
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
-  );
+  const currentUser = useQuery(api.users.currentUser);
   const kids = useQuery(
     api.kids.listByUser,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    currentUser?._id ? { userId: currentUser._id } : "skip"
   );
 
   const createKid = useMutation(api.kids.create);
@@ -47,7 +42,7 @@ export default function KidsPage() {
   }
 
   async function handleSubmit(values: KidFormValues) {
-    if (!convexUser) return;
+    if (!currentUser) return;
     setSaving(true);
     try {
       if (editing) {
@@ -58,7 +53,7 @@ export default function KidsPage() {
         });
       } else {
         await createKid({
-          userId: convexUser._id,
+          userId: currentUser._id,
           name: values.name,
           age: values.age,
         });
@@ -79,7 +74,7 @@ export default function KidsPage() {
     }
   }
 
-  if (!clerkUser || !convexUser) {
+  if (!currentUser) {
     return (
       <div className="py-12 text-center text-ink-500">Loading…</div>
     );

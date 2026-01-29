@@ -1,21 +1,20 @@
-import { auth } from "@clerk/nextjs/server";
-import { ConvexHttpClient } from "convex/browser";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { fetchQuery } from "convex/nextjs";
 import { api } from "../../../../../convex/_generated/api";
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 
 export async function POST() {
-  const { userId } = await auth();
-  if (!userId) {
+  const token = await convexAuthNextjsToken();
+  if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     httpClient: Stripe.createFetchHttpClient(),
   });
-  const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-  const user = await convex.query(api.users.getByClerkId, { clerkId: userId });
+  const user = await fetchQuery(api.users.currentUser, {}, { token });
   if (!user?.stripeCustomerId) {
     return NextResponse.json(
       { error: "No subscription found" },

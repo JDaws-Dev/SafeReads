@@ -1,5 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
-import { ConvexHttpClient } from "convex/browser";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { fetchQuery, fetchMutation } from "convex/nextjs";
 import { api } from "../../../../../convex/_generated/api";
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
@@ -9,13 +9,13 @@ export async function POST() {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       httpClient: Stripe.createFetchHttpClient(),
     });
-    const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-    const { userId } = await auth();
-    if (!userId) {
+
+    const token = await convexAuthNextjsToken();
+    if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await convex.query(api.users.getByClerkId, { clerkId: userId });
+    const user = await fetchQuery(api.users.currentUser, {}, { token });
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -25,19 +25,20 @@ export async function POST() {
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
-        metadata: { clerkId: userId },
+        metadata: { convexUserId: user._id },
       });
       customerId = customer.id;
-      await convex.mutation(api.subscriptions.setStripeCustomerId, {
-        clerkId: userId,
-        stripeCustomerId: customerId,
-      });
+      await fetchMutation(
+        api.subscriptions.setStripeCustomerId,
+        { stripeCustomerId: customerId },
+        { token }
+      );
     }
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
-      metadata: { clerkId: userId },
+      metadata: { convexUserId: user._id },
       line_items: [
         {
           price: process.env.STRIPE_PRICE_ID!,

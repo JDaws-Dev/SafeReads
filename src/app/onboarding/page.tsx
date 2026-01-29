@@ -1,25 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { BookOpen, Users, ArrowRight, Plus, X } from "lucide-react";
 import { KidForm, KidFormValues } from "@/components/KidForm";
-import { UserSync } from "@/components/UserSync";
 import { Id } from "../../../convex/_generated/dataModel";
 
 type AddedKid = { name: string; age?: number };
 
 export default function OnboardingPage() {
-  const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    user?.id ? { clerkId: user.id } : "skip"
-  );
+  const currentUser = useQuery(api.users.currentUser);
   const completeOnboarding = useMutation(api.users.completeOnboarding);
   const createKid = useMutation(api.kids.create);
 
@@ -29,18 +23,23 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
 
   // Redirect if already onboarded
-  if (convexUser?.onboardingComplete) {
+  if (currentUser?.onboardingComplete) {
     router.replace("/dashboard");
     return null;
   }
 
-  if (!isLoaded || !user) {
-    return null;
+  // Show loading state while user data loads
+  if (currentUser === undefined) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-parchment-300 border-t-parchment-700" />
+      </div>
+    );
   }
 
-  // Wait for Convex user to be created by UserSync
-  if (convexUser === undefined || convexUser === null) {
-    return <UserSync />;
+  // Handle case where user doesn't exist (shouldn't happen with Convex Auth)
+  if (currentUser === null) {
+    return null;
   }
 
   function addKid(values: KidFormValues) {
@@ -53,19 +52,19 @@ export default function OnboardingPage() {
   }
 
   async function handleComplete() {
-    if (!user || !convexUser) return;
+    if (!currentUser) return;
     setSaving(true);
     try {
       // Create all kids
       for (const kid of kids) {
         await createKid({
-          userId: convexUser._id as Id<"users">,
+          userId: currentUser._id as Id<"users">,
           name: kid.name,
           age: kid.age,
         });
       }
       // Mark onboarding complete
-      await completeOnboarding({ clerkId: user.id });
+      await completeOnboarding();
       router.replace("/dashboard");
     } catch {
       setSaving(false);
@@ -74,7 +73,6 @@ export default function OnboardingPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
-      <UserSync />
       {/* Progress dots */}
       <div className="mb-8 flex items-center justify-center gap-2">
         {[0, 1, 2].map((i) => (

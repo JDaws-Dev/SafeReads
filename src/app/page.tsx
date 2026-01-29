@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
-import { SignInButton } from "@clerk/nextjs";
+import { useConvexAuth } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
@@ -18,22 +18,27 @@ import {
 import { Footer } from "@/components/Footer";
 
 export default function Home() {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { signIn } = useAuthActions();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
+    if (!isLoading && isAuthenticated) {
       router.replace("/dashboard");
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoading, isAuthenticated, router]);
 
   // Show nothing while redirecting signed-in users
-  if (!isLoaded) {
+  if (isLoading) {
     return <div className="min-h-[calc(100vh-4rem)]" />;
   }
-  if (isSignedIn) {
+  if (isAuthenticated) {
     return <div className="min-h-[calc(100vh-4rem)]" />;
   }
+
+  const handleSignIn = () => {
+    void signIn("google");
+  };
 
   return (
     <div className="min-h-[calc(100vh-4rem)]">
@@ -53,11 +58,12 @@ export default function Home() {
             for your family.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <SignInButton mode="modal">
-              <button className="w-full rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800 sm:w-auto">
-                Get Started — It&apos;s Free
-              </button>
-            </SignInButton>
+            <button
+              onClick={handleSignIn}
+              className="w-full rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800 sm:w-auto"
+            >
+              Get Started — It&apos;s Free
+            </button>
             <a
               href="#how-it-works"
               className="text-sm font-medium text-ink-500 transition-colors hover:text-ink-700"
@@ -182,11 +188,12 @@ export default function Home() {
                   Kids &amp; wishlists
                 </li>
               </ul>
-              <SignInButton mode="modal">
-                <button className="mt-6 w-full rounded-lg border border-parchment-300 bg-white px-4 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:bg-parchment-50">
-                  Get Started
-                </button>
-              </SignInButton>
+              <button
+                onClick={handleSignIn}
+                className="mt-6 w-full rounded-lg border border-parchment-300 bg-white px-4 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:bg-parchment-50"
+              >
+                Get Started
+              </button>
             </div>
 
             {/* Pro tier */}
@@ -220,11 +227,12 @@ export default function Home() {
                   Cancel anytime
                 </li>
               </ul>
-              <SignInButton mode="modal">
-                <button className="mt-6 w-full rounded-lg bg-parchment-700 px-4 py-2.5 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800">
-                  Start Free, Upgrade Later
-                </button>
-              </SignInButton>
+              <button
+                onClick={handleSignIn}
+                className="mt-6 w-full rounded-lg bg-parchment-700 px-4 py-2.5 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800"
+              >
+                Start Free, Upgrade Later
+              </button>
             </div>
           </div>
         </div>
@@ -261,11 +269,12 @@ export default function Home() {
             Sign up in seconds with your Google account. Your first 3 reviews
             are free — no credit card needed.
           </p>
-          <SignInButton mode="modal">
-            <button className="mt-6 rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800">
-              Get Started Free
-            </button>
-          </SignInButton>
+          <button
+            onClick={handleSignIn}
+            className="mt-6 rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800"
+          >
+            Get Started Free
+          </button>
         </div>
       </section>
 

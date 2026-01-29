@@ -1,47 +1,62 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { api } from "../../../convex/_generated/api";
-import { UserSync } from "@/components/UserSync";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isLoaded } = useUser();
+  const { isAuthenticated, isLoading } = useConvexAuth();
   const router = useRouter();
 
   const convexUser = useQuery(
-    api.users.getByClerkId,
-    isLoaded && user?.id ? { clerkId: user.id } : "skip"
+    api.users.currentUser,
+    isAuthenticated ? {} : "skip"
   );
 
   useEffect(() => {
-    if (!isLoaded || !user || convexUser === undefined) return;
-    // convexUser is null → UserSync hasn't created the user yet; wait
-    if (convexUser === null) return;
-    if (!convexUser.onboardingComplete) {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/");
+      return;
+    }
+    if (convexUser && !convexUser.onboardingComplete) {
       router.replace("/onboarding");
     }
-  }, [isLoaded, user, convexUser, router]);
+  }, [isLoading, isAuthenticated, convexUser, router]);
 
-  // Always render UserSync so user gets created in Convex
-  // Show nothing else while checking onboarding status
-  if (!isLoaded || !user || convexUser === undefined || convexUser === null) {
-    return <UserSync />;
+  // Show loading state while checking auth
+  if (isLoading || !isAuthenticated) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-parchment-300 border-t-parchment-700" />
+        </div>
+      </div>
+    );
   }
 
-  if (!convexUser.onboardingComplete) {
-    return <UserSync />;
+  // Show loading state while fetching user
+  if (convexUser === undefined) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8">
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-parchment-300 border-t-parchment-700" />
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to onboarding if not complete
+  if (convexUser && !convexUser.onboardingComplete) {
+    return null;
   }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
-      <UserSync />
       {children}
     </div>
   );

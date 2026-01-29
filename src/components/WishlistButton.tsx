@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
@@ -15,14 +14,10 @@ type Kid = {
 };
 
 export function WishlistButton({ bookId }: { bookId: Id<"books"> }) {
-  const { user: clerkUser } = useUser();
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
-  );
+  const userId = useQuery(api.users.currentUserId);
   const kids = useQuery(
     api.kids.listByUser,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    userId ? { userId } : "skip"
   );
 
   const [dialogOpen, setDialogOpen] = useState(false);

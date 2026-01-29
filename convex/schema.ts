@@ -1,12 +1,20 @@
 import { defineSchema, defineTable } from "convex/server";
+import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  ...authTables,
+  // Extended users table (overrides authTables.users with custom fields)
   users: defineTable({
-    clerkId: v.string(),
-    email: v.string(),
+    // Convex Auth fields
     name: v.optional(v.string()),
-    imageUrl: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.float64()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.float64()),
+    isAnonymous: v.optional(v.boolean()),
+    // SafeReads custom fields
     onboardingComplete: v.optional(v.boolean()),
     stripeCustomerId: v.optional(v.string()),
     stripeSubscriptionId: v.optional(v.string()),
@@ -21,7 +29,8 @@ export default defineSchema({
     subscriptionCurrentPeriodEnd: v.optional(v.number()),
     analysisCount: v.optional(v.number()),
   })
-    .index("by_clerk_id", ["clerkId"])
+    .index("email", ["email"])
+    .index("phone", ["phone"])
     .index("by_stripe_customer_id", ["stripeCustomerId"]),
 
   profiles: defineTable({

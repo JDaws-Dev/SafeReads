@@ -1,51 +1,26 @@
-import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 /**
- * Upsert a user from Clerk webhook or client-side sync.
- * Called after sign-in to ensure the user exists in Convex.
+ * Get the current authenticated user.
+ * Convex Auth automatically creates users in the users table via authTables.
  */
-export const upsert = mutation({
-  args: {
-    clerkId: v.string(),
-    email: v.string(),
-    name: v.optional(v.string()),
-    imageUrl: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const existing = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .unique();
-
-    if (existing) {
-      await ctx.db.patch(existing._id, {
-        email: args.email,
-        name: args.name,
-        imageUrl: args.imageUrl,
-      });
-      return existing._id;
-    }
-
-    return await ctx.db.insert("users", {
-      clerkId: args.clerkId,
-      email: args.email,
-      name: args.name,
-      imageUrl: args.imageUrl,
-    });
+export const currentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+    return await ctx.db.get(userId);
   },
 });
 
 /**
- * Get the current user by their Clerk ID.
+ * Get the current user's ID (for use in components).
  */
-export const getByClerkId = query({
-  args: { clerkId: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .unique();
+export const currentUserId = query({
+  args: {},
+  handler: async (ctx) => {
+    return await getAuthUserId(ctx);
   },
 });
 
@@ -53,13 +28,10 @@ export const getByClerkId = query({
  * Mark onboarding as complete for the current user.
  */
 export const completeOnboarding = mutation({
-  args: { clerkId: v.string() },
-  handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
-      .unique();
-    if (!user) throw new Error("User not found");
-    await ctx.db.patch(user._id, { onboardingComplete: true });
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    await ctx.db.patch(userId, { onboardingComplete: true });
   },
 });

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Libre_Baskerville } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { Navbar } from "@/components/Navbar";
 import { BottomNav } from "@/components/BottomNav";
@@ -52,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider dynamic>
+    <ConvexAuthNextjsServerProvider>
       <html lang="en">
         <body className={`${inter.variable} ${libreBaskerville.variable} font-sans antialiased`}>
           <ConvexClientProvider>
@@ -62,6 +62,6 @@ export default function RootLayout({
           </ConvexClientProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </ConvexAuthNextjsServerProvider>
   );
 }

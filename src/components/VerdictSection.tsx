@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useQuery, useAction } from "convex/react";
-import { useUser } from "@clerk/nextjs";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { VerdictCard, VerdictCardAnalysis } from "./VerdictCard";
@@ -21,12 +20,7 @@ interface VerdictSectionProps {
 
 export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
   const cachedAnalysis = useQuery(api.analyses.getByBook, { bookId });
-  const { user } = useUser();
-  const clerkId = user?.id;
-  const access = useQuery(
-    api.subscriptions.checkAccess,
-    clerkId ? { clerkId } : "skip"
-  ) as { hasAccess: boolean; freeRemaining: number; isSubscribed: boolean } | undefined;
+  const access = useQuery(api.subscriptions.checkAccess) as { hasAccess: boolean; freeRemaining: number; isSubscribed: boolean } | undefined;
   const { notify } = useNotification();
 
   const analyzeAction = useAction(api.analyses.analyze);
@@ -45,7 +39,7 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
     setAnalyzing(true);
     setError(null);
     try {
-      const result = await analyzeAction({ bookId, clerkId });
+      const result = await analyzeAction({ bookId });
       setActionResult(result as typeof actionResult);
       notify(`SafeReads: ${bookTitle}`, {
         body: `Review complete \u2014 ${(result as { verdict: string }).verdict.replace("_", " ")}`,

@@ -1,10 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { BookOpen } from "lucide-react";
+import { useConvexAuth } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
+import { BookOpen, LogOut, Settings, User, ChevronDown } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 export function Navbar() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { signIn, signOut } = useAuthActions();
+
   return (
     <nav className="border-b border-parchment-200 bg-parchment-50">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
@@ -16,76 +23,113 @@ export function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <SignedIn>
-            <div className="hidden items-center gap-4 sm:flex">
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-              >
-                Home
-              </Link>
-              <Link
-                href="/dashboard/search"
-                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-              >
-                Search
-              </Link>
-              <Link
-                href="/dashboard/kids"
-                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-              >
-                Kids
-              </Link>
-              <Link
-                href="/dashboard/chat"
-                className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
-              >
-                Chat
-              </Link>
-            </div>
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                elements: {
-                  avatarBox: "h-8 w-8",
-                },
-              }}
+          {isLoading ? (
+            <div className="h-8 w-8 animate-pulse rounded-full bg-parchment-200" />
+          ) : isAuthenticated ? (
+            <>
+              <div className="hidden items-center gap-4 sm:flex">
+                <Link
+                  href="/dashboard"
+                  className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/dashboard/search"
+                  className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+                >
+                  Search
+                </Link>
+                <Link
+                  href="/dashboard/kids"
+                  className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+                >
+                  Kids
+                </Link>
+                <Link
+                  href="/dashboard/chat"
+                  className="text-sm font-medium text-ink-600 transition-colors hover:text-ink-900"
+                >
+                  Chat
+                </Link>
+              </div>
+              <UserMenu onSignOut={() => void signOut()} />
+            </>
+          ) : (
+            <button
+              onClick={() => void signIn("google")}
+              className="rounded-lg bg-parchment-700 px-4 py-2 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800"
             >
-              <UserButton.MenuItems>
-                <UserButton.Link
-                  label="Settings"
-                  labelIcon={<SettingsIcon />}
-                  href="/dashboard/settings"
-                />
-              </UserButton.MenuItems>
-            </UserButton>
-          </SignedIn>
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button className="rounded-lg bg-parchment-700 px-4 py-2 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800">
-                Sign In
-              </button>
-            </SignInButton>
-          </SignedOut>
+              Sign In
+            </button>
+          )}
         </div>
       </div>
     </nav>
   );
 }
 
-function SettingsIcon() {
+function UserMenu({ onSignOut }: { onSignOut: () => void }) {
+  const currentUser = useQuery(api.users.currentUser);
+
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      className="h-4 w-4"
-    >
-      <path
-        fillRule="evenodd"
-        d="M6.955 1.45A.5.5 0 0 1 7.452 1h1.096a.5.5 0 0 1 .497.45l.17 1.699c.484.12.94.312 1.356.562l1.321-.916a.5.5 0 0 1 .67.055l.775.776a.5.5 0 0 1 .055.67l-.916 1.32c.25.417.443.873.563 1.357l1.699.17a.5.5 0 0 1 .45.497v1.096a.5.5 0 0 1-.45.497l-1.699.17c-.12.484-.312.94-.562 1.356l.916 1.321a.5.5 0 0 1-.055.67l-.776.776a.5.5 0 0 1-.67.054l-1.32-.916a5.44 5.44 0 0 1-1.357.563l-.17 1.699a.5.5 0 0 1-.497.45H7.452a.5.5 0 0 1-.497-.45l-.17-1.699a5.44 5.44 0 0 1-1.356-.562l-1.321.916a.5.5 0 0 1-.67-.055l-.775-.776a.5.5 0 0 1-.055-.67l.916-1.32a5.44 5.44 0 0 1-.563-1.357l-1.699-.17A.5.5 0 0 1 1 8.548V7.452a.5.5 0 0 1 .45-.497l1.699-.17c.12-.484.312-.94.562-1.356l-.916-1.321a.5.5 0 0 1 .055-.67l.776-.776a.5.5 0 0 1 .67-.054l1.32.916a5.44 5.44 0 0 1 1.357-.563l.17-1.699ZM8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
-        clipRule="evenodd"
-      />
-    </svg>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button className="flex items-center gap-1.5 rounded-full border border-parchment-200 bg-white p-1.5 pr-2 text-ink-700 transition-colors hover:bg-parchment-50 focus:outline-none focus:ring-2 focus:ring-parchment-400">
+          {currentUser?.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={currentUser.image}
+              alt=""
+              className="h-6 w-6 rounded-full"
+            />
+          ) : (
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-parchment-200">
+              <User className="h-3.5 w-3.5 text-parchment-600" />
+            </div>
+          )}
+          <ChevronDown className="h-3.5 w-3.5 text-ink-400" />
+        </button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          align="end"
+          sideOffset={8}
+          className="z-50 min-w-[180px] rounded-lg border border-parchment-200 bg-white p-1 shadow-lg"
+        >
+          {currentUser && (
+            <div className="border-b border-parchment-100 px-3 py-2">
+              <p className="truncate text-sm font-medium text-ink-900">
+                {currentUser.name ?? "User"}
+              </p>
+              <p className="truncate text-xs text-ink-400">
+                {currentUser.email}
+              </p>
+            </div>
+          )}
+
+          <DropdownMenu.Item asChild>
+            <Link
+              href="/dashboard/settings"
+              className="flex w-full cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm text-ink-700 outline-none hover:bg-parchment-50 focus:bg-parchment-50"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
+          </DropdownMenu.Item>
+
+          <DropdownMenu.Separator className="my-1 h-px bg-parchment-100" />
+
+          <DropdownMenu.Item
+            onClick={onSignOut}
+            className="flex w-full cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm text-ink-700 outline-none hover:bg-parchment-50 focus:bg-parchment-50"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }

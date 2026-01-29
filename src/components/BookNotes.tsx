@@ -1,24 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { StickyNote, Pencil, Trash2, Check, X } from "lucide-react";
 
 export function BookNotes({ bookId }: { bookId: Id<"books"> }) {
-  const { user } = useUser();
-  const clerkId = user?.id;
-
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    clerkId ? { clerkId } : "skip"
-  );
+  const userId = useQuery(api.users.currentUserId);
 
   const note = useQuery(
     api.notes.getByUserAndBook,
-    convexUser?._id ? { userId: convexUser._id, bookId } : "skip"
+    userId ? { userId, bookId } : "skip"
   );
 
   const upsert = useMutation(api.notes.upsert);
@@ -34,10 +27,10 @@ export function BookNotes({ bookId }: { bookId: Id<"books"> }) {
   }
 
   async function handleSave() {
-    if (!convexUser?._id || !draft.trim()) return;
+    if (!userId || !draft.trim()) return;
     setSaving(true);
     try {
-      await upsert({ userId: convexUser._id, bookId, content: draft.trim() });
+      await upsert({ userId, bookId, content: draft.trim() });
       setEditing(false);
     } finally {
       setSaving(false);
@@ -57,7 +50,7 @@ export function BookNotes({ bookId }: { bookId: Id<"books"> }) {
   }
 
   // Don't render until user data is loaded
-  if (!convexUser) return null;
+  if (!userId) return null;
 
   // Loading state for note query
   if (note === undefined) return null;

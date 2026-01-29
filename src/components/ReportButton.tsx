@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
@@ -24,16 +23,12 @@ interface ReportButtonProps {
 }
 
 export function ReportButton({ bookId, analysisId }: ReportButtonProps) {
-  const { user: clerkUser } = useUser();
-  const convexUser = useQuery(
-    api.users.getByClerkId,
-    clerkUser?.id ? { clerkId: clerkUser.id } : "skip"
-  );
+  const userId = useQuery(api.users.currentUserId);
 
   const existingReport = useQuery(
     api.reports.getByUserAndAnalysis,
-    convexUser?._id
-      ? { userId: convexUser._id, analysisId }
+    userId
+      ? { userId, analysisId }
       : "skip"
   );
 
@@ -46,16 +41,16 @@ export function ReportButton({ bookId, analysisId }: ReportButtonProps) {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  if (!convexUser) return null;
+  if (!userId) return null;
 
   const hasExistingReport = existingReport !== undefined && existingReport !== null;
 
   async function handleSubmit() {
-    if (!reason || !convexUser) return;
+    if (!reason || !userId) return;
     setSubmitting(true);
     try {
       await submitReport({
-        userId: convexUser._id,
+        userId,
         bookId,
         analysisId,
         reason,
@@ -74,11 +69,11 @@ export function ReportButton({ bookId, analysisId }: ReportButtonProps) {
   }
 
   async function handleRemoveReport() {
-    if (!convexUser) return;
+    if (!userId) return;
     setSubmitting(true);
     try {
       await removeReport({
-        userId: convexUser._id,
+        userId,
         analysisId,
       });
       setDialogOpen(false);

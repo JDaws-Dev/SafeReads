@@ -10,41 +10,35 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 58 — SafeReads-y1i: Migrate authentication from Clerk to Convex Auth
+
+- Problem: Clerk proxy setup failed repeatedly on Vercel due to wildcard DNS intercepting clerk.getsafereads.com subdomain
+- Solution: Migrated to Convex Auth — cleaner integration since we already use Convex for backend
+- **Key changes**:
+  - `convex/auth.ts`: Added Google OAuth provider from `@auth/core/providers/google`
+  - `convex/schema.ts`: Added `authTables` spread, updated users table with Convex Auth fields (name, image, email, emailVerificationTime, etc.)
+  - `convex/auth.config.ts`: Deleted (no longer needed with Convex Auth)
+  - `middleware.ts`: Replaced Clerk middleware with `convexAuthNextjsMiddleware`
+  - `src/app/layout.tsx`: Replaced `ClerkProvider` with `ConvexAuthNextjsServerProvider`
+  - `src/components/ConvexClientProvider.tsx`: Replaced `ConvexProviderWithClerk` with `ConvexAuthProvider`
+  - `src/components/Navbar.tsx`: Custom user menu with Radix dropdown, `useConvexAuth` for auth state, `useAuthActions` for sign-in/out
+  - `convex/users.ts`: Rewrote to use `getAuthUserId` — `currentUser` and `currentUserId` queries replace `getByClerkId`
+  - `convex/subscriptions.ts`: All queries/mutations now use authenticated user internally (no more clerkId args)
+  - `convex/analyses.ts`: Removed clerkId from analyze/reanalyze actions
+  - Stripe API routes: Use `convexAuthNextjsToken()` for auth, `fetchQuery`/`fetchMutation` with auth token
+- Removed `@clerk/nextjs` dependency
+- Deleted: `src/components/UserSync.tsx`, `src/app/api/clerk-proxy/[...path]/route.ts`
+- Updated `.env.local.example`: Removed Clerk vars, added Convex Auth vars (AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET, SITE_URL)
+- **Key learning**: Convex Auth eliminates external DNS dependencies, users are auto-created on OAuth callback
+- Build + lint pass clean
+
 ### Iteration 57 — SafeReads-m4y: Fix Clerk authentication proxy (API route approach)
 
-- Problem: Clerk 500 error + clerk.browser.js SyntaxError on production
-- Root cause: `NextResponse.rewrite()` in middleware doesn't properly proxy external domains on Vercel Edge — responses get corrupted/truncated
-- Previous approaches tried: middleware rewrite to frontend-api.clerk.dev (multiple iterations, all failed)
-- **Fix**: Switched from middleware rewrite to dedicated API route at `/api/__clerk/[...path]`
-  - API route uses `fetch()` to make real HTTP requests to Clerk
-  - Full control over request/response — no edge runtime limitations
-  - Proper header forwarding: Clerk-Proxy-Url, Clerk-Secret-Key, X-Forwarded-For/Host/Proto
-  - Response body passed through as ArrayBuffer to avoid corruption
-- Reverted middleware.ts to simple clerkMiddleware (no proxy logic)
-- Updated ClerkProvider proxyUrl to `/api/__clerk`
-- Added NEXT_PUBLIC_CLERK_PROXY_URL to .env.local.example
-- **Key learning**: Vercel Edge middleware cannot reliably proxy external domains — use API routes with fetch() instead
-- Build + lint pass clean
-- Files: `src/app/api/__clerk/[...path]/route.ts` (new), `middleware.ts` (simplified), `src/app/layout.tsx` (proxyUrl updated), `.env.local.example` (updated)
+- (Moved to archive — superseded by Convex Auth migration)
 
 ### Iteration 56 — SafeReads-ord: Fix Clerk authentication proxy headers
 
-- Problem: Clerk authentication still not working after previous proxy fixes — Host header was set to `clerk.getsafereads.com` while proxying to `frontend-api.clerk.dev`
-- Root cause: Host header mismatch — when proxying to `frontend-api.clerk.dev`, the Host header must also be `frontend-api.clerk.dev`, not the custom subdomain
-- Fix: Changed Host header from `clerk.getsafereads.com` to `frontend-api.clerk.dev` in the proxy route
-- Removed unused `Clerk-Frontend-Api` header (not in Clerk documentation)
-- Required headers per Clerk docs: `Clerk-Proxy-Url`, `Clerk-Secret-Key`, `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`
-- **Key learning**: Clerk proxy headers must be consistent — Host header must match the actual target host you're proxying to
-- Build + lint pass clean
-- Files: `src/app/api/clerkproxy/[...path]/route.ts` (modified)
-
-### Iteration 56 — SafeReads-ord: Fix Clerk authentication proxy headers
-
-- (Moved to archive — superseded by iteration 57)
-
-### Iteration 55 — SafeReads-p93: Fix Clerk authentication on Vercel-managed domain
-
-- (Moved to archive — superseded by iteration 57)
+- (Moved to archive — superseded by Convex Auth migration)
 
 ---
 
@@ -60,18 +54,21 @@ Patterns, gotchas, and decisions that affect future work:
 
 ### Stack
 
-- Next.js 16 (App Router, TypeScript) on Vercel
+- Next.js 15 (App Router, TypeScript) on Vercel
 - Convex for backend + real-time DB
-- Clerk for auth (Google sign-in)
+- Convex Auth for authentication (Google OAuth)
 - OpenAI GPT-4o for AI verdict engine
 - Tailwind CSS with bookish theme (serif headings, parchment palette)
 - Radix UI primitives for accessible components
 
 ### Patterns
 
-- Next.js 16: use `proxy.ts` not `middleware.ts` (deprecated). Same API, just renamed.
-- ClerkProvider needs `dynamic` prop to avoid build errors when env vars aren't set
-- Provider nesting: ClerkProvider (server) > ConvexClientProvider (client "use client") > app
+- Provider nesting: ConvexAuthNextjsServerProvider (server, layout.tsx) > ConvexAuthProvider (client, ConvexClientProvider.tsx) > app
+- Convex Auth middleware: `convexAuthNextjsMiddleware` in `middleware.ts` handles route protection
+- `getAuthUserId(ctx)` from `@convex-dev/auth/server` to get authenticated user ID in Convex functions
+- `useConvexAuth()` hook for auth state (`isAuthenticated`, `isLoading`)
+- `useAuthActions()` hook for `signIn("google")` and `signOut()` functions
+- Custom user menu with Radix dropdown (replaces Clerk's UserButton)
 - `src/` directory structure with App Router
 - Convex actions for external API calls (Google Books, Open Library, OpenAI)
 - Convex queries/mutations for DB reads/writes
@@ -84,7 +81,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Open Library fallback: ISBN lookup → title+author search → work details. Description field is polymorphic (string | {type, value}). Best-effort only — wrapped in try/catch.
 - Book upsert deduplicates by `googleBooksId` index — patches existing records to enrich data over time.
 - With `AnyApi` stubs, `useQuery` returns `any` — always add explicit type annotations on `.map()` callbacks and similar to satisfy `noImplicitAny`.
-- Convex auth config: `convex/auth.config.ts` exports `{ providers: [{ domain, applicationID }] }`. Domain comes from `CLERK_JWT_ISSUER_DOMAIN` env var. No JWT template needed with newer Clerk/Convex integration.
+- Convex Auth config: `convex/auth.ts` exports auth functions from `convexAuth({ providers: [Google] })`. Google provider from `@auth/core/providers/google`. Env vars: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`.
 - Convex actions use `useAction` (not `useQuery`/`useMutation`). Actions require manual loading/error state — they don't auto-subscribe like queries.
 - Next.js Image component requires `images.remotePatterns` in `next.config.ts` for external image hosts (books.google.com, covers.openlibrary.org).
 - BookCard links to `/dashboard/book/{_id}` — book detail page is SafeReads-t99.
@@ -96,7 +93,7 @@ Patterns, gotchas, and decisions that affect future work:
 - WishlistButton hidden when user has no kids (returns null).
 - Wishlists use (kidId, bookId) composite index for dedup. `add` mutation checks existing before insert.
 - Kid deletion cascades to wishlist entries (manual cascade in `kids.remove`).
-- VerdictSection orchestrates: Clerk user → Convex user → profile → profileHash → cached analysis query. Falls back to `useAction` for fresh analysis. Action results stored in local state until Convex query picks up the cache.
+- VerdictSection orchestrates: cached analysis query by bookId. Falls back to `useAction` for fresh analysis. Action results stored in local state until Convex query picks up the cache.
 - `computeProfileHash` from `convex/lib/profileHash` can be imported client-side (pure function, no server deps).
 - `html5-qrcode` for barcode scanning: dynamic import (`import("html5-qrcode")`) to avoid SSR. Uses `Html5Qrcode` class — create instance, call `.start()` with camera config, `.stop()` on cleanup. Scanned ISBN barcodes are EAN-13 (13 digits) or ISBN-10 (10 digits).
 - BarcodeScanner creates its own container div imperatively (html5-qrcode manages its own DOM). Use a ref to a wrapper div, create child div with unique ID.
@@ -108,7 +105,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Web Share API (`navigator.share()`) for mobile native sharing — clipboard fallback for desktop. Check `navigator.share` exists before calling. Catch `AbortError` (user cancelled) silently.
 - Convex chat pattern: action `sendMessage` stores user msg via internalMutation, loads context (kids, analyses, last 20 msgs) via internalQueries, calls GPT-4o, stores assistant msg. No streaming — Convex actions return complete results. `useQuery(api.chat.getMessages)` auto-updates reactively when new messages are stored, so the UI picks up both user and assistant messages without manual state management. Typing indicator shown via local `isSending` state during the action call.
 - **Stripe SDK on Vercel**: Must use Fetch HTTP client for serverless compatibility. Default Node.js `http` module causes `StripeConnectionError` on Vercel. Fix: `new Stripe(key, { httpClient: Stripe.createFetchHttpClient() })`.
-- **Clerk proxy on Vercel-managed domains**: Vercel's wildcard ALIAS record intercepts all subdomains including `clerk.<domain>`. Solution: proxy to `frontend-api.clerk.dev` (not the subdomain) and add `proxyUrl` to ClerkProvider. Required headers: `Host: frontend-api.clerk.dev`, `Clerk-Proxy-Url`, `Clerk-Secret-Key`, `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`.
+- **Convex Auth on Vercel**: No external DNS dependencies — auth handled entirely through Convex HTTP routes. Users auto-created on OAuth callback via `authTables` schema integration.
 
 ### Testing
 

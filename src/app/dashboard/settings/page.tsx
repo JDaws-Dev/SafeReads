@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import {
@@ -15,12 +14,7 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { user } = useUser();
-  const clerkId = user?.id;
-  const details = useQuery(
-    api.subscriptions.getDetails,
-    clerkId ? { clerkId } : "skip"
-  ) as {
+  const details = useQuery(api.subscriptions.getDetails) as {
     isSubscribed: boolean;
     status: string | null;
     currentPeriodEnd: number | null;
