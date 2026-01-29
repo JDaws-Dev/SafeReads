@@ -39,10 +39,10 @@ export const redeemCoupon = mutation({
 
     // Look up the coupon code (case-insensitive)
     const normalizedCode = args.code.trim().toUpperCase();
-    const coupon = await ctx.db
-      .query("couponCodes")
-      .withIndex("by_code", (q) => q.eq("code", normalizedCode))
-      .unique();
+
+    // Query without index first (index might not be built yet)
+    const allCoupons = await ctx.db.query("couponCodes").collect();
+    const coupon = allCoupons.find((c) => c.code === normalizedCode);
 
     if (!coupon) {
       return { success: false, message: "Invalid coupon code" };
@@ -104,10 +104,8 @@ export const validateCoupon = query({
   },
   handler: async (ctx, args) => {
     const normalizedCode = args.code.trim().toUpperCase();
-    const coupon = await ctx.db
-      .query("couponCodes")
-      .withIndex("by_code", (q) => q.eq("code", normalizedCode))
-      .unique();
+    const allCoupons = await ctx.db.query("couponCodes").collect();
+    const coupon = allCoupons.find((c) => c.code === normalizedCode);
 
     if (!coupon || !coupon.active) {
       return { valid: false };
@@ -153,10 +151,8 @@ export const seedCoupon = mutation({
     const normalizedCode = args.code.trim().toUpperCase();
 
     // Check if coupon already exists
-    const existing = await ctx.db
-      .query("couponCodes")
-      .withIndex("by_code", (q) => q.eq("code", normalizedCode))
-      .unique();
+    const allCoupons = await ctx.db.query("couponCodes").collect();
+    const existing = allCoupons.find((c) => c.code === normalizedCode);
 
     if (existing) {
       return { created: false, message: "Coupon already exists", id: existing._id };
