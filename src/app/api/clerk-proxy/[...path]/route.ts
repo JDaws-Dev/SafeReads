@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * Clerk Frontend API Proxy
  *
- * Proxies requests from /__clerk/* to frontend-api.clerk.dev/*
+ * Proxies requests from /api/clerk-proxy/* to frontend-api.clerk.dev/*
  * Required because Vercel's wildcard DNS intercepts clerk.getsafereads.com
  *
  * Based on Clerk's proxy documentation:
@@ -31,7 +31,7 @@ async function handler(
   // Required Clerk proxy headers
   headers.set(
     "Clerk-Proxy-Url",
-    process.env.NEXT_PUBLIC_CLERK_PROXY_URL || "https://getsafereads.com/api/__clerk"
+    process.env.NEXT_PUBLIC_CLERK_PROXY_URL || "https://getsafereads.com/api/clerk-proxy"
   );
   headers.set("Clerk-Secret-Key", process.env.CLERK_SECRET_KEY || "");
 
