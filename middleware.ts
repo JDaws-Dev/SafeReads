@@ -1,8 +1,17 @@
 import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
 
-// Temporarily disabled route protection to debug auth loop
-// TODO: Re-enable once auth cookies are working properly
-export default convexAuthNextjsMiddleware();
+export default convexAuthNextjsMiddleware(
+  // No custom handler - just handle auth cookies
+  undefined,
+  {
+    // Enable verbose logging to debug auth issues
+    verbose: true,
+    // Persist auth cookie for 30 days (default is session cookie)
+    cookieConfig: {
+      maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
+    },
+  }
+);
 
 export const config = {
   matcher: [
