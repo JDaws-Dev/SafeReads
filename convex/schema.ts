@@ -31,10 +31,21 @@ export default defineSchema({
     ),
     subscriptionCurrentPeriodEnd: v.optional(v.number()),
     analysisCount: v.optional(v.number()),
+    // Coupon system
+    redeemedCoupon: v.optional(v.string()), // Coupon code that was redeemed
   })
     .index("email", ["email"])
     .index("phone", ["phone"])
     .index("by_stripe_customer_id", ["stripeCustomerId"]),
+
+  couponCodes: defineTable({
+    code: v.string(), // The coupon code (e.g., "DAWSFRIEND")
+    type: v.union(v.literal("lifetime"), v.literal("trial")),
+    usageLimit: v.optional(v.number()), // null = unlimited
+    usageCount: v.number(),
+    active: v.boolean(),
+    description: v.optional(v.string()),
+  }).index("by_code", ["code"]),
 
   profiles: defineTable({
     userId: v.id("users"),
