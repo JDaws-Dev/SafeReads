@@ -1,17 +1,8 @@
-import {
-  convexAuthNextjsMiddleware,
-  createRouteMatcher,
-  nextjsMiddlewareRedirect,
-} from "@convex-dev/auth/nextjs/server";
+import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
 
-const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/onboarding(.*)"]);
-
-export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
-  // Redirect unauthenticated users away from protected routes
-  if (isProtectedRoute(request) && !(await convexAuth.isAuthenticated())) {
-    return nextjsMiddlewareRedirect(request, "/");
-  }
-});
+// Temporarily disabled route protection to debug auth loop
+// TODO: Re-enable once auth cookies are working properly
+export default convexAuthNextjsMiddleware();
 
 export const config = {
   matcher: [
