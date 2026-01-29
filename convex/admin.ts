@@ -1,10 +1,10 @@
-import { query } from "./_generated/server";
+import { query, QueryCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 // Admin emails - add your email here
 const ADMIN_EMAILS = ["jedaws@gmail.com", "jeremiah@getsafereads.com"];
 
-async function requireAdmin(ctx: any) {
+async function requireAdmin(ctx: QueryCtx) {
   const userId = await getAuthUserId(ctx);
   if (!userId) throw new Error("Not authenticated");
 
@@ -28,6 +28,8 @@ export const getStats = query({
 
     const activeSubscribers = users.filter(u => u.subscriptionStatus === "active").length;
     const totalAnalysisCount = users.reduce((sum, u) => sum + (u.analysisCount || 0), 0);
+    const usersWithAnalyses = users.filter(u => (u.analysisCount || 0) > 0).length;
+    const onboardedUsers = users.filter(u => u.onboardingComplete).length;
 
     const verdictCounts = {
       safe: analyses.filter(a => a.verdict === "safe").length,
@@ -35,6 +37,13 @@ export const getStats = query({
       warning: analyses.filter(a => a.verdict === "warning").length,
       no_verdict: analyses.filter(a => a.verdict === "no_verdict").length,
     };
+
+    // Calculate 7-day and 30-day user counts based on creation time
+    const now = Date.now();
+    const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+    const usersLast7Days = users.filter(u => u._creationTime > sevenDaysAgo).length;
+    const usersLast30Days = users.filter(u => u._creationTime > thirtyDaysAgo).length;
 
     return {
       userCount: users.length,
@@ -45,6 +54,13 @@ export const getStats = query({
       kidCount: kids.length,
       conversationCount: conversations.length,
       verdictCounts,
+      // New engagement metrics
+      usersWithAnalyses,
+      onboardedUsers,
+      avgAnalysesPerUser: users.length > 0 ? totalAnalysisCount / users.length : 0,
+      avgKidsPerUser: users.length > 0 ? kids.length / users.length : 0,
+      usersLast7Days,
+      usersLast30Days,
     };
   },
 });
@@ -55,6 +71,14 @@ export const listUsers = query({
     await requireAdmin(ctx);
 
     const users = await ctx.db.query("users").order("desc").take(100);
+    const kids = await ctx.db.query("kids").collect();
+
+    // Create a map of userId to kids count
+    const kidsCountByUser = new Map<string, number>();
+    for (const kid of kids) {
+      const count = kidsCountByUser.get(kid.userId) || 0;
+      kidsCountByUser.set(kid.userId, count + 1);
+    }
 
     return users.map(user => ({
       _id: user._id,
@@ -65,6 +89,7 @@ export const listUsers = query({
       subscriptionStatus: user.subscriptionStatus,
       analysisCount: user.analysisCount || 0,
       onboardingComplete: user.onboardingComplete,
+      kidsCount: kidsCountByUser.get(user._id) || 0,
     }));
   },
 });
