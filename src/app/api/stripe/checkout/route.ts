@@ -49,8 +49,14 @@ export async function POST() {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Checkout failed";
+    const errorType = error?.constructor?.name || "Unknown";
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Checkout failed" },
+      {
+        error: errorMessage,
+        type: errorType,
+        keyPrefix: process.env.STRIPE_SECRET_KEY?.substring(0, 12) || "NOT_SET"
+      },
       { status: 500 }
     );
   }
