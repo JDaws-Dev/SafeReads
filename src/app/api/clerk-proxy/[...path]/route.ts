@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
  * https://clerk.com/docs/advanced-usage/using-proxies
  */
 
-const CLERK_FRONTEND_API = "https://frontend-api.clerk.dev";
+const CLERK_FRONTEND_API = "https://frontend-api.clerk.services";
 
 async function handler(
   req: NextRequest,
@@ -36,8 +36,8 @@ async function handler(
     }
   });
 
-  // Set Host header to Clerk's frontend API domain
-  headers.set("Host", "frontend-api.clerk.dev");
+  // Set Host header to our Clerk frontend API domain (identifies our instance)
+  headers.set("Host", "clerk.getsafereads.com");
 
   // Required Clerk proxy headers
   headers.set(
