@@ -57,7 +57,7 @@ export function Navbar() {
             </>
           ) : (
             <button
-              onClick={() => void signIn("google")}
+              onClick={() => void signIn("google", { redirectTo: "/dashboard" })}
               className="rounded-lg bg-parchment-700 px-4 py-2 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800"
             >
               Sign In
