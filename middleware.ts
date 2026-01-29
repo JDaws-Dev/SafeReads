@@ -1,14 +1,20 @@
-import { convexAuthNextjsMiddleware } from "@convex-dev/auth/nextjs/server";
+import {
+  convexAuthNextjsMiddleware,
+  createRouteMatcher,
+  nextjsMiddlewareRedirect,
+} from "@convex-dev/auth/nextjs/server";
+
+const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/onboarding(.*)", "/admin(.*)"]);
 
 export default convexAuthNextjsMiddleware(
-  // No custom handler - just handle auth cookies
-  undefined,
+  async (request, { convexAuth }) => {
+    if (isProtectedRoute(request) && !(await convexAuth.isAuthenticated())) {
+      return nextjsMiddlewareRedirect(request, "/");
+    }
+  },
   {
-    // Enable verbose logging to debug auth issues
-    verbose: true,
-    // Persist auth cookie for 30 days (default is session cookie)
     cookieConfig: {
-      maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
+      maxAge: 60 * 60 * 24 * 30, // 30 days
     },
   }
 );
