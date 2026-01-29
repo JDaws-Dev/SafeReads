@@ -21,13 +21,15 @@ function handleClerkProxy(req: NextRequest) {
 
   // Remove /__clerk prefix and forward to Clerk's API
   const clerkPath = url.pathname.replace(/^\/__clerk/, "");
-  const targetUrl = new URL(`https://clerk.getsafereads.com${clerkPath}${url.search}`);
+  const targetUrl = new URL(`https://frontend-api.clerk.services${clerkPath}${url.search}`);
 
   // Create headers for the proxy request
   const headers = new Headers(req.headers);
   headers.set("Clerk-Proxy-Url", "https://getsafereads.com/__clerk");
   headers.set("Clerk-Secret-Key", process.env.CLERK_SECRET_KEY || "");
-  headers.set("X-Forwarded-Host", "clerk.getsafereads.com");
+  headers.set("Clerk-Frontend-Api", "clerk.getsafereads.com");
+  headers.set("Host", "clerk.getsafereads.com");
+  headers.set("X-Forwarded-Host", "getsafereads.com");
   headers.set("X-Forwarded-Proto", "https");
 
   // Forward client IP
