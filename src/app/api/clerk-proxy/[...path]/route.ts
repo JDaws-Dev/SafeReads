@@ -10,7 +10,8 @@ import { NextRequest, NextResponse } from "next/server";
  * https://clerk.com/docs/advanced-usage/using-proxies
  */
 
-const CLERK_FRONTEND_API = "https://frontend-api.clerk.dev";
+// Use our Clerk frontend API domain - the CNAME resolves correctly from Vercel's servers
+const CLERK_FRONTEND_API = "https://clerk.getsafereads.com";
 
 async function handler(
   req: NextRequest,
@@ -36,8 +37,8 @@ async function handler(
     }
   });
 
-  // Set Host header to our Clerk frontend API domain (identifies our instance)
-  headers.set("Host", "clerk.getsafereads.com");
+  // Don't override Host - let fetch set it to the target domain
+  // Clerk identifies our instance via Clerk-Proxy-Url header
 
   // Required Clerk proxy headers
   headers.set(
