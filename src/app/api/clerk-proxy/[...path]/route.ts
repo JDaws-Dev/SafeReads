@@ -25,8 +25,19 @@ async function handler(
     targetUrl.searchParams.set(key, value);
   });
 
-  // Build headers for Clerk
+  // Build headers for Clerk - start with a copy of incoming headers
   const headers = new Headers();
+
+  // Forward all incoming headers first (preserves cookies, auth, etc.)
+  req.headers.forEach((value, key) => {
+    // Skip host and connection headers - we'll set these ourselves
+    if (!["host", "connection", "content-length"].includes(key.toLowerCase())) {
+      headers.set(key, value);
+    }
+  });
+
+  // Set Host header to Clerk's frontend API domain
+  headers.set("Host", "frontend-api.clerk.dev");
 
   // Required Clerk proxy headers
   headers.set(
@@ -44,21 +55,12 @@ async function handler(
     headers.set("X-Forwarded-For", forwardedFor);
   }
 
-  // Forward the original host
+  // Forward the original host info
   headers.set("X-Forwarded-Host", req.headers.get("host") || "getsafereads.com");
   headers.set("X-Forwarded-Proto", "https");
 
-  // Forward content-type if present
-  const contentType = req.headers.get("content-type");
-  if (contentType) {
-    headers.set("Content-Type", contentType);
-  }
-
-  // Forward authorization if present
-  const authorization = req.headers.get("authorization");
-  if (authorization) {
-    headers.set("Authorization", authorization);
-  }
+  // Origin header for CORS
+  headers.set("Origin", "https://getsafereads.com");
 
   try {
     const response = await fetch(targetUrl.toString(), {
