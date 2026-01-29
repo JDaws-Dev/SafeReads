@@ -14,6 +14,9 @@ export default defineSchema({
     phone: v.optional(v.string()),
     phoneVerificationTime: v.optional(v.float64()),
     isAnonymous: v.optional(v.boolean()),
+    // Legacy Clerk fields (kept for backward compat with existing users)
+    clerkId: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
     // SafeReads custom fields
     onboardingComplete: v.optional(v.boolean()),
     stripeCustomerId: v.optional(v.string()),
