@@ -10,6 +10,17 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 56 — SafeReads-ord: Fix Clerk authentication proxy headers
+
+- Problem: Clerk authentication still not working after previous proxy fixes — Host header was set to `clerk.getsafereads.com` while proxying to `frontend-api.clerk.dev`
+- Root cause: Host header mismatch — when proxying to `frontend-api.clerk.dev`, the Host header must also be `frontend-api.clerk.dev`, not the custom subdomain
+- Fix: Changed Host header from `clerk.getsafereads.com` to `frontend-api.clerk.dev` in the proxy route
+- Removed unused `Clerk-Frontend-Api` header (not in Clerk documentation)
+- Required headers per Clerk docs: `Clerk-Proxy-Url`, `Clerk-Secret-Key`, `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`
+- **Key learning**: Clerk proxy headers must be consistent — Host header must match the actual target host you're proxying to
+- Build + lint pass clean
+- Files: `src/app/api/clerkproxy/[...path]/route.ts` (modified)
+
 ### Iteration 55 — SafeReads-p93: Fix Clerk authentication on Vercel-managed domain
 
 - Problem: Clerk authentication fails on production with `failed to load script: https://clerk.getsafereads.com/...` — Vercel wildcard ALIAS record intercepts all subdomains
@@ -29,15 +40,6 @@ This file maintains context between autonomous iterations.
 - Applied to all 3 Stripe routes: checkout, portal, webhook
 - Build + lint pass clean
 - Files: `src/app/api/stripe/checkout/route.ts`, `src/app/api/stripe/portal/route.ts`, `src/app/api/webhooks/stripe/route.ts` (all modified)
-
-### Iteration 53 — SafeReads-y5o: Fix author detection for query-based matching
-
-- Problem: searching "J.K. Rowling" returned biographies/study guides by other authors, so 50% heuristic never triggered AuthorCard
-- Added fast-path detection (Strategy 1): check if search query matches any author name in results (exact, substring in either direction) before falling back to majority heuristic (Strategy 2)
-- When Strategy 1 matches, uses `searchByAuthor` action (`inauthor:` Google Books query) to fetch the author's actual catalog instead of biographies about them — falls back to general results on error
-- Both strategies feed into the same AuthorCard rendering logic — no duplication
-- Build + lint pass clean
-- Files: `src/app/dashboard/search/page.tsx` (modified)
 
 ---
 
@@ -101,7 +103,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Web Share API (`navigator.share()`) for mobile native sharing — clipboard fallback for desktop. Check `navigator.share` exists before calling. Catch `AbortError` (user cancelled) silently.
 - Convex chat pattern: action `sendMessage` stores user msg via internalMutation, loads context (kids, analyses, last 20 msgs) via internalQueries, calls GPT-4o, stores assistant msg. No streaming — Convex actions return complete results. `useQuery(api.chat.getMessages)` auto-updates reactively when new messages are stored, so the UI picks up both user and assistant messages without manual state management. Typing indicator shown via local `isSending` state during the action call.
 - **Stripe SDK on Vercel**: Must use Fetch HTTP client for serverless compatibility. Default Node.js `http` module causes `StripeConnectionError` on Vercel. Fix: `new Stripe(key, { httpClient: Stripe.createFetchHttpClient() })`.
-- **Clerk proxy on Vercel-managed domains**: Vercel's wildcard ALIAS record intercepts all subdomains including `clerk.<domain>`. Solution: proxy `/__clerk` to `frontend-api.clerk.dev` (not the subdomain) and add `proxyUrl="/__clerk"` to ClerkProvider.
+- **Clerk proxy on Vercel-managed domains**: Vercel's wildcard ALIAS record intercepts all subdomains including `clerk.<domain>`. Solution: proxy to `frontend-api.clerk.dev` (not the subdomain) and add `proxyUrl` to ClerkProvider. Required headers: `Host: frontend-api.clerk.dev`, `Clerk-Proxy-Url`, `Clerk-Secret-Key`, `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Proto`.
 
 ### Testing
 
@@ -110,6 +112,15 @@ Patterns, gotchas, and decisions that affect future work:
 ---
 
 ## Archive (Older Iterations)
+
+### Iteration 53 — SafeReads-y5o: Fix author detection for query-based matching
+
+- Problem: searching "J.K. Rowling" returned biographies/study guides by other authors, so 50% heuristic never triggered AuthorCard
+- Added fast-path detection (Strategy 1): check if search query matches any author name in results (exact, substring in either direction) before falling back to majority heuristic (Strategy 2)
+- When Strategy 1 matches, uses `searchByAuthor` action (`inauthor:` Google Books query) to fetch the author's actual catalog instead of biographies about them — falls back to general results on error
+- Both strategies feed into the same AuthorCard rendering logic — no duplication
+- Build + lint pass clean
+- Files: `src/app/dashboard/search/page.tsx` (modified)
 
 ### Iteration 52 — SafeReads-fk6: Switch Clerk to production keys
 
