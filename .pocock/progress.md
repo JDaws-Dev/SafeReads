@@ -10,6 +10,23 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 57 — SafeReads-m4y: Fix Clerk authentication proxy (API route approach)
+
+- Problem: Clerk 500 error + clerk.browser.js SyntaxError on production
+- Root cause: `NextResponse.rewrite()` in middleware doesn't properly proxy external domains on Vercel Edge — responses get corrupted/truncated
+- Previous approaches tried: middleware rewrite to frontend-api.clerk.dev (multiple iterations, all failed)
+- **Fix**: Switched from middleware rewrite to dedicated API route at `/api/__clerk/[...path]`
+  - API route uses `fetch()` to make real HTTP requests to Clerk
+  - Full control over request/response — no edge runtime limitations
+  - Proper header forwarding: Clerk-Proxy-Url, Clerk-Secret-Key, X-Forwarded-For/Host/Proto
+  - Response body passed through as ArrayBuffer to avoid corruption
+- Reverted middleware.ts to simple clerkMiddleware (no proxy logic)
+- Updated ClerkProvider proxyUrl to `/api/__clerk`
+- Added NEXT_PUBLIC_CLERK_PROXY_URL to .env.local.example
+- **Key learning**: Vercel Edge middleware cannot reliably proxy external domains — use API routes with fetch() instead
+- Build + lint pass clean
+- Files: `src/app/api/__clerk/[...path]/route.ts` (new), `middleware.ts` (simplified), `src/app/layout.tsx` (proxyUrl updated), `.env.local.example` (updated)
+
 ### Iteration 56 — SafeReads-ord: Fix Clerk authentication proxy headers
 
 - Problem: Clerk authentication still not working after previous proxy fixes — Host header was set to `clerk.getsafereads.com` while proxying to `frontend-api.clerk.dev`
@@ -21,25 +38,13 @@ This file maintains context between autonomous iterations.
 - Build + lint pass clean
 - Files: `src/app/api/clerkproxy/[...path]/route.ts` (modified)
 
+### Iteration 56 — SafeReads-ord: Fix Clerk authentication proxy headers
+
+- (Moved to archive — superseded by iteration 57)
+
 ### Iteration 55 — SafeReads-p93: Fix Clerk authentication on Vercel-managed domain
 
-- Problem: Clerk authentication fails on production with `failed to load script: https://clerk.getsafereads.com/...` — Vercel wildcard ALIAS record intercepts all subdomains
-- Root cause: Previous fix proxied `/__clerk` to `clerk.getsafereads.com` (the blocked subdomain), not Clerk's actual API
-- Fix:
-  1. Changed Next.js rewrite destination from `clerk.getsafereads.com` to `frontend-api.clerk.dev` (Clerk's actual frontend API)
-  2. Added explicit `proxyUrl="/__clerk"` prop to ClerkProvider — ensures SDK uses proxy path instead of trying subdomain
-- **Key learning**: Clerk proxy must forward to `frontend-api.clerk.dev`, not your Clerk subdomain. The subdomain is just a CNAME alias — if DNS is broken, proxy to the actual API endpoint.
-- Build + lint pass clean
-- Files: `next.config.ts` (modified), `src/app/layout.tsx` (modified)
-
-### Iteration 54 — SafeReads-jv0: Fix Stripe checkout 500 error
-
-- Problem: Stripe API calls failing with `StripeConnectionError: An error occurred with our connection to Stripe. Request was retried 2 times.`
-- Root cause: Stripe SDK default HTTP client (Node.js `http` module) incompatible with Vercel serverless functions — known issue in containerized/serverless environments
-- Fix: Configure Stripe SDK to use Fetch HTTP client: `new Stripe(key, { httpClient: Stripe.createFetchHttpClient() })`
-- Applied to all 3 Stripe routes: checkout, portal, webhook
-- Build + lint pass clean
-- Files: `src/app/api/stripe/checkout/route.ts`, `src/app/api/stripe/portal/route.ts`, `src/app/api/webhooks/stripe/route.ts` (all modified)
+- (Moved to archive — superseded by iteration 57)
 
 ---
 
