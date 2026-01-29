@@ -5,19 +5,11 @@ import {
 } from "@convex-dev/auth/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/onboarding(.*)"]);
-const isPublicAuthRoute = createRouteMatcher(["/"]);
 
 export default convexAuthNextjsMiddleware(async (request, { convexAuth }) => {
-  const isAuthenticated = await convexAuth.isAuthenticated();
-
   // Redirect unauthenticated users away from protected routes
-  if (isProtectedRoute(request) && !isAuthenticated) {
+  if (isProtectedRoute(request) && !(await convexAuth.isAuthenticated())) {
     return nextjsMiddlewareRedirect(request, "/");
-  }
-
-  // Redirect authenticated users from landing page to dashboard
-  if (isPublicAuthRoute(request) && isAuthenticated) {
-    return nextjsMiddlewareRedirect(request, "/dashboard");
   }
 });
 
