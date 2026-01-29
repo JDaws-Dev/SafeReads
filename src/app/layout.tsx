@@ -52,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider dynamic>
+    <ClerkProvider dynamic proxyUrl="/__clerk">
       <html lang="en">
         <body className={`${inter.variable} ${libreBaskerville.variable} font-sans antialiased`}>
           <ConvexClientProvider>

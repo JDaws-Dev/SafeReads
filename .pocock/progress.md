@@ -10,6 +10,17 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 55 — SafeReads-p93: Fix Clerk authentication on Vercel-managed domain
+
+- Problem: Clerk authentication fails on production with `failed to load script: https://clerk.getsafereads.com/...` — Vercel wildcard ALIAS record intercepts all subdomains
+- Root cause: Previous fix proxied `/__clerk` to `clerk.getsafereads.com` (the blocked subdomain), not Clerk's actual API
+- Fix:
+  1. Changed Next.js rewrite destination from `clerk.getsafereads.com` to `frontend-api.clerk.dev` (Clerk's actual frontend API)
+  2. Added explicit `proxyUrl="/__clerk"` prop to ClerkProvider — ensures SDK uses proxy path instead of trying subdomain
+- **Key learning**: Clerk proxy must forward to `frontend-api.clerk.dev`, not your Clerk subdomain. The subdomain is just a CNAME alias — if DNS is broken, proxy to the actual API endpoint.
+- Build + lint pass clean
+- Files: `next.config.ts` (modified), `src/app/layout.tsx` (modified)
+
 ### Iteration 54 — SafeReads-jv0: Fix Stripe checkout 500 error
 
 - Problem: Stripe API calls failing with `StripeConnectionError: An error occurred with our connection to Stripe. Request was retried 2 times.`
@@ -90,6 +101,7 @@ Patterns, gotchas, and decisions that affect future work:
 - Web Share API (`navigator.share()`) for mobile native sharing — clipboard fallback for desktop. Check `navigator.share` exists before calling. Catch `AbortError` (user cancelled) silently.
 - Convex chat pattern: action `sendMessage` stores user msg via internalMutation, loads context (kids, analyses, last 20 msgs) via internalQueries, calls GPT-4o, stores assistant msg. No streaming — Convex actions return complete results. `useQuery(api.chat.getMessages)` auto-updates reactively when new messages are stored, so the UI picks up both user and assistant messages without manual state management. Typing indicator shown via local `isSending` state during the action call.
 - **Stripe SDK on Vercel**: Must use Fetch HTTP client for serverless compatibility. Default Node.js `http` module causes `StripeConnectionError` on Vercel. Fix: `new Stripe(key, { httpClient: Stripe.createFetchHttpClient() })`.
+- **Clerk proxy on Vercel-managed domains**: Vercel's wildcard ALIAS record intercepts all subdomains including `clerk.<domain>`. Solution: proxy `/__clerk` to `frontend-api.clerk.dev` (not the subdomain) and add `proxyUrl="/__clerk"` to ClerkProvider.
 
 ### Testing
 
