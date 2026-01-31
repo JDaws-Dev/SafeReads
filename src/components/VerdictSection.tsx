@@ -112,7 +112,7 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
         <div className="rounded-xl border border-parchment-200 bg-white p-6 text-center">
           <Sparkles className="mx-auto h-8 w-8 text-parchment-400" />
           <p className="mt-3 font-serif text-lg font-bold text-ink-900">
-            You&apos;ve used all 3 free reviews
+            You&apos;ve used your 3 trial reviews
           </p>
           <p className="mt-1 text-sm text-ink-500">
             Upgrade to SafeReads Pro for unlimited book reviews.
@@ -132,7 +132,7 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
           <AnalyzeButton onClick={handleAnalyze} loading={analyzing} />
           {access && !access.isSubscribed && access.freeRemaining > 0 && (
             <p className="mt-3 text-xs text-ink-400">
-              {access.freeRemaining} of 3 free reviews remaining
+              {access.freeRemaining} of 3 trial reviews remaining
             </p>
           )}
         </div>

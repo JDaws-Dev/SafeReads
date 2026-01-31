@@ -74,19 +74,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* App Demo Video */}
+      {/* App Demo Video - iPhone Wrapper */}
       <section className="mx-auto max-w-xs sm:max-w-sm px-4 pb-16 sm:pb-20">
-        <div className="overflow-hidden rounded-xl border border-parchment-200 shadow-lg">
-          <video
-            className="w-full"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="none"
-          >
-            <source src="/safereads-app-demo.mp4" type="video/mp4" />
-          </video>
+        <div className="relative mx-auto rounded-[3rem] bg-ink-900 p-3 shadow-2xl">
+          {/* Dynamic Island */}
+          <div className="absolute left-1/2 top-5 z-10 h-7 w-24 -translate-x-1/2 rounded-full bg-ink-900" />
+          {/* Screen */}
+          <div className="overflow-hidden rounded-[2.5rem] bg-black">
+            <video
+              className="w-full"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="none"
+            >
+              <source src="/safereads-app-demo.mp4" type="video/mp4" />
+            </video>
+          </div>
         </div>
       </section>
 
@@ -160,20 +165,20 @@ export default function Home() {
             Simple, honest pricing
           </h2>
           <p className="mt-3 text-center text-ink-500">
-            Start free. Upgrade when you need more.
+            Try before you buy. Upgrade when you&apos;re ready.
           </p>
           <div className="mt-10 grid gap-6 sm:grid-cols-2 sm:gap-8 mx-auto max-w-3xl">
-            {/* Free tier */}
+            {/* Trial tier */}
             <div className="rounded-xl border border-parchment-200 bg-white p-6">
-              <h3 className="font-serif text-lg font-bold text-ink-900">Free</h3>
+              <h3 className="font-serif text-lg font-bold text-ink-900">Free Trial</h3>
               <p className="mt-1 text-3xl font-bold text-ink-900">
-                $0
-                <span className="text-sm font-normal text-ink-500">/forever</span>
+                3 reviews
+                <span className="text-sm font-normal text-ink-500"> included</span>
               </p>
               <ul className="mt-5 space-y-3 text-sm text-ink-600">
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
-                  3 book reviews
+                  Try the full experience
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
@@ -220,7 +225,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
-                  Everything in Free
+                  All features unlocked
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-verdict-safe" />
@@ -254,7 +259,7 @@ export default function Home() {
             <span className="hidden sm:inline">&middot;</span>
             <span>No agenda, just clarity</span>
             <span className="hidden sm:inline">&middot;</span>
-            <span>3 free reviews to start</span>
+            <span>Free trial, 3 reviews</span>
           </div>
         </div>
       </section>
@@ -266,8 +271,8 @@ export default function Home() {
             Stop guessing. Start knowing.
           </h2>
           <p className="mt-3 text-ink-500">
-            Sign up in seconds with your Google account. Your first 3 reviews
-            are free — no credit card needed.
+            Sign up in seconds with your Google account. Try 3 reviews free —
+            no credit card needed.
           </p>
           <button
             onClick={handleSignIn}

@@ -127,12 +127,12 @@ export default function SettingsPage() {
             </button>
           </div>
         ) : (
-          /* Free tier state */
+          /* Trial state */
           <div className="space-y-4">
             <div className="space-y-2 text-sm text-ink-600">
               <p>
                 Plan:{" "}
-                <span className="font-medium text-ink-900">Free</span>
+                <span className="font-medium text-ink-900">Free Trial</span>
               </p>
               <p>
                 Reviews used:{" "}
