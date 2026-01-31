@@ -75,7 +75,7 @@ export default function Home() {
       </section>
 
       {/* App Demo Video */}
-      <section className="mx-auto max-w-3xl px-4 pb-16 sm:pb-20">
+      <section className="mx-auto max-w-xs sm:max-w-sm px-4 pb-16 sm:pb-20">
         <div className="overflow-hidden rounded-xl border border-parchment-200 shadow-lg">
           <video
             className="w-full"
