@@ -7,9 +7,10 @@ interface SearchBarProps {
   onSearch: (query: string) => void;
   loading?: boolean;
   initialQuery?: string;
+  placeholder?: string;
 }
 
-export function SearchBar({ onSearch, loading, initialQuery = "" }: SearchBarProps) {
+export function SearchBar({ onSearch, loading, initialQuery = "", placeholder = "Title, author, or ISBN…" }: SearchBarProps) {
   const [query, setQuery] = useState(initialQuery);
 
   const handleSubmit = useCallback(
@@ -31,7 +32,7 @@ export function SearchBar({ onSearch, loading, initialQuery = "" }: SearchBarPro
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Title, author, or ISBN…"
+          placeholder={placeholder}
           className="w-full rounded-lg border border-parchment-200 bg-white py-3 pl-10 pr-20 text-sm text-ink-900 placeholder:text-ink-400 focus:border-parchment-400 focus:outline-none focus:ring-2 focus:ring-parchment-300 sm:pr-24 sm:text-base"
           disabled={loading}
         />

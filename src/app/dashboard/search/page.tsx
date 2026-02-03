@@ -210,6 +210,7 @@ export default function SearchPage() {
           onSearch={handleSearch}
           loading={loading}
           initialQuery={initialQuery}
+          placeholder={searchMode === "author" ? "Author name…" : "Book title or ISBN…"}
         />
 
         {/* Scanner buttons - full width with labels */}
