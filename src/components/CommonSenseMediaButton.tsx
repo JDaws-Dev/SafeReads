@@ -7,8 +7,16 @@ interface CommonSenseMediaButtonProps {
 }
 
 function buildCommonSenseMediaUrl(title: string): string {
-  // Search books only using CSM's category filter
-  return `https://www.commonsensemedia.org/search/${encodeURIComponent(title)}?f%5B0%5D=field_reference_review_ent_prod%253Aproduct_type%3ABook`;
+  // Try direct link to book review using slugified title
+  // CSM uses format: /book-reviews/[lowercase-hyphenated-title]
+  const slug = title
+    .toLowerCase()
+    .replace(/['']/g, "") // Remove apostrophes
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+    .replace(/\s+/g, "-") // Spaces to hyphens
+    .replace(/-+/g, "-") // Collapse multiple hyphens
+    .trim();
+  return `https://www.commonsensemedia.org/book-reviews/${slug}`;
 }
 
 export function CommonSenseMediaButton({ title }: CommonSenseMediaButtonProps) {
