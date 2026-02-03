@@ -96,12 +96,12 @@ export function CoverScanner({ onCapture, disabled }: CoverScannerProps) {
         type="button"
         onClick={handleOpen}
         disabled={disabled}
-        className="flex items-center justify-center gap-2 rounded-lg border border-parchment-200 bg-white p-3 text-sm font-medium text-ink-600 transition-colors hover:border-parchment-400 hover:text-ink-800 disabled:opacity-50 sm:flex-1 sm:px-4"
+        className="flex h-12 items-center justify-center gap-2 rounded-lg border border-parchment-200 bg-white px-3 text-sm font-medium text-ink-600 transition-colors hover:border-parchment-400 hover:bg-parchment-50 active:scale-[0.98] disabled:opacity-50"
         title="Identify book from cover photo"
         aria-label="Identify book from cover photo"
       >
         <Camera className="h-5 w-5" />
-        <span className="hidden sm:inline">Photo Cover</span>
+        <span>Book Photo</span>
       </button>
 
       {open && (
