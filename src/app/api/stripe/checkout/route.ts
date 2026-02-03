@@ -84,14 +84,18 @@ export async function POST() {
     const errorMessage =
       error instanceof Error ? error.message : "Checkout failed";
     const errorType = error?.constructor?.name || "Unknown";
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return NextResponse.json(
       {
         error: errorMessage,
         type: errorType,
-        // Only include key prefix in development for debugging
-        ...(process.env.NODE_ENV === "development" && {
-          keyPrefix: process.env.STRIPE_SECRET_KEY?.substring(0, 12) || "NOT_SET",
-        }),
+        // Temporarily include debug info
+        debug: {
+          stack: errorStack?.split("\n").slice(0, 5),
+          hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
+          hasPriceId: !!process.env.STRIPE_PRICE_ID,
+          hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
+        },
       },
       { status: 500 }
     );
