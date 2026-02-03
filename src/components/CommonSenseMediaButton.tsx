@@ -7,8 +7,8 @@ interface CommonSenseMediaButtonProps {
 }
 
 function buildCommonSenseMediaUrl(title: string): string {
-  // Search by title only - cleaner results than title + author
-  return `https://www.commonsensemedia.org/search/${encodeURIComponent(title)}?type=book_reviews`;
+  // Search books only using CSM's category filter
+  return `https://www.commonsensemedia.org/search/${encodeURIComponent(title)}?f%5B0%5D=field_reference_review_ent_prod%253Aproduct_type%3ABook`;
 }
 
 export function CommonSenseMediaButton({ title }: CommonSenseMediaButtonProps) {
