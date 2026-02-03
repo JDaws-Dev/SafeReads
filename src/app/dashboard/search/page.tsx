@@ -182,12 +182,12 @@ export default function SearchPage() {
           loading={loading}
           initialQuery={initialQuery}
         />
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-2">
             <BarcodeScanner onScan={handleSearch} disabled={loading} />
             <CoverScanner onCapture={handleCoverCapture} disabled={loading} />
           </div>
-          <div className="flex rounded-lg border border-parchment-200 bg-white p-0.5">
+          <div className="flex self-start rounded-lg border border-parchment-200 bg-white p-0.5 sm:self-auto">
             <button
               onClick={() => setSearchMode("title")}
               className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
