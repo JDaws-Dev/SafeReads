@@ -6,6 +6,7 @@ import { api } from "../../../../../convex/_generated/api";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { BookHeader } from "@/components/BookHeader";
 import { AmazonButton } from "@/components/AmazonButton";
+import { CommonSenseMediaButton } from "@/components/CommonSenseMediaButton";
 import { WishlistButton } from "@/components/WishlistButton";
 import { VerdictSection } from "@/components/VerdictSection";
 import { AlternativesSuggestions } from "@/components/AlternativesSuggestions";
@@ -65,6 +66,10 @@ export default function BookDetailPage({
               title={book.title}
               authors={book.authors}
               isbn={book.isbn13 ?? book.isbn10}
+            />
+            <CommonSenseMediaButton
+              title={book.title}
+              authors={book.authors}
             />
             <WishlistButton bookId={book._id} />
           </div>
