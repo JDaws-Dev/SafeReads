@@ -201,6 +201,20 @@ async function searchGoogleBooks(
     const response = await fetch(url);
 
     if (response.status === 429) {
+      // Check if this is a daily quota limit (not recoverable with retries)
+      try {
+        const errorData = await response.clone().json();
+        if (errorData?.error?.message?.includes("per day")) {
+          throw new Error(
+            "Book search is temporarily unavailable due to high demand. Please try again later."
+          );
+        }
+      } catch (e) {
+        // If we can't parse the error, continue with retry logic
+        if (e instanceof Error && e.message.includes("temporarily unavailable")) {
+          throw e;
+        }
+      }
       const delay = 1000 * Math.pow(2, attempt); // 1s, 2s, 4s
       await new Promise((r) => setTimeout(r, delay));
       continue;
@@ -216,7 +230,7 @@ async function searchGoogleBooks(
     return data.items ?? [];
   }
 
-  throw new Error("Google Books API rate limited after 3 retries. Try again in a moment.");
+  throw new Error("Book search is temporarily unavailable. Please try again in a moment.");
 }
 
 interface ParsedBook {

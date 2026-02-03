@@ -56,7 +56,8 @@ export default function SearchPage() {
         setSearched(true);
 
         // Author detection: if inauthor: search returned results, this is an author
-        if (authorCatalog.length >= 2) {
+        // Only show author card if we also have book results (avoids confusing UX when main search fails)
+        if (authorCatalog.length >= 2 && bookResults.length > 0) {
           // Use the most common author name from inauthor: results
           const authorCounts = new Map<string, { count: number; display: string }>();
           for (const book of authorCatalog) {
