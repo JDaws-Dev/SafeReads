@@ -67,10 +67,7 @@ export default function BookDetailPage({
               authors={book.authors}
               isbn={book.isbn13 ?? book.isbn10}
             />
-            <CommonSenseMediaButton
-              title={book.title}
-              authors={book.authors}
-            />
+            <CommonSenseMediaButton title={book.title} />
             <WishlistButton bookId={book._id} />
           </div>
         }

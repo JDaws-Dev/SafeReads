@@ -4,17 +4,15 @@ import { ExternalLink } from "lucide-react";
 
 interface CommonSenseMediaButtonProps {
   title: string;
-  authors: string[];
 }
 
-function buildCommonSenseMediaUrl(title: string, authors: string[]): string {
-  // Build search query with title and first author for better matching
-  const query = authors[0] ? `${title} ${authors[0]}` : title;
-  return `https://www.commonsensemedia.org/search/${encodeURIComponent(query)}?type=book_reviews`;
+function buildCommonSenseMediaUrl(title: string): string {
+  // Search by title only - cleaner results than title + author
+  return `https://www.commonsensemedia.org/search/${encodeURIComponent(title)}?type=book_reviews`;
 }
 
-export function CommonSenseMediaButton({ title, authors }: CommonSenseMediaButtonProps) {
-  const url = buildCommonSenseMediaUrl(title, authors);
+export function CommonSenseMediaButton({ title }: CommonSenseMediaButtonProps) {
+  const url = buildCommonSenseMediaUrl(title);
 
   return (
     <a
