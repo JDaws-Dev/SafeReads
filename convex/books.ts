@@ -182,8 +182,13 @@ async function searchGoogleBooks(
   query: string,
   maxResults: number
 ): Promise<GoogleBooksItem[]> {
+  // Add intitle: prefix if query doesn't already have a search operator
+  // This works around a Google Books API issue where plain queries return 0 results
+  const hasOperator = /^(intitle:|inauthor:|isbn:|subject:)/i.test(query);
+  const searchQuery = hasOperator ? query : `intitle:${query}`;
+
   const params = new URLSearchParams({
-    q: query,
+    q: searchQuery,
     maxResults: String(maxResults),
     printType: "books",
     orderBy: "relevance",
