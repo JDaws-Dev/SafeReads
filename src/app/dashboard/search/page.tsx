@@ -55,64 +55,9 @@ export default function SearchPage() {
         setResults(bookResults);
         setSearched(true);
 
-        // Author detection: if inauthor: search returned results, this is an author
-        // Only show author card if we also have book results (avoids confusing UX when main search fails)
-        if (authorCatalog.length >= 2 && bookResults.length > 0) {
-          // Use the most common author name from inauthor: results
-          const authorCounts = new Map<string, { count: number; display: string }>();
-          for (const book of authorCatalog) {
-            for (const author of book.authors) {
-              const key = author.toLowerCase().trim();
-              const existing = authorCounts.get(key);
-              if (existing) {
-                existing.count++;
-              } else {
-                authorCounts.set(key, { count: 1, display: author });
-              }
-            }
-          }
-          let bestMatch = { count: 0, display: "", key: "" };
-          // Prefer the author whose name matches the query
-          const queryLower = query.toLowerCase().trim();
-          for (const [key, val] of authorCounts) {
-            if (
-              key === queryLower ||
-              key.includes(queryLower) ||
-              queryLower.includes(key)
-            ) {
-              if (val.count > bestMatch.count) {
-                bestMatch = { ...val, key };
-              }
-            }
-          }
-          // Fallback: most common author in results
-          if (bestMatch.count === 0) {
-            for (const [key, val] of authorCounts) {
-              if (val.count > bestMatch.count) {
-                bestMatch = { ...val, key };
-              }
-            }
-          }
-
-          const authorBooks = authorCatalog.filter((b) =>
-            b.authors.some(
-              (a) => a.toLowerCase().trim() === bestMatch.key
-            )
-          );
-          const allCategories = authorBooks.flatMap(
-            (b) => b.categories ?? []
-          );
-
-          setAuthorMatch({
-            name: bestMatch.display,
-            bookCount: authorBooks.length,
-            topBooks: authorBooks.slice(0, 4).map((b) => ({
-              title: b.title,
-              coverUrl: b.coverUrl,
-            })),
-            categories: [...new Set(allCategories)].slice(0, 5),
-          });
-        } else if (bookResults.length >= 2) {
+        // Author detection: check if title search results have a dominant author
+        // This is more reliable than the inauthor: search which can match unrelated people
+        if (bookResults.length >= 2) {
           // Fallback: ≥50% of general results share the same author
           const authorCounts = new Map<string, number>();
           for (const book of bookResults) {
