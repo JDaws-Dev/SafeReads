@@ -6,7 +6,36 @@ import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    // Validate environment variables early
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    const stripePriceId = process.env.STRIPE_PRICE_ID;
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+    if (!stripeSecretKey) {
+      console.error("Checkout error: STRIPE_SECRET_KEY not set");
+      return NextResponse.json(
+        { error: "Payment service not configured" },
+        { status: 500 }
+      );
+    }
+
+    if (!stripePriceId) {
+      console.error("Checkout error: STRIPE_PRICE_ID not set");
+      return NextResponse.json(
+        { error: "Payment service not configured" },
+        { status: 500 }
+      );
+    }
+
+    if (!appUrl) {
+      console.error("Checkout error: NEXT_PUBLIC_APP_URL not set");
+      return NextResponse.json(
+        { error: "Payment service not configured" },
+        { status: 500 }
+      );
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
       httpClient: Stripe.createFetchHttpClient(),
     });
 
@@ -41,24 +70,28 @@ export async function POST() {
       metadata: { convexUserId: user._id },
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID!,
+          price: stripePriceId,
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?subscription=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?subscription=canceled`,
+      success_url: `${appUrl}/dashboard?subscription=success`,
+      cancel_url: `${appUrl}/dashboard?subscription=canceled`,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Checkout error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Checkout failed";
+    const errorMessage =
+      error instanceof Error ? error.message : "Checkout failed";
     const errorType = error?.constructor?.name || "Unknown";
     return NextResponse.json(
       {
         error: errorMessage,
         type: errorType,
-        keyPrefix: process.env.STRIPE_SECRET_KEY?.substring(0, 12) || "NOT_SET"
+        // Only include key prefix in development for debugging
+        ...(process.env.NODE_ENV === "development" && {
+          keyPrefix: process.env.STRIPE_SECRET_KEY?.substring(0, 12) || "NOT_SET",
+        }),
       },
       { status: 500 }
     );
