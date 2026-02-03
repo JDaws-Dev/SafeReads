@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
@@ -34,6 +34,11 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState("");
+
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+  }, []);
 
   async function handleAnalyze() {
     setAnalyzing(true);
@@ -97,7 +102,7 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
                 verdict={analysis.verdict}
                 summary={analysis.summary}
                 ageRecommendation={analysis.ageRecommendation}
-                bookUrl={typeof window !== "undefined" ? window.location.href : ""}
+                bookUrl={currentUrl}
               />
             )}
             {cachedAnalysis?._id && (

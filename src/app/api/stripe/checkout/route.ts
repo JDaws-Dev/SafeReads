@@ -39,12 +39,32 @@ export async function POST() {
       httpClient: Stripe.createFetchHttpClient(),
     });
 
-    const token = await convexAuthNextjsToken();
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let token: string | undefined;
+    try {
+      token = await convexAuthNextjsToken();
+    } catch (tokenError) {
+      console.error("Token retrieval error:", tokenError);
+      return NextResponse.json(
+        { error: "Authentication error", details: String(tokenError) },
+        { status: 401 }
+      );
     }
 
-    const user = await fetchQuery(api.users.currentUser, {}, { token });
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized - no token" }, { status: 401 });
+    }
+
+    let user;
+    try {
+      user = await fetchQuery(api.users.currentUser, {}, { token });
+    } catch (queryError) {
+      console.error("User query error:", queryError);
+      return NextResponse.json(
+        { error: "Failed to fetch user", details: String(queryError) },
+        { status: 500 }
+      );
+    }
+
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
