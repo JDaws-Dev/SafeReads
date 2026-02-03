@@ -38,12 +38,16 @@ export function SearchBar({ onSearch, loading, initialQuery = "" }: SearchBarPro
         <button
           type="submit"
           disabled={loading || !query.trim()}
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-parchment-700 px-4 py-1.5 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800 disabled:opacity-50"
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md bg-parchment-700 p-2 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800 disabled:opacity-50 sm:px-4 sm:py-1.5"
+          aria-label="Search"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            "Search"
+            <>
+              <Search className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">Search</span>
+            </>
           )}
         </button>
       </div>

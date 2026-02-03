@@ -182,34 +182,38 @@ export default function SearchPage() {
           loading={loading}
           initialQuery={initialQuery}
         />
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3">
+          {/* Search mode toggle - primary action */}
+          <div className="flex justify-center sm:justify-start">
+            <div className="inline-flex rounded-lg border border-parchment-200 bg-white p-1">
+              <button
+                onClick={() => setSearchMode("title")}
+                className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  searchMode === "title"
+                    ? "bg-parchment-100 text-ink-900"
+                    : "text-ink-500 hover:text-ink-700"
+                }`}
+              >
+                <BookText className="h-4 w-4" />
+                Title
+              </button>
+              <button
+                onClick={() => setSearchMode("author")}
+                className={`flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  searchMode === "author"
+                    ? "bg-parchment-100 text-ink-900"
+                    : "text-ink-500 hover:text-ink-700"
+                }`}
+              >
+                <User className="h-4 w-4" />
+                Author
+              </button>
+            </div>
+          </div>
+          {/* Scanner buttons */}
           <div className="flex gap-2">
             <BarcodeScanner onScan={handleSearch} disabled={loading} />
             <CoverScanner onCapture={handleCoverCapture} disabled={loading} />
-          </div>
-          <div className="flex self-start rounded-lg border border-parchment-200 bg-white p-0.5 sm:self-auto">
-            <button
-              onClick={() => setSearchMode("title")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                searchMode === "title"
-                  ? "bg-parchment-100 text-ink-900"
-                  : "text-ink-500 hover:text-ink-700"
-              }`}
-            >
-              <BookText className="h-4 w-4" />
-              Title
-            </button>
-            <button
-              onClick={() => setSearchMode("author")}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                searchMode === "author"
-                  ? "bg-parchment-100 text-ink-900"
-                  : "text-ink-500 hover:text-ink-700"
-              }`}
-            >
-              <User className="h-4 w-4" />
-              Author
-            </button>
           </div>
         </div>
       </div>

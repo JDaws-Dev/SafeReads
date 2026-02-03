@@ -119,12 +119,12 @@ export function BarcodeScanner({ onScan, disabled }: BarcodeScannerProps) {
         type="button"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-parchment-200 bg-white px-4 py-3 text-sm font-medium text-ink-600 transition-colors hover:border-parchment-400 hover:text-ink-800 disabled:opacity-50"
+        className="flex items-center justify-center gap-2 rounded-lg border border-parchment-200 bg-white p-3 text-sm font-medium text-ink-600 transition-colors hover:border-parchment-400 hover:text-ink-800 disabled:opacity-50 sm:flex-1 sm:px-4"
         title="Scan ISBN barcode"
         aria-label="Scan ISBN barcode"
       >
         <ScanBarcode className="h-5 w-5" />
-        <span>Scan Barcode</span>
+        <span className="hidden sm:inline">Scan Barcode</span>
       </button>
 
       {open && (
