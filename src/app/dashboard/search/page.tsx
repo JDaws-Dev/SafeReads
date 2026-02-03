@@ -9,7 +9,9 @@ import { BarcodeScanner } from "@/components/BarcodeScanner";
 import { CoverScanner } from "@/components/CoverScanner";
 import { BookCard, BookCardBook } from "@/components/BookCard";
 import { AuthorCard, AuthorCardData } from "@/components/AuthorCard";
-import { BookOpen, Search, Trash2 } from "lucide-react";
+import { BookOpen, Search, Trash2, BookText, User } from "lucide-react";
+
+type SearchMode = "title" | "author";
 
 export default function SearchPage() {
   const currentUser = useQuery(api.users.currentUser);
@@ -34,6 +36,7 @@ export default function SearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [clearing, setClearing] = useState(false);
   const [authorMatch, setAuthorMatch] = useState<AuthorCardData | null>(null);
+  const [searchMode, setSearchMode] = useState<SearchMode>("title");
   const autoSearched = useRef(false);
 
   const handleSearch = useCallback(
@@ -42,16 +45,17 @@ export default function SearchPage() {
       setError(null);
       setAuthorMatch(null);
       try {
-        // Run general search and inauthor: search in parallel.
-        // The inauthor: search detects if the query is an author name.
-        const [books, authorCatalogRaw] = await Promise.all([
-          searchBooks({ query }),
-          searchByAuthor({ authorName: query, maxResults: 10 }).catch(
-            () => [] as BookCardBook[]
-          ),
-        ]);
-        const bookResults = books as BookCardBook[];
-        const authorCatalog = authorCatalogRaw as BookCardBook[];
+        let bookResults: BookCardBook[];
+
+        if (searchMode === "author") {
+          // Author mode: only search by author
+          const books = await searchByAuthor({ authorName: query, maxResults: 20 });
+          bookResults = books as BookCardBook[];
+        } else {
+          // Title mode: search by title (20 results to ensure we get full series)
+          const books = await searchBooks({ query, maxResults: 20 });
+          bookResults = books as BookCardBook[];
+        }
         setResults(bookResults);
         setSearched(true);
 
@@ -113,7 +117,7 @@ export default function SearchPage() {
           recordSearch({
             userId: currentUser._id,
             query,
-            resultCount: books.length,
+            resultCount: bookResults.length,
           }).catch(() => {
             // Best-effort — don't break search if history recording fails
           });
@@ -124,7 +128,7 @@ export default function SearchPage() {
         setLoading(false);
       }
     },
-    [searchBooks, searchByAuthor, currentUser, recordSearch]
+    [searchBooks, searchByAuthor, currentUser, recordSearch, searchMode]
   );
 
   // Auto-trigger search from ?q= query param
@@ -178,9 +182,35 @@ export default function SearchPage() {
           loading={loading}
           initialQuery={initialQuery}
         />
-        <div className="flex gap-2">
-          <BarcodeScanner onScan={handleSearch} disabled={loading} />
-          <CoverScanner onCapture={handleCoverCapture} disabled={loading} />
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            <BarcodeScanner onScan={handleSearch} disabled={loading} />
+            <CoverScanner onCapture={handleCoverCapture} disabled={loading} />
+          </div>
+          <div className="flex rounded-lg border border-parchment-200 bg-white p-0.5">
+            <button
+              onClick={() => setSearchMode("title")}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                searchMode === "title"
+                  ? "bg-parchment-100 text-ink-900"
+                  : "text-ink-500 hover:text-ink-700"
+              }`}
+            >
+              <BookText className="h-4 w-4" />
+              Title
+            </button>
+            <button
+              onClick={() => setSearchMode("author")}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                searchMode === "author"
+                  ? "bg-parchment-100 text-ink-900"
+                  : "text-ink-500 hover:text-ink-700"
+              }`}
+            >
+              <User className="h-4 w-4" />
+              Author
+            </button>
+          </div>
         </div>
       </div>
 
