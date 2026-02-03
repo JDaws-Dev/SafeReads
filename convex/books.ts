@@ -192,6 +192,7 @@ async function searchGoogleBooks(
     maxResults: String(maxResults),
     printType: "books",
     orderBy: "relevance",
+    langRestrict: "en",
   });
 
   const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
