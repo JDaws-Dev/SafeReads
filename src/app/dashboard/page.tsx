@@ -3,6 +3,8 @@
 import { useQuery } from "convex/react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { api } from "../../../convex/_generated/api";
 import {
   Search,
@@ -13,7 +15,9 @@ import {
   Shield,
   ChevronRight,
   MessageCircle,
+  X,
 } from "lucide-react";
+import { SubscriptionSuccessModal } from "@/components/SubscriptionSuccessModal";
 
 const VERDICT_STYLES: Record<string, { bg: string; text: string; label: string }> = {
   safe: { bg: "bg-verdict-safe", text: "text-white", label: "Safe" },
@@ -23,6 +27,16 @@ const VERDICT_STYLES: Record<string, { bg: string; text: string; label: string }
 };
 
 export default function DashboardPage() {
+  const searchParams = useSearchParams();
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  // Derive subscription banner from URL params (React pattern: derive state during render)
+  const subscriptionParam = searchParams.get("subscription");
+  const subscriptionBanner =
+    !bannerDismissed && (subscriptionParam === "success" || subscriptionParam === "canceled")
+      ? subscriptionParam
+      : null;
+
   const convexUser = useQuery(api.users.currentUser);
   const userId = useQuery(api.users.currentUserId);
 
@@ -36,8 +50,36 @@ export default function DashboardPage() {
   // Extract first name from user name
   const firstName = convexUser?.name?.split(" ")[0];
 
+  // Clear URL parameter after reading (side effect only, no state sync)
+  useEffect(() => {
+    if (subscriptionParam === "success" || subscriptionParam === "canceled") {
+      window.history.replaceState({}, "", "/dashboard");
+    }
+  }, [subscriptionParam]);
+
   return (
     <div>
+      {/* Subscription success modal */}
+      {subscriptionBanner === "success" && (
+        <SubscriptionSuccessModal onClose={() => setBannerDismissed(true)} />
+      )}
+
+      {/* Canceled checkout message */}
+      {subscriptionBanner === "canceled" && (
+        <div className="mb-6 flex items-center justify-between gap-3 rounded-lg bg-parchment-50 border border-parchment-200 px-4 py-3">
+          <p className="text-sm text-ink-600">
+            Checkout was canceled. You can upgrade anytime from Settings.
+          </p>
+          <button
+            onClick={() => setBannerDismissed(true)}
+            className="text-ink-400 hover:text-ink-600"
+            aria-label="Dismiss"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
+
       <h1 className="font-serif text-2xl font-bold text-ink-900 sm:text-3xl">
         Welcome{firstName ? `, ${firstName}` : ""}
       </h1>
