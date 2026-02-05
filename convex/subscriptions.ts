@@ -1,32 +1,61 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
-const FREE_ANALYSIS_LIMIT = 3;
+const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 /**
  * Check whether the current user can run an analysis.
- * Free users get 3 analyses; subscribed users get unlimited.
+ * Trial users get 7 days; subscribed/lifetime users get unlimited.
  */
 export const checkAccess = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) {
-      return { hasAccess: false, freeRemaining: 0, isSubscribed: false };
+      return {
+        hasAccess: false,
+        isSubscribed: false,
+        status: null,
+        trialDaysRemaining: 0,
+        analysisCount: 0,
+      };
     }
 
     const user = await ctx.db.get(userId);
     if (!user) {
-      return { hasAccess: false, freeRemaining: 0, isSubscribed: false };
+      return {
+        hasAccess: false,
+        isSubscribed: false,
+        status: null,
+        trialDaysRemaining: 0,
+        analysisCount: 0,
+      };
     }
 
+    const now = Date.now();
     const analysisCount = user.analysisCount ?? 0;
-    const isSubscribed = user.subscriptionStatus === "active";
-    const freeRemaining = Math.max(0, FREE_ANALYSIS_LIMIT - analysisCount);
-    const hasAccess = isSubscribed || analysisCount < FREE_ANALYSIS_LIMIT;
+    const status = user.subscriptionStatus ?? "trial";
+    // Fall back to _creationTime + 7 days if trialExpiresAt not set
+    const trialExpiresAt = user.trialExpiresAt ?? (user._creationTime + TRIAL_DURATION_MS);
 
-    return { hasAccess, freeRemaining, isSubscribed };
+    // Determine access
+    const isSubscribed = status === "active" || status === "lifetime";
+    const isTrialValid = status === "trial" && now < trialExpiresAt;
+    const hasAccess = isSubscribed || isTrialValid;
+
+    // Calculate days remaining in trial
+    const trialDaysRemaining = isTrialValid
+      ? Math.ceil((trialExpiresAt - now) / (24 * 60 * 60 * 1000))
+      : 0;
+
+    return {
+      hasAccess,
+      isSubscribed,
+      status,
+      trialDaysRemaining,
+      analysisCount,
+    };
   },
 });
 
@@ -42,8 +71,9 @@ export const getDetails = query({
         isSubscribed: false,
         status: null,
         currentPeriodEnd: null,
+        trialExpiresAt: null,
+        trialDaysRemaining: 0,
         analysisCount: 0,
-        freeRemaining: FREE_ANALYSIS_LIMIT,
       };
     }
 
@@ -53,20 +83,30 @@ export const getDetails = query({
         isSubscribed: false,
         status: null,
         currentPeriodEnd: null,
+        trialExpiresAt: null,
+        trialDaysRemaining: 0,
         analysisCount: 0,
-        freeRemaining: FREE_ANALYSIS_LIMIT,
       };
     }
 
+    const now = Date.now();
     const analysisCount = user.analysisCount ?? 0;
-    const isSubscribed = user.subscriptionStatus === "active";
+    const status = user.subscriptionStatus ?? "trial";
+    const trialExpiresAt = user.trialExpiresAt ?? (user._creationTime + TRIAL_DURATION_MS);
+
+    const isSubscribed = status === "active" || status === "lifetime";
+    const isTrialValid = status === "trial" && now < trialExpiresAt;
+    const trialDaysRemaining = isTrialValid
+      ? Math.ceil((trialExpiresAt - now) / (24 * 60 * 60 * 1000))
+      : 0;
 
     return {
       isSubscribed,
-      status: user.subscriptionStatus ?? null,
+      status,
       currentPeriodEnd: user.subscriptionCurrentPeriodEnd ?? null,
+      trialExpiresAt,
+      trialDaysRemaining,
       analysisCount,
-      freeRemaining: Math.max(0, FREE_ANALYSIS_LIMIT - analysisCount),
     };
   },
 });
@@ -169,5 +209,29 @@ export const updateSubscriptionByEmail = mutation({
     });
 
     return { success: true, userId: user._id };
+  },
+});
+
+/**
+ * Internal mutation to grant lifetime access by email.
+ * Called from HTTP admin endpoint.
+ */
+export const grantLifetimeInternal = internalMutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", args.email))
+      .first();
+
+    if (!user) {
+      throw new Error(`User not found: ${args.email}`);
+    }
+
+    await ctx.db.patch(user._id, {
+      subscriptionStatus: "lifetime",
+    });
+
+    return { success: true, email: args.email };
   },
 });

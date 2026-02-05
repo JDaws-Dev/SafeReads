@@ -18,8 +18,9 @@ export default function SettingsPage() {
     isSubscribed: boolean;
     status: string | null;
     currentPeriodEnd: number | null;
+    trialExpiresAt: number | null;
+    trialDaysRemaining: number;
     analysisCount: number;
-    freeRemaining: number;
   } | undefined;
 
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -126,6 +127,34 @@ export default function SettingsPage() {
                 : "Manage Subscription"}
             </button>
           </div>
+        ) : details.status === "lifetime" ? (
+          /* Lifetime state */
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Crown className="h-5 w-5 text-purple-500" />
+              <span className="text-sm font-semibold text-ink-900">
+                SafeReads Lifetime
+              </span>
+              <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+                Lifetime
+              </span>
+            </div>
+
+            <div className="space-y-2 text-sm text-ink-600">
+              <p>
+                Status:{" "}
+                <span className="font-medium text-ink-900">
+                  Lifetime Access
+                </span>
+              </p>
+              <p>
+                Total reviews:{" "}
+                <span className="font-medium text-ink-900">
+                  {details.analysisCount}
+                </span>
+              </p>
+            </div>
+          </div>
         ) : (
           /* Trial state */
           <div className="space-y-4">
@@ -134,16 +163,39 @@ export default function SettingsPage() {
                 Plan:{" "}
                 <span className="font-medium text-ink-900">Free Trial</span>
               </p>
+              {details.trialDaysRemaining > 0 ? (
+                <>
+                  <p>
+                    Time remaining:{" "}
+                    <span className="font-medium text-ink-900">
+                      {details.trialDaysRemaining} {details.trialDaysRemaining === 1 ? "day" : "days"}
+                    </span>
+                  </p>
+                  {details.trialExpiresAt && (
+                    <p>
+                      Expires:{" "}
+                      <span className="font-medium text-ink-900">
+                        {new Date(details.trialExpiresAt).toLocaleDateString("en-US", {
+                          month: "long",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p>
+                  Status:{" "}
+                  <span className="font-medium text-amber-600">
+                    Trial Expired
+                  </span>
+                </p>
+              )}
               <p>
-                Reviews used:{" "}
+                Reviews completed:{" "}
                 <span className="font-medium text-ink-900">
-                  {details.analysisCount} of 3
-                </span>
-              </p>
-              <p>
-                Remaining:{" "}
-                <span className="font-medium text-ink-900">
-                  {details.freeRemaining}
+                  {details.analysisCount}
                 </span>
               </p>
             </div>

@@ -23,13 +23,16 @@ export default defineSchema({
     stripeSubscriptionId: v.optional(v.string()),
     subscriptionStatus: v.optional(
       v.union(
+        v.literal("trial"),
         v.literal("active"),
+        v.literal("lifetime"),
         v.literal("canceled"),
         v.literal("past_due"),
         v.literal("incomplete")
       )
     ),
     subscriptionCurrentPeriodEnd: v.optional(v.number()),
+    trialExpiresAt: v.optional(v.number()), // Unix timestamp when trial expires
     analysisCount: v.optional(v.number()),
     // Coupon system
     redeemedCoupon: v.optional(v.string()), // Coupon code that was redeemed

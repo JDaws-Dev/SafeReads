@@ -172,8 +172,8 @@ export default function Home() {
             <div className="rounded-xl border border-parchment-200 bg-white p-6">
               <h3 className="font-serif text-lg font-bold text-ink-900">Free Trial</h3>
               <p className="mt-1 text-3xl font-bold text-ink-900">
-                3 reviews
-                <span className="text-sm font-normal text-ink-500"> included</span>
+                7 days
+                <span className="text-sm font-normal text-ink-500"> free</span>
               </p>
               <ul className="mt-5 space-y-3 text-sm text-ink-600">
                 <li className="flex items-start gap-2">
@@ -259,7 +259,7 @@ export default function Home() {
             <span className="hidden sm:inline">&middot;</span>
             <span>No agenda, just clarity</span>
             <span className="hidden sm:inline">&middot;</span>
-            <span>Free trial, 3 reviews</span>
+            <span>7-day free trial</span>
           </div>
         </div>
       </section>
@@ -271,7 +271,7 @@ export default function Home() {
             Stop guessing. Start knowing.
           </h2>
           <p className="mt-3 text-ink-500">
-            Sign up in seconds with your Google account. Try 3 reviews free —
+            Sign up in seconds with your Google account. 7-day free trial —
             no credit card needed.
           </p>
           <button

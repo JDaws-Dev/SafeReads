@@ -20,7 +20,13 @@ interface VerdictSectionProps {
 
 export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
   const cachedAnalysis = useQuery(api.analyses.getByBook, { bookId });
-  const access = useQuery(api.subscriptions.checkAccess) as { hasAccess: boolean; freeRemaining: number; isSubscribed: boolean } | undefined;
+  const access = useQuery(api.subscriptions.checkAccess) as {
+    hasAccess: boolean;
+    isSubscribed: boolean;
+    status: string | null;
+    trialDaysRemaining: number;
+    analysisCount: number;
+  } | undefined;
   const { notify } = useNotification();
 
   const analyzeAction = useAction(api.analyses.analyze);
@@ -117,7 +123,7 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
         <div className="rounded-xl border border-parchment-200 bg-white p-6 text-center">
           <Sparkles className="mx-auto h-8 w-8 text-parchment-400" />
           <p className="mt-3 font-serif text-lg font-bold text-ink-900">
-            You&apos;ve used your 3 trial reviews
+            Your 7-day trial has expired
           </p>
           <p className="mt-1 text-sm text-ink-500">
             Upgrade to SafeReads Pro for unlimited book reviews.
@@ -135,9 +141,9 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
             Get an objective content review of this book.
           </p>
           <AnalyzeButton onClick={handleAnalyze} loading={analyzing} />
-          {access && !access.isSubscribed && access.freeRemaining > 0 && (
+          {access && !access.isSubscribed && access.trialDaysRemaining > 0 && (
             <p className="mt-3 text-xs text-ink-400">
-              {access.freeRemaining} of 3 trial reviews remaining
+              {access.trialDaysRemaining} {access.trialDaysRemaining === 1 ? "day" : "days"} left in your free trial
             </p>
           )}
         </div>

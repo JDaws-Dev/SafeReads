@@ -80,7 +80,7 @@ export function UpgradePrompt({ onDismiss }: UpgradePromptProps) {
         </div>
 
         <p className="mb-5 text-sm text-ink-600">
-          You&apos;ve used your trial reviews. Upgrade to continue
+          Your free trial has ended. Upgrade to continue
           reviewing books for your family.
         </p>
 
