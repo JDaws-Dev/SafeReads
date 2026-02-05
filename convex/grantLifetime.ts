@@ -8,11 +8,9 @@ const grantLifetimeAction = httpAction(async (ctx, request) => {
     const url = new URL(request.url);
     const email = url.searchParams.get("email");
     const secretKey = url.searchParams.get("key");
-    const ADMIN_SECRET =
-      process.env.ADMIN_SECRET_KEY ||
-      "IscYPRsiaDdpuN378QS5tEvp2uCT+UHPyHpZG6lVko4=";
+    const ADMIN_SECRET = process.env.ADMIN_KEY;
 
-    if (secretKey !== ADMIN_SECRET) {
+    if (!ADMIN_SECRET || secretKey !== ADMIN_SECRET) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 403,
         headers: { "Content-Type": "application/json" },
