@@ -1,4 +1,4 @@
-import { query, mutation, QueryCtx, MutationCtx } from "./_generated/server";
+import { query, mutation, internalMutation, QueryCtx, MutationCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
@@ -136,5 +136,127 @@ export const isAdmin = query({
     if (!user?.email) return false;
 
     return ADMIN_EMAILS.includes(user.email);
+  },
+});
+
+/**
+ * Internal mutation to delete a user and all their associated data by email.
+ * Called from HTTP admin endpoint.
+ */
+export const deleteUserByEmailInternal = internalMutation({
+  args: { email: v.string() },
+  handler: async (ctx, args) => {
+    // Find the user by email
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", args.email))
+      .first();
+
+    if (!user) {
+      throw new Error(`User not found: ${args.email}`);
+    }
+
+    // Track deletion counts
+    let deletedProfiles = 0;
+    let deletedKids = 0;
+    let deletedWishlists = 0;
+    let deletedNotes = 0;
+    let deletedSearchHistory = 0;
+    let deletedConversations = 0;
+    let deletedMessages = 0;
+    let deletedReports = 0;
+
+    // Delete profiles
+    const profiles = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const profile of profiles) {
+      await ctx.db.delete(profile._id);
+      deletedProfiles++;
+    }
+
+    // Delete kids and their wishlists
+    const kids = await ctx.db
+      .query("kids")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const kid of kids) {
+      // Delete wishlists for this kid
+      const wishlists = await ctx.db
+        .query("wishlists")
+        .withIndex("by_kid", (q) => q.eq("kidId", kid._id))
+        .collect();
+      for (const wishlist of wishlists) {
+        await ctx.db.delete(wishlist._id);
+        deletedWishlists++;
+      }
+      await ctx.db.delete(kid._id);
+      deletedKids++;
+    }
+
+    // Delete notes
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const note of notes) {
+      await ctx.db.delete(note._id);
+      deletedNotes++;
+    }
+
+    // Delete search history
+    const searchHistory = await ctx.db
+      .query("searchHistory")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const search of searchHistory) {
+      await ctx.db.delete(search._id);
+      deletedSearchHistory++;
+    }
+
+    // Delete conversations and their messages
+    const conversations = await ctx.db
+      .query("conversations")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const conversation of conversations) {
+      // Delete messages for this conversation
+      const messages = await ctx.db
+        .query("messages")
+        .withIndex("by_conversation", (q) => q.eq("conversationId", conversation._id))
+        .collect();
+      for (const message of messages) {
+        await ctx.db.delete(message._id);
+        deletedMessages++;
+      }
+      await ctx.db.delete(conversation._id);
+      deletedConversations++;
+    }
+
+    // Delete reports
+    const reports = await ctx.db
+      .query("reports")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .collect();
+    for (const report of reports) {
+      await ctx.db.delete(report._id);
+      deletedReports++;
+    }
+
+    // Finally, delete the user
+    await ctx.db.delete(user._id);
+
+    return {
+      deletedUser: args.email,
+      deletedProfiles,
+      deletedKids,
+      deletedWishlists,
+      deletedNotes,
+      deletedSearchHistory,
+      deletedConversations,
+      deletedMessages,
+      deletedReports,
+    };
   },
 });

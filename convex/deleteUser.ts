@@ -1,0 +1,57 @@
+import { httpAction } from "./_generated/server";
+import { internal } from "./_generated/api";
+
+// HTTP endpoint to delete a user and all their associated data
+// Usage: curl "https://exuberant-puffin-838.convex.site/deleteUser?email=xxx@gmail.com&key=xxx"
+const deleteUserAction = httpAction(async (ctx, request) => {
+  try {
+    const url = new URL(request.url);
+    const email = url.searchParams.get("email");
+    const secretKey = url.searchParams.get("key");
+    const ADMIN_SECRET =
+      process.env.ADMIN_SECRET_KEY ||
+      "IscYPRsiaDdpuN378QS5tEvp2uCT+UHPyHpZG6lVko4=";
+
+    if (secretKey !== ADMIN_SECRET) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (!email) {
+      return new Response(JSON.stringify({ error: "Email required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Call internal mutation to delete user and all associated data
+    const result = await ctx.runMutation(
+      internal.admin.deleteUserByEmailInternal,
+      {
+        email,
+      }
+    );
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        email,
+        message: `Deleted user ${email} and all associated data`,
+        result,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Delete user error:", error);
+    return new Response(
+      JSON.stringify({
+        error: error instanceof Error ? error.message : String(error),
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+});
+
+export default deleteUserAction;
