@@ -14,6 +14,7 @@ import type * as auth from "../auth.js";
 import type * as books from "../books.js";
 import type * as chat from "../chat.js";
 import type * as coupons from "../coupons.js";
+import type * as grantLifetime from "../grantLifetime.js";
 import type * as http from "../http.js";
 import type * as kids from "../kids.js";
 import type * as lib_doesTheDogDie from "../lib/doesTheDogDie.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   books: typeof books;
   chat: typeof chat;
   coupons: typeof coupons;
+  grantLifetime: typeof grantLifetime;
   http: typeof http;
   kids: typeof kids;
   "lib/doesTheDogDie": typeof lib_doesTheDogDie;
