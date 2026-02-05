@@ -2,6 +2,7 @@ import { httpRouter } from "convex/server";
 import { auth } from "./auth";
 import grantLifetime from "./grantLifetime";
 import deleteUser from "./deleteUser";
+import adminDashboard from "./adminDashboard";
 
 const http = httpRouter();
 
@@ -17,6 +18,19 @@ http.route({
   path: "/deleteUser",
   method: "GET",
   handler: deleteUser,
+});
+
+// Admin dashboard route (GET for data, OPTIONS for CORS preflight)
+http.route({
+  path: "/adminDashboard",
+  method: "GET",
+  handler: adminDashboard,
+});
+
+http.route({
+  path: "/adminDashboard",
+  method: "OPTIONS",
+  handler: adminDashboard,
 });
 
 auth.addHttpRoutes(http);

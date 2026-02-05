@@ -140,6 +140,40 @@ export const isAdmin = query({
 });
 
 /**
+ * Get all users with stats for admin dashboard.
+ * Called from HTTP endpoint (no auth check - endpoint handles auth).
+ */
+export const getAllUsersWithStats = query({
+  args: {},
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+    const kids = await ctx.db.query("kids").collect();
+
+    // Create a map of userId to kids count
+    const kidsCountByUser = new Map<string, number>();
+    for (const kid of kids) {
+      const count = kidsCountByUser.get(kid.userId) || 0;
+      kidsCountByUser.set(kid.userId, count + 1);
+    }
+
+    return users.map((user) => ({
+      _id: user._id,
+      createdAt: user._creationTime,
+      name: user.name,
+      email: user.email,
+      subscriptionStatus: user.subscriptionStatus,
+      subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd,
+      trialExpiresAt: user.trialExpiresAt,
+      analysisCount: user.analysisCount || 0,
+      onboardingComplete: user.onboardingComplete,
+      kidCount: kidsCountByUser.get(user._id) || 0,
+      stripeCustomerId: user.stripeCustomerId,
+      redeemedCoupon: user.redeemedCoupon,
+    }));
+  },
+});
+
+/**
  * Internal mutation to delete a user and all their associated data by email.
  * Called from HTTP admin endpoint.
  */
