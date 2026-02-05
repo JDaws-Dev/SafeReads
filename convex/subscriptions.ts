@@ -140,3 +140,34 @@ export const setStripeCustomerId = mutation({
     });
   },
 });
+
+/**
+ * Internal mutation to update subscription by email (for manual activation).
+ */
+export const updateSubscriptionByEmail = mutation({
+  args: {
+    email: v.string(),
+    subscriptionStatus: v.union(
+      v.literal("active"),
+      v.literal("canceled"),
+      v.literal("past_due"),
+      v.literal("incomplete")
+    ),
+    subscriptionCurrentPeriodEnd: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", args.email))
+      .unique();
+
+    if (!user) throw new Error(`User not found: ${args.email}`);
+
+    await ctx.db.patch(user._id, {
+      subscriptionStatus: args.subscriptionStatus,
+      subscriptionCurrentPeriodEnd: args.subscriptionCurrentPeriodEnd,
+    });
+
+    return { success: true, userId: user._id };
+  },
+});

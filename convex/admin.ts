@@ -1,10 +1,11 @@
-import { query, QueryCtx } from "./_generated/server";
+import { query, mutation, QueryCtx, MutationCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { v } from "convex/values";
 
 // Admin emails - add your email here
 const ADMIN_EMAILS = ["jedaws@gmail.com", "jeremiah@getsafereads.com"];
 
-async function requireAdmin(ctx: QueryCtx) {
+async function requireAdmin(ctx: QueryCtx | MutationCtx) {
   const userId = await getAuthUserId(ctx);
   if (!userId) throw new Error("Not authenticated");
 
@@ -14,6 +15,37 @@ async function requireAdmin(ctx: QueryCtx) {
   }
   return user;
 }
+
+/**
+ * Admin mutation to manually activate a user's subscription.
+ */
+export const activateSubscription = mutation({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), args.email))
+      .unique();
+
+    if (!user) {
+      throw new Error(`User not found: ${args.email}`);
+    }
+
+    // Set subscription to active for 1 year
+    const oneYearFromNow = Date.now() + 365 * 24 * 60 * 60 * 1000;
+
+    await ctx.db.patch(user._id, {
+      subscriptionStatus: "active",
+      subscriptionCurrentPeriodEnd: oneYearFromNow,
+    });
+
+    return { success: true, userId: user._id };
+  },
+});
 
 export const getStats = query({
   args: {},

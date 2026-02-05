@@ -6,7 +6,9 @@ AI-powered book content analysis for parents. Search books, get objective conten
 
 - Next.js 15 (App Router, TypeScript, `src/` directory)
 - Convex (backend, real-time DB, actions for external APIs)
-- Clerk (auth, Google sign-in)
+- Convex Auth (authentication, Google OAuth)
+- Stripe (subscriptions, $2.99/mo Pro plan)
+- Resend (transactional emails - welcome email on subscription)
 - OpenAI GPT-4o (AI verdict engine with structured JSON output)
 - Tailwind CSS (bookish theme: parchment palette, Libre Baskerville + Inter)
 - Radix UI primitives for accessible components
@@ -29,6 +31,23 @@ npm run lint         # ESLint
 - **One analysis per book** — objective content review, not personalized to user profiles
 - Analyses keyed by `bookId` only (no profile dependency)
 - "No Verdict" returned when insufficient book data
+
+## Subscription Flow
+
+1. Free users get 3 trial reviews
+2. Upgrade triggers Stripe Checkout (`/api/stripe/checkout`)
+3. Stripe webhook (`/api/webhooks/stripe`) updates user subscription status
+4. Welcome email sent via Resend on `customer.subscription.created`
+5. Success modal shown on redirect to `/dashboard?subscription=success`
+
+## Environment Variables (Vercel Production)
+
+- `STRIPE_SECRET_KEY` — Stripe API key
+- `STRIPE_PRICE_ID` — Pro plan price ID
+- `STRIPE_WEBHOOK_SECRET` — Webhook signing secret
+- `RESEND_API_KEY` — Resend email API key
+- `NEXT_PUBLIC_CONVEX_URL` — Convex deployment URL
+- `NEXT_PUBLIC_APP_URL` — App URL (https://getsafereads.com)
 
 ## Key Directories
 
