@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useConvexAuth } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { BookOpen } from "lucide-react";
+import { useHaptic } from "../../hooks/useHaptic";
 
 export default function LoginPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isPending } = useConvexAuth();
   const { signIn } = useAuthActions();
+  const haptic = useHaptic();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,6 +21,11 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+
+  // Refs for accessibility - focus management on errors
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -48,6 +55,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    haptic.light(); // Light tap on submit
     setLoading(true);
     setError("");
 
@@ -62,10 +70,12 @@ export default function LoginPage() {
       // Save email for convenience
       localStorage.setItem("safereads_remembered_email", formData.email);
 
+      haptic.success(); // Success feedback
       // Redirect to dashboard
       router.push("/dashboard");
     } catch (err: unknown) {
       console.error("[LoginPage] Login error:", err);
+      haptic.error(); // Error feedback
       const errorMessage = err instanceof Error ? err.message : "";
       if (
         errorMessage.includes("Invalid") ||
@@ -74,6 +84,7 @@ export default function LoginPage() {
         errorMessage.includes("Could not verify")
       ) {
         setError("Invalid email or password. Please try again.");
+        emailInputRef.current?.focus();
       } else if (
         errorMessage.includes("network") ||
         errorMessage.includes("fetch") ||
@@ -83,11 +94,13 @@ export default function LoginPage() {
       } else {
         setError("Login failed. Please try again.");
       }
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    haptic.light(); // Light tap on Google button
     setGoogleLoading(true);
     setError("");
 
@@ -123,7 +136,7 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <div className="rounded-xl border border-parchment-200 bg-white p-8 shadow-sm">
+        <div className="rounded-xl border border-parchment-200 bg-white p-8 shadow-sm min-w-0">
           <div className="mb-6 text-center">
             <h1 className="font-serif text-2xl font-bold text-ink-900">
               Welcome back
@@ -134,7 +147,13 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div
+              ref={errorRef}
+              role="alert"
+              aria-live="assertive"
+              id="form-error"
+              className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
               {error}
             </div>
           )}
@@ -144,7 +163,7 @@ export default function LoginPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || loading}
-            className="mb-4 flex w-full items-center justify-center gap-3 rounded-lg border border-parchment-300 bg-white px-4 py-3 font-medium text-ink-700 transition hover:bg-parchment-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mb-4 flex w-full min-h-[48px] items-center justify-center gap-3 rounded-lg border border-parchment-300 bg-white px-4 py-3 font-medium text-ink-700 transition hover:bg-parchment-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {googleLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-parchment-300 border-t-parchment-600" />
@@ -180,7 +199,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" aria-busy={loading}>
             <div>
               <label
                 htmlFor="email"
@@ -189,14 +208,18 @@ export default function LoginPage() {
                 Email
               </label>
               <input
+                ref={emailInputRef}
                 type="email"
                 id="email"
                 name="email"
+                inputMode="email"
                 autoComplete="email"
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-parchment-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "form-error" : undefined}
+                className="w-full min-h-[44px] rounded-lg border border-parchment-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
                 placeholder="you@example.com"
               />
             </div>
@@ -217,6 +240,7 @@ export default function LoginPage() {
                 </Link>
               </div>
               <input
+                ref={passwordInputRef}
                 type="password"
                 id="password"
                 name="password"
@@ -224,7 +248,9 @@ export default function LoginPage() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-parchment-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? "form-error" : undefined}
+                className="w-full min-h-[44px] rounded-lg border border-parchment-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
                 placeholder="Enter your password"
               />
             </div>
@@ -232,7 +258,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full rounded-lg bg-parchment-700 px-4 py-3 font-semibold text-parchment-50 transition hover:bg-parchment-800 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full min-h-[48px] rounded-lg bg-parchment-700 px-4 py-3 font-semibold text-parchment-50 transition hover:bg-parchment-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>

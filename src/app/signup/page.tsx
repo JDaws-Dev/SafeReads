@@ -8,12 +8,14 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { BookOpen, Eye, EyeOff } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import PasswordStrengthIndicator from "../../components/PasswordStrengthIndicator";
+import { useHaptic } from "../../hooks/useHaptic";
 
 export default function SignupPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: isPending } = useConvexAuth();
   const { signIn } = useAuthActions();
   const redeemCoupon = useMutation(api.coupons.redeemCoupon);
+  const haptic = useHaptic();
 
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -69,10 +71,12 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    haptic.light(); // Light tap on submit
     setError("");
 
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters");
+      haptic.error();
       passwordInputRef.current?.focus();
       errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
@@ -80,6 +84,7 @@ export default function SignupPage() {
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
+      haptic.error();
       confirmPasswordInputRef.current?.focus();
       errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
@@ -105,10 +110,12 @@ export default function SignupPage() {
         }
       }
 
+      haptic.success(); // Success feedback
       // Go to onboarding
       router.push("/onboarding");
     } catch (err: unknown) {
       console.error("[SignupPage] Signup error:", err);
+      haptic.error(); // Error feedback
       const errorMessage = err instanceof Error ? err.message : "";
       if (
         errorMessage.includes("already exists") ||
@@ -125,6 +132,7 @@ export default function SignupPage() {
   };
 
   const handleGoogleSignUp = async () => {
+    haptic.light(); // Light tap on Google button
     setGoogleLoading(true);
     setError("");
 
