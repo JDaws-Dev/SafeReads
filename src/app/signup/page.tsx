@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useConvexAuth, useMutation } from "convex/react";
@@ -28,6 +28,13 @@ export default function SignupPage() {
     couponCode: "",
   });
   const [passwordMismatch, setPasswordMismatch] = useState(false);
+
+  // Refs for accessibility - focus management on errors
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+  const confirmPasswordInputRef = useRef<HTMLInputElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -65,11 +72,15 @@ export default function SignupPage() {
 
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters");
+      passwordInputRef.current?.focus();
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
+      confirmPasswordInputRef.current?.focus();
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
 
@@ -103,9 +114,11 @@ export default function SignupPage() {
         errorMessage.includes("Account already exists")
       ) {
         setError("This email is already registered. Please log in instead.");
+        emailInputRef.current?.focus();
       } else {
         setError("Signup failed. Please try again.");
       }
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       setLoading(false);
     }
   };
@@ -146,7 +159,7 @@ export default function SignupPage() {
           </Link>
         </div>
 
-        <div className="rounded-xl border border-parchment-200 bg-white p-8 shadow-sm">
+        <div className="rounded-xl border border-parchment-200 bg-white p-8 shadow-sm min-w-0">
           <div className="mb-6 text-center">
             <h1 className="font-serif text-2xl font-bold text-ink-900">
               {isLifetimeCode ? "Get Lifetime Access" : "Start Your Free Trial"}
@@ -159,7 +172,13 @@ export default function SignupPage() {
           </div>
 
           {error && (
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div
+              ref={errorRef}
+              role="alert"
+              aria-live="assertive"
+              id="form-error"
+              className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
               {error}
             </div>
           )}
@@ -169,7 +188,7 @@ export default function SignupPage() {
             type="button"
             onClick={handleGoogleSignUp}
             disabled={googleLoading || loading}
-            className="mb-4 flex w-full items-center justify-center gap-3 rounded-lg border border-parchment-300 bg-white px-4 py-3 font-medium text-ink-700 transition hover:bg-parchment-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mb-4 flex w-full min-h-[48px] items-center justify-center gap-3 rounded-lg border border-parchment-300 bg-white px-4 py-3 font-medium text-ink-700 transition hover:bg-parchment-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {googleLoading ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-parchment-300 border-t-parchment-600" />
@@ -207,7 +226,7 @@ export default function SignupPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" aria-busy={loading}>
             <div>
               <label
                 htmlFor="name"
@@ -216,13 +235,14 @@ export default function SignupPage() {
                 Your Name
               </label>
               <input
+                ref={nameInputRef}
                 type="text"
                 id="name"
                 name="name"
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-parchment-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
+                className="w-full min-h-[44px] rounded-lg border border-parchment-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
                 placeholder="Sarah"
               />
             </div>
@@ -235,14 +255,18 @@ export default function SignupPage() {
                 Email
               </label>
               <input
+                ref={emailInputRef}
                 type="email"
                 id="email"
                 name="email"
+                inputMode="email"
                 autoComplete="email"
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-parchment-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
+                aria-invalid={error.includes("email") || error.includes("registered") ? true : undefined}
+                aria-describedby={error.includes("email") || error.includes("registered") ? "form-error" : undefined}
+                className="w-full min-h-[44px] rounded-lg border border-parchment-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
                 placeholder="you@example.com"
               />
             </div>
@@ -256,6 +280,7 @@ export default function SignupPage() {
               </label>
               <div className="relative">
                 <input
+                  ref={passwordInputRef}
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
@@ -264,7 +289,9 @@ export default function SignupPage() {
                   minLength={8}
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-parchment-300 px-4 py-3 pr-12 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
+                  aria-invalid={error.includes("Password") && error.includes("8") ? true : undefined}
+                  aria-describedby={error.includes("Password") && error.includes("8") ? "form-error" : undefined}
+                  className="w-full min-h-[44px] rounded-lg border border-parchment-300 px-4 py-3 pr-12 focus:border-transparent focus:ring-2 focus:ring-parchment-600"
                   placeholder="At least 8 characters"
                 />
                 <button
@@ -290,6 +317,7 @@ export default function SignupPage() {
                 Confirm Password
               </label>
               <input
+                ref={confirmPasswordInputRef}
                 type={showPassword ? "text" : "password"}
                 id="confirmPassword"
                 name="confirmPassword"
@@ -298,7 +326,9 @@ export default function SignupPage() {
                 minLength={8}
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`w-full rounded-lg border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600 ${
+                aria-invalid={passwordMismatch || error.includes("match") ? true : undefined}
+                aria-describedby={passwordMismatch ? "password-mismatch-error" : (error.includes("match") ? "form-error" : undefined)}
+                className={`w-full min-h-[44px] rounded-lg border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600 ${
                   passwordMismatch
                     ? "border-red-300 bg-red-50"
                     : "border-parchment-300"
@@ -306,7 +336,7 @@ export default function SignupPage() {
                 placeholder="Confirm your password"
               />
               {passwordMismatch && (
-                <p className="mt-1 text-sm text-red-600">
+                <p id="password-mismatch-error" role="alert" className="mt-1 text-sm text-red-600">
                   Passwords do not match
                 </p>
               )}
@@ -335,7 +365,7 @@ export default function SignupPage() {
                   name="couponCode"
                   value={formData.couponCode}
                   onChange={handleChange}
-                  className={`w-full rounded-lg border px-4 py-3 uppercase focus:ring-2 focus:ring-parchment-600 ${
+                  className={`w-full min-h-[44px] rounded-lg border px-4 py-3 uppercase focus:ring-2 focus:ring-parchment-600 ${
                     isLifetimeCode
                       ? "border-green-500 bg-green-50"
                       : hasInvalidCode
@@ -384,7 +414,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className={`mt-2 w-full rounded-lg px-4 py-3 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`mt-2 w-full min-h-[48px] rounded-lg px-4 py-3 font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-50 ${
                 isLifetimeCode
                   ? "bg-green-600 hover:bg-green-700"
                   : "bg-parchment-700 hover:bg-parchment-800"
@@ -440,6 +470,56 @@ export default function SignupPage() {
                 Sign in
               </Link>
             </p>
+          </div>
+
+          {/* Bundle Upsell */}
+          <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500">
+                <svg
+                  className="h-4 w-4 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-emerald-900">
+                  Want all 3 apps? Save 33%
+                </p>
+                <p className="mt-0.5 text-xs text-emerald-700">
+                  Get SafeReads + SafeTunes + SafeTube for just $9.99/mo instead of $14.97
+                </p>
+                <a
+                  href="https://getsafecontent.vercel.app/#pricing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                >
+                  Learn about the Safe Suite
+                  <svg
+                    className="h-3 w-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </div>
           </div>
 
           <div className="mt-6 border-t border-parchment-100 pt-6">
