@@ -24,8 +24,10 @@ export default function SignupPage() {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     couponCode: "",
   });
+  const [passwordMismatch, setPasswordMismatch] = useState(false);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -42,10 +44,19 @@ export default function SignupPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [name]: value,
-    }));
+    };
+    setFormData(newFormData);
+
+    // Real-time password mismatch validation
+    if (name === "password" || name === "confirmPassword") {
+      const password = name === "password" ? value : newFormData.password;
+      const confirmPassword = name === "confirmPassword" ? value : newFormData.confirmPassword;
+      // Only show mismatch if confirm field has content
+      setPasswordMismatch(confirmPassword.length > 0 && password !== confirmPassword);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,6 +65,11 @@ export default function SignupPage() {
 
     if (formData.password.length < 8) {
       setError("Password must be at least 8 characters");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
       return;
     }
 
@@ -243,6 +259,7 @@ export default function SignupPage() {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
+                  autoComplete="new-password"
                   required
                   minLength={8}
                   value={formData.password}
@@ -263,6 +280,36 @@ export default function SignupPage() {
                   )}
                 </button>
               </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="mb-1 block text-sm font-medium text-ink-700"
+              >
+                Confirm Password
+              </label>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className={`w-full rounded-lg border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-parchment-600 ${
+                  passwordMismatch
+                    ? "border-red-300 bg-red-50"
+                    : "border-parchment-300"
+                }`}
+                placeholder="Confirm your password"
+              />
+              {passwordMismatch && (
+                <p className="mt-1 text-sm text-red-600">
+                  Passwords do not match
+                </p>
+              )}
             </div>
 
             {/* Promo code section */}
