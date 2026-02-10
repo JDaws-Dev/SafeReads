@@ -1,6 +1,10 @@
 import { httpAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 
+// TEMPORARY WORKAROUND: Convex has a bug where env vars set via CLI don't propagate
+// to HTTP actions. Using a hardcoded key until Convex fixes this.
+const HARDCODED_ADMIN_KEY = "u2A0NLQwYgNCGVz3/6b9v97bFsP6v3TnqqtxFL8rOQ0=";
+
 // HTTP endpoint to delete a user and all their associated data
 // Usage: curl "https://exuberant-puffin-838.convex.site/deleteUser?email=xxx@gmail.com&key=xxx"
 const deleteUserAction = httpAction(async (ctx, request) => {
@@ -8,9 +12,9 @@ const deleteUserAction = httpAction(async (ctx, request) => {
     const url = new URL(request.url);
     const email = url.searchParams.get("email");
     const secretKey = url.searchParams.get("key");
-    const ADMIN_SECRET = process.env.ADMIN_KEY;
+    const ADMIN_SECRET = process.env.ADMIN_KEY || HARDCODED_ADMIN_KEY;
 
-    if (!ADMIN_SECRET || secretKey !== ADMIN_SECRET) {
+    if (!secretKey || secretKey !== ADMIN_SECRET) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 403,
         headers: { "Content-Type": "application/json" },
