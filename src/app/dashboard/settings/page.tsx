@@ -209,7 +209,7 @@ export default function SettingsPage() {
                 </span>
               </div>
               <p className="mb-3 text-lg font-semibold text-ink-900">
-                $2.99
+                $4.99
                 <span className="text-sm font-normal text-ink-500">
                   /month
                 </span>

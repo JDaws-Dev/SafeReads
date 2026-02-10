@@ -1,8 +1,8 @@
 "use client";
 
 import { useConvexAuth } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect } from "react";
 import {
   BookOpen,
@@ -19,7 +19,6 @@ import { Footer } from "@/components/Footer";
 
 export default function Home() {
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const { signIn } = useAuthActions();
   const router = useRouter();
 
   useEffect(() => {
@@ -35,10 +34,6 @@ export default function Home() {
   if (isAuthenticated) {
     return <div className="min-h-[calc(100vh-4rem)]" />;
   }
-
-  const handleSignIn = () => {
-    void signIn("google");
-  };
 
   return (
     <div className="min-h-[calc(100vh-4rem)]">
@@ -58,12 +53,12 @@ export default function Home() {
             for your family.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <button
-              onClick={handleSignIn}
-              className="w-full rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800 sm:w-auto"
+            <Link
+              href="/signup"
+              className="w-full rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800 sm:w-auto text-center"
             >
               Get Started — It&apos;s Free
-            </button>
+            </Link>
             <a
               href="#how-it-works"
               className="text-sm font-medium text-ink-500 transition-colors hover:text-ink-700"
@@ -193,12 +188,12 @@ export default function Home() {
                   Kids &amp; wishlists
                 </li>
               </ul>
-              <button
-                onClick={handleSignIn}
-                className="mt-6 w-full rounded-lg border border-parchment-300 bg-white px-4 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:bg-parchment-50"
+              <Link
+                href="/signup"
+                className="mt-6 block w-full rounded-lg border border-parchment-300 bg-white px-4 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:bg-parchment-50 text-center"
               >
                 Get Started
-              </button>
+              </Link>
             </div>
 
             {/* Pro tier */}
@@ -211,7 +206,7 @@ export default function Home() {
               </div>
               <h3 className="font-serif text-lg font-bold text-ink-900">Pro</h3>
               <p className="mt-1 text-3xl font-bold text-ink-900">
-                $2.99
+                $4.99
                 <span className="text-sm font-normal text-ink-500">/month</span>
               </p>
               <ul className="mt-5 space-y-3 text-sm text-ink-600">
@@ -232,12 +227,12 @@ export default function Home() {
                   Cancel anytime
                 </li>
               </ul>
-              <button
-                onClick={handleSignIn}
-                className="mt-6 w-full rounded-lg bg-parchment-700 px-4 py-2.5 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800"
+              <Link
+                href="/signup"
+                className="mt-6 block w-full rounded-lg bg-parchment-700 px-4 py-2.5 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800 text-center"
               >
                 Start Free, Upgrade Later
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -271,15 +266,15 @@ export default function Home() {
             Stop guessing. Start knowing.
           </h2>
           <p className="mt-3 text-ink-500">
-            Sign up in seconds with your Google account. 7-day free trial —
+            Sign up in seconds with Google or email. 7-day free trial —
             no credit card needed.
           </p>
-          <button
-            onClick={handleSignIn}
-            className="mt-6 rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800"
+          <Link
+            href="/signup"
+            className="mt-6 inline-block rounded-lg bg-parchment-700 px-8 py-3 text-base font-semibold text-parchment-50 transition-colors hover:bg-parchment-800"
           >
             Get Started Free
-          </button>
+          </Link>
         </div>
       </section>
 

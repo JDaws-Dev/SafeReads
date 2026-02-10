@@ -86,7 +86,7 @@ export function UpgradePrompt({ onDismiss }: UpgradePromptProps) {
 
         <div className="mb-5 rounded-lg border border-parchment-200 bg-parchment-50 p-4">
           <p className="mb-3 text-lg font-semibold text-ink-900">
-            $2.99<span className="text-sm font-normal text-ink-500">/month</span>
+            $4.99<span className="text-sm font-normal text-ink-500">/month</span>
           </p>
           <ul className="space-y-2 text-sm text-ink-700">
             <li className="flex items-center gap-2">

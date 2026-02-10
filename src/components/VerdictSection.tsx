@@ -132,7 +132,7 @@ export function VerdictSection({ bookId, bookTitle }: VerdictSectionProps) {
             onClick={() => setShowUpgrade(true)}
             className="mt-4 inline-flex items-center gap-2 rounded-lg bg-parchment-700 px-5 py-2.5 text-sm font-medium text-parchment-50 transition-colors hover:bg-parchment-800"
           >
-            Upgrade — $2.99/mo
+            Upgrade — $4.99/mo
           </button>
         </div>
       ) : (
