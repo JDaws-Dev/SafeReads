@@ -10,33 +10,35 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
+### Iteration 60 — SafeReads-tfg: Rebrand marketing site: Safe Suite → Safe Family
+
+- **Task**: Update all branding on marketing site from "Safe Suite" to "Safe Family"
+- **Changes**:
+  - `sites/marketing/src/app/layout.tsx` — Meta title and OG tags
+  - `sites/marketing/src/components/layout/Header.tsx` — Wordmark and comment
+  - `sites/marketing/src/components/layout/Footer.tsx` — Copyright
+  - `sites/marketing/src/components/landing/PricingSection.tsx` — Bundle name
+  - `sites/marketing/src/components/landing/CTASection.tsx` — CTA copy
+  - `sites/marketing/src/components/landing/Features.tsx` — Section heading
+  - `sites/marketing/src/components/landing/FAQSection.tsx` — FAQ answers (2 occurrences)
+  - `sites/marketing/src/components/landing/AppCards.tsx` — Bundle callout
+  - `sites/marketing/src/components/layout/StickyMobileCTA.tsx` — Mobile CTA text
+  - `sites/marketing/src/app/admin-login/page.tsx` — Login description
+  - `sites/marketing/src/app/admin/page.tsx` — Dashboard subtitle
+  - `sites/marketing/src/components/admin/AdminNav.tsx` — Sidebar wordmark
+  - `sites/marketing/src/app/success/page.tsx` — Welcome heading
+  - `sites/marketing/src/app/admin/users/page.tsx` — Users page subtitle (3 occurrences)
+  - `sites/marketing/README.md` — Stripe product name
+- Build passes, lint has pre-existing errors (not from this iteration)
+- No new patterns or decisions
+
 ### Iteration 59 — SafeReads-7az: Verify admin dashboard tracks users across all 3 apps
 
-- **Problem**: Convex HTTP actions couldn't read environment variables set via CLI — `process.env.ADMIN_KEY` returned undefined
-- **Root cause**: Convex bug where env vars set via `npx convex env set` don't propagate to HTTP actions. Only vars set at initial deployment work (like `OPENAI_API_KEY`, `SITE_URL`).
-- **Solution**: Implemented temporary workaround using hardcoded fallback key in all HTTP admin endpoints
-- **Changes across all 3 apps**:
-  - SafeReads: Updated `convex/adminDashboard.ts`, `convex/grantLifetime.ts`, `convex/deleteUser.ts`
-  - SafeTunes: Updated `convex/adminDashboard.ts`, `convex/grantLifetime.ts`, `convex/setSubscriptionStatus.ts`, `convex/deleteUserHttpAction.ts`
-  - SafeTube: Updated `convex/adminDashboard.ts`, `convex/setSubscriptionStatus.ts`, `convex/deleteUser.ts`
-- Updated marketing site: `sites/marketing/src/lib/admin-api.ts` — aligned admin key fallback with Convex apps
-- Updated Vercel env var `ADMIN_API_KEY` for marketing site production
-- **Verification results**:
-  - SafeTunes: 27 users fetched ✓
-  - SafeTube: 7 users fetched ✓
-  - SafeReads: 3 users fetched ✓
-  - Grant lifetime endpoints: all working ✓
-  - Delete user endpoints: all working ✓
-- **Key learning**: Convex HTTP actions have a bug where CLI-set env vars don't work. Use hardcoded fallbacks with TODO comments for now.
-- Build passes, lint has pre-existing errors (not from this iteration)
+- (Moved to archive)
 
 ### Iteration 58 — SafeReads-y1i: Migrate authentication from Clerk to Convex Auth
 
 - (Moved to archive)
-
-### Iteration 57 — SafeReads-m4y: Fix Clerk authentication proxy (API route approach)
-
-- (Moved to archive — superseded by Convex Auth migration)
 
 ---
 
