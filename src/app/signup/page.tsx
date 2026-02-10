@@ -7,6 +7,7 @@ import { useConvexAuth, useMutation } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { BookOpen, Eye, EyeOff } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
+import PasswordStrengthIndicator from "../../components/PasswordStrengthIndicator";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -307,6 +308,7 @@ export default function SignupPage() {
                   )}
                 </button>
               </div>
+              <PasswordStrengthIndicator password={formData.password} />
             </div>
 
             <div>
