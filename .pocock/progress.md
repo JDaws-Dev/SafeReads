@@ -10,20 +10,19 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
-### Iteration 61 — SafeReads-bue: Update hero headline to cover all 3 apps
+### Iteration 62 — SafeReads-3dx: Update project documentation for Safe Family rebrand
 
-- **Task**: Change headline from "Stop worrying about what they're watching" to include all 3 apps
-- **Solution**: Implemented rotating words animation cycling through "watching", "listening to", "reading"
+- **Task**: Update internal documentation to reflect Safe Family branding
 - **Changes**:
-  - `sites/marketing/src/components/landing/Hero.tsx` — Added useState/useEffect for animation, cycling every 3 seconds with smooth fade transition
-- **Animation details**: 200ms fade-out + slide-down, 3s interval between words
-- Build passes, lint has pre-existing errors (not from this iteration)
+  - `MEMORY.md` — Updated brand name, domain, copyright references
+  - `CLAUDE.md` — Updated "Safe Suite Bundle" → "Safe Family Bundle" in pricing table
+- No build changes (documentation only)
 
-### Iteration 60 — SafeReads-tfg: Rebrand marketing site: Safe Suite → Safe Family
+### Iteration 61 — SafeReads-bue: Update hero headline to cover all 3 apps
 
 - (Moved to archive)
 
-### Iteration 59 — SafeReads-7az: Verify admin dashboard tracks users across all 3 apps
+### Iteration 60 — SafeReads-tfg: Rebrand marketing site: Safe Suite → Safe Family
 
 - (Moved to archive)
 
