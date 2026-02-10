@@ -10,33 +10,20 @@ This file maintains context between autonomous iterations.
 <!-- This section is a rolling window - keep only the last 3 entries -->
 <!-- Move older entries to the Archive section below -->
 
-### Iteration 60 — SafeReads-tfg: Rebrand marketing site: Safe Suite → Safe Family
+### Iteration 61 — SafeReads-bue: Update hero headline to cover all 3 apps
 
-- **Task**: Update all branding on marketing site from "Safe Suite" to "Safe Family"
+- **Task**: Change headline from "Stop worrying about what they're watching" to include all 3 apps
+- **Solution**: Implemented rotating words animation cycling through "watching", "listening to", "reading"
 - **Changes**:
-  - `sites/marketing/src/app/layout.tsx` — Meta title and OG tags
-  - `sites/marketing/src/components/layout/Header.tsx` — Wordmark and comment
-  - `sites/marketing/src/components/layout/Footer.tsx` — Copyright
-  - `sites/marketing/src/components/landing/PricingSection.tsx` — Bundle name
-  - `sites/marketing/src/components/landing/CTASection.tsx` — CTA copy
-  - `sites/marketing/src/components/landing/Features.tsx` — Section heading
-  - `sites/marketing/src/components/landing/FAQSection.tsx` — FAQ answers (2 occurrences)
-  - `sites/marketing/src/components/landing/AppCards.tsx` — Bundle callout
-  - `sites/marketing/src/components/layout/StickyMobileCTA.tsx` — Mobile CTA text
-  - `sites/marketing/src/app/admin-login/page.tsx` — Login description
-  - `sites/marketing/src/app/admin/page.tsx` — Dashboard subtitle
-  - `sites/marketing/src/components/admin/AdminNav.tsx` — Sidebar wordmark
-  - `sites/marketing/src/app/success/page.tsx` — Welcome heading
-  - `sites/marketing/src/app/admin/users/page.tsx` — Users page subtitle (3 occurrences)
-  - `sites/marketing/README.md` — Stripe product name
+  - `sites/marketing/src/components/landing/Hero.tsx` — Added useState/useEffect for animation, cycling every 3 seconds with smooth fade transition
+- **Animation details**: 200ms fade-out + slide-down, 3s interval between words
 - Build passes, lint has pre-existing errors (not from this iteration)
-- No new patterns or decisions
 
-### Iteration 59 — SafeReads-7az: Verify admin dashboard tracks users across all 3 apps
+### Iteration 60 — SafeReads-tfg: Rebrand marketing site: Safe Suite → Safe Family
 
 - (Moved to archive)
 
-### Iteration 58 — SafeReads-y1i: Migrate authentication from Clerk to Convex Auth
+### Iteration 59 — SafeReads-7az: Verify admin dashboard tracks users across all 3 apps
 
 - (Moved to archive)
 
